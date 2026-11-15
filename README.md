@@ -77,12 +77,12 @@ Version 2.3.0 resolves T3 Code skill discovery, introduces automated post-instal
 
 | Platform | Native Location | Registration Mechanism | Verification Status |
 | :--- | :--- | :--- | :--- |
-| **T3 Code** | `.agents/skills/mo7i/` | Native `$mo7i` autocomplete chip & trigger | **Verified Working** (Directory name + frontmatter) |
-| **Universal Shell & CLI** | `bin/mo7i`, `bin/setup-project-skills` | Executable Node.js binary CLI | **Verified Working** (Tested end-to-end) |
-| **Claude Code CLI** | `.claude/commands/mo7i.md` | Slash command (standalone Claude Code) | **Verified Working** (Outside T3 Code runtime) |
-| **Cursor / Windsurf** | `.cursor/rules/mo7i-commands.mdc` | MDC rule-based command dispatch | *Unverified in T3 Code* (Preserved for compatibility) |
-| **OpenAI Codex** | `.codex/prompts/mo7i.md` | Prompt command files | *Unverified in T3 Code* (Preserved for compatibility) |
-| **Gemini CLI** | `.gemini/commands/mo7i.toml` | Extension command definitions | *Unverified in T3 Code* (Preserved for compatibility) |
+| **T3 Code** | `.agents/skills/mo7i/` | Native `$mo7i` autocomplete chip & trigger | **`FILE_PRESENT`** (File present; UI discovery verified manually in sandbox) |
+| **Universal Shell & CLI** | `bin/mo7i`, `bin/setup-project-skills` | Executable Node.js binary CLI | **`VERIFIED`** (Tested end-to-end) |
+| **Claude Code CLI** | `.claude/commands/mo7i.md` | Slash command (standalone Claude Code) | **`VERIFIED`** (Outside T3 Code runtime) |
+| **Cursor / Windsurf** | `.cursor/rules/mo7i-commands.mdc` | MDC rule-based command dispatch | **`UNVERIFIED`** (Preserved for compatibility) |
+| **OpenAI Codex** | `.codex/prompts/mo7i.md` | Prompt command files | **`UNVERIFIED`** (Preserved for compatibility) |
+| **Gemini CLI** | `.gemini/commands/mo7i.toml` | Extension command definitions | **`UNVERIFIED`** (Preserved for compatibility) |
 
 > [!NOTE]
 > In T3 Code, skills are discovered via `.agents/skills/<name>/SKILL.md` (invoked as `$name`). T3 Code does not read `.claude/commands`, `.cursor/rules`, `.codex/prompts`, or `.gemini/commands`.
@@ -91,7 +91,7 @@ Version 2.3.0 resolves T3 Code skill discovery, introduces automated post-instal
 
 ## Installation & Usage
 
-Install using the Skills CLI (`npx skills`) or run directly via Node.js / npx:
+Install using the Skills CLI (`npx skills`) or run directly via Node.js / npx. MO7I ships with a lean package footprint (~75 KB) containing only `SKILL.md` and `references/`:
 
 ### T3 Code & Project Scope (Recommended)
 ```bash
@@ -100,6 +100,13 @@ npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i -y
 
 # Add project setup companion (invokable as $setup-project-skills in T3 Code)
 npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill setup-project-skills -y
+```
+
+### Direct Project Bootstrapping via `$mo7i`
+Once `$mo7i` is installed, you can trigger project-scoped skill initialization directly without installing a separate command:
+```bash
+/mo7i setup initial      # Analyzes stack and provisions recommended skills
+/mo7i setup audit        # Read-only audit of project skills and companion health
 ```
 
 ### Global Scope (Universal Meta-Orchestrator)

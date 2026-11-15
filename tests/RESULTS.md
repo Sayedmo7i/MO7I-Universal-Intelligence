@@ -1,6 +1,6 @@
 # MO7I Universal Intelligence - Production Acceptance Test Suite Results
 
-Date: 2026-11-15 21:49:37Z
+Date: 2026-11-15 23:22:56Z
 Host: Linux 7.0.0-34-generic (x86_64)
 Release Version: v2.3.0
 Suite: 70 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 15 Hardening & Post-Install)
@@ -1044,9 +1044,9 @@ rm -rf /tmp/test-project-scope && mkdir -p /tmp/test-project-scope && (cd /tmp/t
 [?25l│
 ◇  Source: https://github.com/mattpocock/skills.git
 [?25h[?25l│
-◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◇  Repository cloned
+◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository….[1G[J◇  Repository cloned
 [?25h[?25l│
-[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-dKtWpe/skills-DsKfax/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
+[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-b8BIwR/skills-Q1l9Yp/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
 
 description: Shared language for designing a software factory: the tasks it run…
              ^
@@ -1552,7 +1552,7 @@ Default to help catalog displaying all available slash commands and platform sup
 
 ### Supported Platforms & Verification Status
 
-- **T3 Code ($mo7i via .agents/skills/)**: `VERIFIED`
+- **T3 Code ($mo7i via .agents/skills/)**: `FILE_PRESENT` — _file present, UI discovery unverified by code (confirmed manually in sandbox)_
 - **Universal Shell & CLI (bin/mo7i)**: `VERIFIED`
 - **Claude Code Local (.claude/commands/)**: `VERIFIED` — _Claude Code CLI only; not parsed by T3 Code_
 - **Claude Code Global (~/.claude/commands/)**: `VERIFIED` — _Claude Code CLI only_
@@ -1646,7 +1646,7 @@ Display complete official command registry with parameters, examples, and safety
 
 ### Supported Platforms & Verification Status
 
-- **T3 Code ($mo7i via .agents/skills/)**: `VERIFIED`
+- **T3 Code ($mo7i via .agents/skills/)**: `FILE_PRESENT` — _file present, UI discovery unverified by code (confirmed manually in sandbox)_
 - **Universal Shell & CLI (bin/mo7i)**: `VERIFIED`
 - **Claude Code Local (.claude/commands/)**: `VERIFIED` — _Claude Code CLI only; not parsed by T3 Code_
 - **Claude Code Global (~/.claude/commands/)**: `VERIFIED` — _Claude Code CLI only_
@@ -1797,7 +1797,7 @@ Generate comprehensive markdown report summarizing project intelligence profile.
 ```text
 # MO7I Project Intelligence & Skill Setup Report (v2.3.0)
 
-- **Timestamp**: `2026-11-15T21:49:45.998Z`
+- **Timestamp**: `2026-11-15T23:23:04.476Z`
 - **Execution Mode**: `REPORT`
 - **Project Workspace**: `/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/fixtures/projects/nextjs-app`
 - **Project Archetype**: **Fullstack Web Application (Next.js)**
@@ -1987,17 +1987,17 @@ Run system doctor diagnostics validating runtime environment, CLIs, and integrit
 | :--- | :--- | :--- |
 | Node.js Runtime | `PASS` | v22.23.5 (Supported >= 18) |
 | Skills CLI | `PASS` | Version 1.8.1 active |
-| T3 Code Skills Entry Point (.agents/skills/mo7i/) | `PASS` | Verified discovered by T3 Code ($mo7i) |
+| T3 Code Skills Entry Point (.agents/skills/mo7i/) | `INFO` | file present, UI discovery unverified by code (confirmed manually in sandbox) |
 | Slash Command Definitions | `PASS` | Command definitions detected |
 | Project Setup Engine | `PASS` | setup-engine.js present and executable |
 | Project Profile Registry | `INFO` | Uninitialized project workspace |
-| Disk vs Registry Reconciliation | `WARN` | 3 unregistered skill(s) on disk: mo7i, mo7i-project-setup, setup-project-skills |
+| Disk vs Registry Reconciliation | `INFO` | Project not yet initialized; discovered skill(s) on disk: mo7i, mo7i-project-setup, setup-project-skills (run /setup-project-skills initial to register) |
 
 ### Platform Compatibility Status
 
 | Platform | Mechanism | Status | Notes |
 | :--- | :--- | :--- | :--- |
-| T3 Code ($mo7i via .agents/skills/) | `.agents/skills/` | **`VERIFIED`** | Direct entry point |
+| T3 Code ($mo7i via .agents/skills/) | `.agents/skills/` | **`FILE_PRESENT`** | file present, UI discovery unverified by code (confirmed manually in sandbox) |
 | Universal Shell & CLI (bin/mo7i) | `bin/` | **`VERIFIED`** | Direct entry point |
 | Claude Code Local (.claude/commands/) | `.claude/commands/` | **`VERIFIED`** | Claude Code CLI only; not parsed by T3 Code |
 | Claude Code Global (~/.claude/commands/) | `~/.claude/commands/` | **`VERIFIED`** | Claude Code CLI only |
@@ -2275,7 +2275,7 @@ node -e '
 **Actual Behavior & Output Evidence**:
 ```text
 Verification status on current repo: pending
-Evidence: Missing required artifacts (issue-tracker: false, domain: false, instructionsSection: false)
+Evidence: Missing required artifacts (issue-tracker: false, domain: false, triage-labels: false, instructionsSection: false)
 ```
 
 **Verification Analysis**:
@@ -2619,7 +2619,7 @@ node /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v230_hard
 [PASS] Test 2.3.2: T3 Code companion setup-project-skills exists with name: setup-project-skills
 [PASS] Test 2.3.3: Root SKILL.md has name: mo7i and version v2.3.0
 [PASS] Test 2.3.4: Reconciliation detects when a skill exists on disk but is missing from registry
-[PASS] Test 2.3.5: Dynamic post-install detection identifies setup-* skills on disk
+[PASS] Test 2.3.5: Dynamic post-install detection identifies setup-* skills and eliminates false positives
 [PASS] Test 2.3.6: Post-install setup lifecycle transitions: pending -> skipped
 [PASS] Test 2.3.7: Verification verifies completed state with real evidence
 [PASS] Test 2.3.8: Human gate notices format accurately and never invent silent answers

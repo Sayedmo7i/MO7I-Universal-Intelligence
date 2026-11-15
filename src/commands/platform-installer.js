@@ -20,7 +20,7 @@ const { generateCursorCommandFiles } = require('./platform-adapters/cursor-adapt
 const { generateUniversalCommandFiles } = require('./platform-adapters/generic-adapter');
 
 const PLATFORM_VERIFICATION = {
-  'T3 Code ($mo7i via .agents/skills/)': { status: 'VERIFIED', target: '.agents/skills/' },
+  'T3 Code ($mo7i via .agents/skills/)': { status: 'FILE_PRESENT', note: 'file present, UI discovery unverified by code (confirmed manually in sandbox)', target: '.agents/skills/' },
   'Universal Shell & CLI (bin/mo7i)': { status: 'VERIFIED', target: 'bin/' },
   'Claude Code Local (.claude/commands/)': { status: 'VERIFIED', note: 'Claude Code CLI only; not parsed by T3 Code', target: '.claude/commands/' },
   'Claude Code Global (~/.claude/commands/)': { status: 'VERIFIED', note: 'Claude Code CLI only', target: '~/.claude/commands/' },
@@ -53,9 +53,27 @@ function installSlashCommands(targetProjectDir = process.cwd()) {
         const destSkill = path.join(destDir, 'SKILL.md');
         fs.copyFileSync(srcSkill, destSkill);
         summary.createdFiles.push(destSkill);
+
+        // For mo7i, ensure lean self-contained references/ directory is copied
+        if (sName === 'mo7i') {
+          const srcRefs = path.resolve(__dirname, '../../references');
+          const destRefs = path.join(destDir, 'references');
+          if (fs.existsSync(srcRefs)) {
+            if (!fs.existsSync(destRefs)) fs.mkdirSync(destRefs, { recursive: true });
+            const refFiles = fs.readdirSync(srcRefs);
+            for (const rf of refFiles) {
+              const srcFile = path.join(srcRefs, rf);
+              const destFile = path.join(destRefs, rf);
+              if (fs.statSync(srcFile).isFile()) {
+                fs.copyFileSync(srcFile, destFile);
+                summary.createdFiles.push(destFile);
+              }
+            }
+          }
+        }
       }
     }
-    summary.installedPlatforms.push('T3 Code & Universal Agent Skills (.agents/skills/) [VERIFIED]');
+    summary.installedPlatforms.push('T3 Code & Universal Agent Skills (.agents/skills/) [FILE_PRESENT]');
   } catch (err) {
     summary.errors.push(`T3 Code skills provisioner: ${err.message}`);
   }
