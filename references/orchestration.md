@@ -1,6 +1,6 @@
 # Autonomous Orchestration Lifecycle & Execution Protocol
 
-This document specifies the 14-phase execution lifecycle, multi-skill coordination protocols, and cross-domain task orchestration implemented by MO7I Universal Intelligence.
+This document specifies the augmented execution lifecycle, project intelligence integration, multi-skill coordination protocols, and cross-domain task orchestration implemented by MO7I Universal Intelligence (v2.1.0).
 
 ---
 
@@ -8,46 +8,68 @@ This document specifies the 14-phase execution lifecycle, multi-skill coordinati
 
 > **The user specifies WHAT needs to be accomplished. MO7I determines HOW to accomplish it.**
 
-MO7I Universal Intelligence acts as a meta-orchestrator. It translates high-level user intentions into structured, evidence-based execution phases, dynamically finding and applying specialist domain intelligence without requiring the user to select or operate individual skills.
+MO7I Universal Intelligence acts as a meta-orchestrator. It translates high-level user intentions into structured, evidence-based execution phases, dynamically establishing foundational project intelligence and applying specialist domain skills without requiring the user to manually search for or configure individual tools.
 
 ---
 
-## 2. The 14-Phase Autonomous Lifecycle
+## 2. The Integrated Autonomous Lifecycle
+
+In v2.1.0, the lifecycle incorporates the **Project Intelligence Gate** prior to task-level discovery and execution:
 
 ```
-[1. INTAKE] ────────► [2. CONTEXT INSPECTION] ────► [3. TASK CLASSIFICATION]
+[1. INTAKE] ──► [2. PROJECT DETECTION] ──► [3. PROJECT PROFILE INSPECTION]
+                                                      │
+[6. TASK CLASSIFICATION] ◄── [5. PROJECT SETUP (WHEN NEEDED)] ◄── [4. SETUP STATUS CHECK]
+         │
+         ▼
+[7. CAPABILITY GAP ANALYSIS] ──► [8. SKILL DISCOVERY] ──► [9. SKILL LEARNING]
                                                               │
-[6. SKILL LEARNING] ◄── [5. SKILL DISCOVERY] ◄── [4. CAPABILITY GAP ANALYSIS]
+[12. EXECUTION] ◄── [11. SKILL ORCHESTRATION] ◄── [10. COMPATIBILITY & PLANNING]
          │
          ▼
-[7. COMPATIBILITY VALIDATION] ──► [8. EXECUTION PLANNING] ──► [9. SKILL ORCHESTRATION]
-                                                                          │
-[12. LEARNING & KNOWLEDGE] ◄── [11. QUALITY VALIDATION] ◄────── [10. EXECUTION]
-         │
-         ▼
-[13. SAFE CLEANUP] ─────────────► [14. FINAL REPORT]
+[13. QUALITY VALIDATION] ──► [14. KNOWLEDGE & PROFILE UPDATE] ──► [15. SAFE CLEANUP] ──► [16. FINAL REPORT]
 ```
 
 ### Detailed Phase Breakdown
 
 1. **INTAKE**: Receive user prompt, extract explicit objectives, deliverables, and hard constraints.
-2. **CONTEXT INSPECTION**: Inspect current repository, working directory, git state, and project rules (`AGENTS.md`, `CLAUDE.md`, configs).
-3. **TASK CLASSIFICATION**: Classify task into one of the 13 functional domains (Software, Mobile, Design, SEO, DevOps, Research, etc.) and assess complexity tier.
-4. **CAPABILITY GAP ANALYSIS**: Determine whether the active environment and installed skills provide required domain capabilities or if specialist skills are needed.
-5. **SKILL DISCOVERY**: If specialist intelligence is missing, invoke Vercel Labs `find-skills` (`npx skills find "<keywords>"`). Evaluate candidate pools across the 5-point scoring matrix.
-6. **SKILL LEARNING**: Execute the 4-phase learning loop (Inspect -> Understand -> Integrate -> Validate) before using any selected skill.
-7. **COMPATIBILITY VALIDATION**: Verify that selected skills do not conflict with repository conventions or each other.
-8. **EXECUTION PLANNING**: Construct a phased roadmap defining measurable acceptance criteria and required tool invocations prior to making code modifications.
-9. **SKILL ORCHESTRATION**: Sequence specialist skills across pipeline stages, minimizing context by loading only the skill needed for the active phase.
-10. **EXECUTION**: Apply domain best practices and execute implementation commands with real tools.
-11. **QUALITY VALIDATION**: Run test suites, compilers, static analyzers, and linters. Enforce "evidence over claims".
-12. **LEARNING & KNOWLEDGE UPDATE**: Record operational findings, execution telemetry, and compatibility notes in user memory.
-13. **SAFE CLEANUP**: Uninstall temporary skills installed by the orchestrator for this specific task after verifying no other projects depend on them.
-14. **FINAL REPORT**: Deliver structured final report citing verified outputs, changed files, and standardized status labels (`PASS`, `FAIL`, `BLOCKED`).
+2. **PROJECT DETECTION**: Identify project root, git repository boundaries, environment runtimes, and repository layout.
+3. **PROJECT PROFILE INSPECTION**: Audit `.mo7i/project-profile.json` and `.mo7i/skill-registry.json` for existing project intelligence.
+4. **SETUP STATUS CHECK**: Determine whether the project is uninitialized, missing foundational stack skills, or has experienced dependency drift.
+5. **PROJECT SKILL SETUP (WHEN NEEDED)**: Invoke companion skill `mo7i-project-setup` in the appropriate mode (`initial`, `update`, or `repair`):
+   - Integrates the verified official Matt Pocock collection (`mattpocock/skills`).
+   - Discovers and installs essential core framework specialists (Next.js, Flutter, Laravel, etc.).
+   - Establishes persistent project scope in `./.agents/skills/` without global `-g` flags.
+   - Generates `.mo7i/project-profile.json`, `.mo7i/skill-registry.json`, and `.mo7i/setup-report.md`.
+6. **TASK CLASSIFICATION**: Categorize the immediate task into one of the 13 functional domains and assess complexity tier.
+7. **CAPABILITY GAP ANALYSIS**: Determine whether project-installed foundational skills suffice or if a task-level transient skill is needed.
+8. **SKILL DISCOVERY**: If task-specific specialist intelligence is missing, invoke Vercel Labs `find-skills` (`npx skills find "<keywords>"`).
+9. **SKILL LEARNING**: Execute the 4-phase learning loop (Inspect -> Understand -> Integrate -> Validate) before using any selected skill.
+10. **COMPATIBILITY & PLANNING**: Verify candidate skills do not conflict with project conventions and construct phased roadmap.
+11. **SKILL ORCHESTRATION**: Sequence specialist skills across pipeline stages, minimizing context by loading only the skill needed for the active phase.
+12. **EXECUTION**: Apply domain best practices and execute implementation commands with real tools.
+13. **QUALITY VALIDATION**: Run test suites, compilers, static analyzers, and linters. Enforce "evidence over claims".
+14. **KNOWLEDGE & PROFILE UPDATE**: Record operational findings in user memory and update project profile telemetry.
+15. **SAFE CLEANUP**: Prune transient task skills while strictly preserving project foundational skills and user-authored skills.
+16. **FINAL REPORT**: Deliver structured final report citing verified outputs, changed files, and standardized status labels (`PASS`, `FAIL`, `BLOCKED`).
 
 ---
 
-## 3. Conflict Resolution & Precedence Hierarchy
+## 3. Project-Level vs. Task-Level Skill Management
+
+A critical invariant in MO7I v2.1.0 is the clear separation between persistent project-level skills and ephemeral task-level skills:
+
+| Dimension | Project-Level Skills | Task-Level Discovered Skills |
+| :--- | :--- | :--- |
+| **Trigger** | Project initialization, technology stack drift, or user setup request | Immediate task requires niche capability not covered by project skills |
+| **Scope** | Persistent repository environment (`<projectRoot>/.agents/skills/`) | Transient execution scope / temporary workspace |
+| **Catalog** | Matt Pocock collection + Core stack specialists | Niche external community skills |
+| **Registry** | Recorded in `.mo7i/skill-registry.json` and `skills-lock.json` | Recorded as temporary in runtime memory |
+| **Cleanup** | **Preserved indefinitely** across all future turns | Pruned at Phase 15 if marked temporary |
+
+---
+
+## 4. Conflict Resolution & Precedence Hierarchy
 
 When directives between user prompts, repository rules, and specialist skills conflict, the orchestrator enforces an explicit 6-level descending precedence hierarchy:
 

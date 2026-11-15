@@ -1,0 +1,7 @@
+#!/usr/bin/env php
+<?php
+
+define('LARAVEL_START', microtime(true));
+
+// Fake artisan CLI entrypoint for testing
+echo "Laravel Artisan CLI Fixture v11.0\n";

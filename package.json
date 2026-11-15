@@ -1,0 +1,25 @@
+{
+  "name": "mo7i-universal-intelligence",
+  "version": "2.2.0",
+  "description": "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System",
+  "main": "src/commands/command-router.js",
+  "bin": {
+    "mo7i": "./bin/mo7i",
+    "setup-project-skills": "./bin/setup-project-skills",
+    "mo7i-project-setup": "./bin/mo7i-project-setup"
+  },
+  "scripts": {
+    "test": "./tests/run_tests.sh",
+    "doctor": "./bin/mo7i doctor",
+    "status": "./bin/mo7i status"
+  },
+  "keywords": [
+    "agent-skills",
+    "slash-commands",
+    "orchestrator",
+    "universal-intelligence",
+    "matt-pocock-skills"
+  ],
+  "author": "Sayedmo7i",
+  "license": "MIT"
+}

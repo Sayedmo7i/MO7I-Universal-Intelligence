@@ -1,157 +1,142 @@
 # MO7I Universal Intelligence
 
-> **Universal Intelligence Layer & Autonomous Task Meta-Orchestrator**  
+> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.2.0)**  
 > *The user specifies WHAT needs to be accomplished. MO7I determines HOW to accomplish it.*
 
-MO7I Universal Intelligence is an autonomous intelligence layer and meta-orchestrator built on the open [Agent Skills](https://skills.sh) standard. It operates as the single autonomous entry point across all engineering repositories and domains. 
+MO7I Universal Intelligence is an autonomous intelligence layer, task meta-orchestrator, project intelligence engine, and native slash command system built on the open [Agent Skills](https://skills.sh) standard. It operates as the single autonomous entry point across all engineering repositories and domains.
 
-It does not simply install or manage skills; it independently analyzes project context, classifies cross-domain task requirements, discovers and vets specialist skills via Vercel Labs `find-skills`, learns their operational contracts, coordinates multi-skill pipelines, enforces zero-trust safety boundaries, verifies outcomes with real execution evidence, and preserves reusable intelligence across projects.
+Rather than expecting users to manually configure tools or remember complex prompts, MO7I provides direct native slash command entry points (`/mo7i`, `/setup-project-skills`, `/mo7i audit`, etc.), automatically inspects projects, detects frameworks and architectures, provisions project-scoped specialist skills (including the verified Matt Pocock collection), learns operational contracts, coordinates multi-skill pipelines, enforces zero-trust safety boundaries, and verifies outcomes with real execution evidence.
 
 ---
 
-## The 14-Phase Autonomous Execution Lifecycle
+## What's New in v2.2.0: Official Slash Commands System
+
+Version 2.2.0 introduces native, executable Slash Commands across all supported agent environments:
+
+```text
+User Slash Commands
+  ├── /mo7i [task]              -> Autonomous Universal Intelligence Meta-Orchestrator
+  ├── /mo7i help                -> Command catalog, usage syntax, and platform guides
+  ├── /setup-project-skills     -> Project Intelligence & Skill Setup (mo7i-project-setup)
+  ├── /mo7i audit               -> Read-only project stack, skills, and configuration audit
+  ├── /mo7i learn [skill]       -> 4-phase Skill Learning Engine (Inspect -> Understand -> Integrate -> Validate)
+  ├── /mo7i discover <query>    -> find-skills dynamic discovery with 5-dimension scoring
+  ├── /mo7i status              -> System telemetry, project archetype, and installed skills inventory
+  ├── /mo7i doctor              -> Diagnostics for runtimes, scripts, registries, and links
+  └── /mo7i update              -> Dependency drift detection and safe registry synchronization
+```
+
+### Key Highlights:
+1. **Real Native Slash Commands**: Registered and discoverable in Claude Code (`.claude/commands/`), Cursor (`.cursor/rules/`), and universal shell/agents (`bin/mo7i`).
+2. **Unified Command Router**: Reuses core engines without duplicating business logic; features input tokenization and strict path traversal protection.
+3. **Safety & Read-Only Strictness**: Inspection commands (`audit`, `status`, `doctor`, `help`, `discover`) are guaranteed non-destructive.
+4. **Approval Gate Integration**: Destructive actions and package updates require explicit user authorization.
+
+---
+
+## The Official Command Set
+
+| Command | Usage | Description | Safety Profile |
+| :--- | :--- | :--- | :--- |
+| **`/mo7i`** | `/mo7i <task>` | Primary entry point to the 16-phase Universal Intelligence Meta-Orchestrator. | Standard Execution |
+| **`/mo7i help`** | `/mo7i help` | Displays the complete catalog of commands, syntax, and examples. | Read-Only |
+| **`/setup-project-skills`** | `/setup-project-skills [mode]` | Provisions project-scoped skills (`initial`, `audit`, `update`, `repair`, `report`). | Standard Execution |
+| **`/mo7i audit`** | `/mo7i audit` | Performs a read-only audit of project dependencies, installed skills, and drift. | Read-Only |
+| **`/mo7i learn`** | `/mo7i learn [skill]` | Executes the 4-phase learning loop and records operational capability contracts. | Standard Execution |
+| **`/mo7i discover`** | `/mo7i discover <query>` | Evaluates candidate specialists on skills.sh across 5 dimensions without auto-install. | Read-Only |
+| **`/mo7i status`** | `/mo7i status [--json]` | Displays system release, active workspace, stack profile, and registry telemetry. | Read-Only |
+| **`/mo7i doctor`** | `/mo7i doctor` | Validates Node.js runtimes, Skills CLI, command registrations, and script integrity. | Read-Only |
+| **`/mo7i update`** | `/mo7i update [--dry-run]` | Detects new dependencies and synchronizes project skills with `.bak` backups. | Human Gate Required |
+
+---
+
+## The Integrated Autonomous Execution Lifecycle
 
 ```
-[1. INTAKE] ────────► [2. CONTEXT INSPECTION] ────► [3. TASK CLASSIFICATION]
+[1. INTAKE] ──► [2. PROJECT DETECTION] ──► [3. PROJECT PROFILE INSPECTION]
+                                                      │
+[6. TASK CLASSIFICATION] ◄── [5. PROJECT SETUP (WHEN NEEDED)] ◄── [4. SETUP STATUS CHECK]
+         │
+         ▼
+[7. CAPABILITY GAP ANALYSIS] ──► [8. SKILL DISCOVERY] ──► [9. SKILL LEARNING]
                                                               │
-[6. SKILL LEARNING] ◄── [5. SKILL DISCOVERY] ◄── [4. CAPABILITY GAP ANALYSIS]
+[12. EXECUTION] ◄── [11. SKILL ORCHESTRATION] ◄── [10. COMPATIBILITY & PLANNING]
          │
          ▼
-[7. COMPATIBILITY VALIDATION] ──► [8. EXECUTION PLANNING] ──► [9. SKILL ORCHESTRATION]
-                                                                          │
-[12. LEARNING & KNOWLEDGE] ◄── [11. QUALITY VALIDATION] ◄────── [10. EXECUTION]
-         │
-         ▼
-[13. SAFE CLEANUP] ─────────────► [14. FINAL REPORT]
+[13. QUALITY VALIDATION] ──► [14. KNOWLEDGE & PROFILE UPDATE] ──► [15. SAFE CLEANUP] ──► [16. FINAL REPORT]
 ```
 
-1. **INTAKE**: Deconstruct user goals, deliverables, acceptance criteria, and hard constraints.
-2. **CONTEXT INSPECTION**: Audit repository root, active branch, runtime environment, and project rules (`AGENTS.md`, `CLAUDE.md`, linters).
-3. **TASK CLASSIFICATION**: Categorize into functional domain (Software, Mobile, Design, SEO, DevOps, Research, etc.) and assess complexity tier.
-4. **CAPABILITY GAP ANALYSIS**: Determine whether installed skills suffice or external specialist skills are needed.
-5. **SKILL DISCOVERY**: Discover specialist skills via Vercel Labs `find-skills` (`npx skills find "<keywords>"`).
-6. **SKILL LEARNING**: Execute the 4-phase learning loop (Inspect -> Understand -> Integrate -> Validate).
-7. **COMPATIBILITY VALIDATION**: Verify that candidate skills do not conflict with repository conventions or each other.
-8. **EXECUTION PLANNING**: Construct a phased roadmap defining measurable acceptance criteria before making edits.
-9. **SKILL ORCHESTRATION**: Sequence specialist skills across pipeline stages, loading only the active skill into context.
-10. **EXECUTION**: Implement changes adhering to domain best practices and execute required tool commands.
-11. **QUALITY VALIDATION**: Run test suites, compilers, and linters. Enforce "evidence over claims".
-12. **LEARNING & KNOWLEDGE UPDATE**: Record operational insights, execution telemetry, and compatibility in user memory.
-13. **SAFE CLEANUP**: Prune eligible temporary skills installed by the orchestrator after checking cross-project usage.
-14. **FINAL REPORT**: Deliver structured final report citing verified outputs, changed files, and standardized status labels.
+1. **INTAKE**: Deconstruct user goals or slash command parameters.
+2. **PROJECT DETECTION**: Identify project root, git repository boundaries, and environment runtimes.
+3. **PROJECT PROFILE INSPECTION**: Audit `.mo7i/project-profile.json` and `.mo7i/skill-registry.json`.
+4. **SETUP STATUS CHECK**: Determine whether the project is uninitialized or missing foundational skills.
+5. **PROJECT SKILL SETUP (WHEN NEEDED)**: Invoke `mo7i-project-setup` to provision project-scoped skills into `./.agents/skills/`.
+6. **TASK CLASSIFICATION**: Categorize immediate task into one of 13 functional domains.
+7. **CAPABILITY GAP ANALYSIS**: Determine whether project skills suffice or external specialists are required.
+8. **SKILL DISCOVERY**: Discover candidate skills via Vercel Labs `find-skills` (`npx skills find "<keywords>"`).
+9. **SKILL LEARNING**: Execute the 4-phase learning loop (Inspect -> Understand -> Integrate -> Validate).
+10. **COMPATIBILITY & PLANNING**: Verify candidate skills do not conflict and construct phased roadmap.
+11. **SKILL ORCHESTRATION**: Sequence specialist skills across pipeline stages, minimizing context bloat.
+12. **EXECUTION**: Implement changes adhering to domain best practices and execute tool commands.
+13. **QUALITY VALIDATION**: Run test suites, compilers, and linters ("evidence over claims").
+14. **KNOWLEDGE & PROFILE UPDATE**: Record operational insights in memory and update project profile telemetry.
+15. **SAFE CLEANUP**: Prune transient task skills while strictly preserving project foundational skills.
+16. **FINAL REPORT**: Deliver structured final report citing verified outputs and standardized status labels.
 
 ---
 
-## Universal Task Domain Taxonomy
+## Platform Compatibility & Discovery
 
-MO7I orchestrates across 13 distinct functional domains:
-
-| Domain | Scope & Workload |
-| :--- | :--- |
-| **Software Engineering** | Full-stack web architectures, distributed systems, REST/GraphQL APIs, compiler transforms. |
-| **Mobile Development** | Flutter, React Native, Swift, Kotlin, responsive multi-device widget layouts. |
-| **UI/UX & Visual Design** | Design tokens, WCAG AAA accessibility, typography, responsive design systems. |
-| **Marketing, SEO & Growth** | Technical SEO, OpenGraph metadata, JSON-LD Schema.org structured data, XML sitemaps. |
-| **Business Strategy** | Process mapping, product requirement documents, workflow optimization. |
-| **Research & Analysis** | Literature synthesis, quantitative benchmark extraction, comparative trade-offs. |
-| **Data Processing** | ETL pipelines, SQL queries, analytical data transforms. |
-| **DevOps & Infrastructure** | Container security, non-root Dockerfiles, multi-stage builds, CI/CD pipelines. |
-| **Technical Writing** | Architecture decision records (ADRs), API documentation, release notes. |
-| **Automation & Tooling** | Custom CLI utilities, webhooks, cron-based maintenance jobs. |
-| **Education & Learning** | Step-by-step technical explainers, interactive exercise scaffolding. |
-| **Financial Modeling** | Unit economics, valuation formulas, quantitative metric verification. |
-| **General Productivity** | Multi-step task tracking, project planning, backlog refinement. |
-
-*Anti-Fabrication Guard*: If a task requires an unavailable tool, hardware device, paid subscription, or private API key (e.g., Stripe, AWS), the orchestrator identifies the missing dependency and documents clear next steps rather than fabricating execution.
+| Platform | Native Location | Registration Mechanism |
+| :--- | :--- | :--- |
+| **Claude Code** | `.claude/commands/` and `~/.claude/commands/` | Native Markdown slash commands (`mo7i.md`, `setup-project-skills.md`) |
+| **Cursor & Windsurf** | `.cursor/rules/` and `.cursorrules` | MDC rule-based command dispatch (`mo7i-commands.mdc`) |
+| **OpenAI Codex** | `.codex/prompts/` | Prompt command files |
+| **Gemini CLI** | `.gemini/commands/` | Command extensions |
+| **Universal Shell & Agent** | `bin/mo7i`, `bin/setup-project-skills` | Executable Node.js binary via `npx mo7i` or local path |
 
 ---
 
-## Core Systems
+## Installation & Usage
 
-### 1. Skill Learning Engine & Six State Transitions
-The orchestrator tracks skills across six distinct states to prevent premature capability assumptions:
-`DISCOVERED` -> `INSTALLED` -> `UNDERSTOOD` -> `RUNTIME_VERIFIED` -> `SUCCESSFULLY_USED` (or `FAILED_OR_INCOMPATIBLE`).
-
-Before using any skill, it executes a 4-phase learning loop:
-- **Phase A (Inspection)**: Reads full `SKILL.md`, walks linked references in `references/`, audits bundled scripts, and verifies tool requirements.
-- **Phase B (Understanding)**: Synthesizes an operational profile detailing core capabilities, activation boundaries, contraindications, required inputs, and expected artifacts.
-- **Phase C (Integration)**: Maps task categories, pairs complementary skills, identifies conflicting conventions, and establishes stage sequencing.
-- **Phase D (Practical Validation)**: Probes the runtime environment (`which <cmd>`) to distinguish between *installed on disk* and *available in runtime*.
-
-### 2. Mandatory `find-skills` Integration
-MO7I Universal Intelligence designates `find-skills` (`vercel-labs/skills`) as a core discovery dependency:
-- Queries the ecosystem: `npx skills find "<keywords>"`.
-- Evaluates candidate pools across a 5-dimension scoring rubric:
-  - **Task Relevance & Stack Fit**: 35%
-  - **Publisher Reputation**: 25% (official vendors prioritized over unverified forks)
-  - **Community Adoption**: 15% (installs and stars on skills.sh)
-  - **Documentation Quality**: 15% (modular guides, clear triggers)
-  - **Security & Maintainability**: 10% (automated audit ratings)
-- Adheres to the **Primary Specialist Rule**: selects ONE best specialist skill per domain stage.
-
-### 3. Multi-Skill Context Minimization & Precedence
-When coordinating complex workflows across multiple domains (e.g., Database + Backend + Frontend + E2E Tests):
-- **Context Minimization**: Sequentially loads only the skill relevant to the active stage, avoiding context bloat and token degradation.
-- **Explicit Conflict Resolution**: Resolves contradictory instructions in strict descending priority order:
-  1. *System & Platform Safety Requirements* (Highest Authority)
-  2. *Explicit Current User Instructions*
-  3. *Project-Specific Instructions* (`AGENTS.md`, `CLAUDE.md`, repository linters)
-  4. *Specialist Skill Instructions*
-  5. *Confirmed User Preferences*
-  6. *General Defaults* (Lowest Authority)
-
-### 4. Global Preferences & Cross-Project Memory
-Persistent cross-project intelligence is stored in user profile space (`~/.config/mo7i/universal-intelligence/`):
-- `preferences.json`: Confirmed user tech preferences (languages, frameworks, tools, models, image engines).
-- `skill-registry.json`: Canonical inventory and classifications (`core`, `pinned`, `persistent`, `temporary`).
-- `skill-knowledge.json`: Operational profiles and capability contracts derived by the learning engine.
-- `skill-usage-history.json`: Auditable append-only execution history and outcomes.
-- `skill-compatibility.json`: Pairwise synergy and sequencing matrix.
-
-*Cross-Project Invariant: Global preferences never override explicit project conventions. No secrets or tokens are ever stored.*
-
-### 5. Security Governance & Mandatory Human Gates
-The orchestrator enforces zero-trust vetting and halts execution to request explicit interactive human approval before:
-- Destructive filesystem operations outside temporary paths (`rm -rf`).
-- Destructive database migrations or table drops.
-- Production deployments or public package/repository releases.
-- Billable cloud provisioning or financial transactions.
-- Installing unvetted community skills from unknown authors.
-- System-level privilege escalation (`sudo`).
-
----
-
-## Installation
-
-Install using the Skills CLI (`npx skills`):
+Install using the Skills CLI (`npx skills`) or run directly via Node.js / npx:
 
 ### Global Scope (Universal Meta-Orchestrator)
 ```bash
 npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-universal-intelligence -g -y
 ```
 
-### Project Scope (Repository-Bound)
+### Project Scope (Companion Skill & Project Setup)
 ```bash
-npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-universal-intelligence -y
+npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-project-setup -y
 ```
 
----
+### CLI Execution
+```bash
+# Display help and commands catalog
+./bin/mo7i help
 
-## Verification & Standard Statuses
+# Execute a universal engineering task
+./bin/mo7i "Build a responsive Next.js landing page"
 
-Every task reports verifiable command evidence under standardized statuses:
-- **`PASS`**: Complete execution evidence; all criteria met.
-- **`FAIL`**: Execution failed assertions or returned non-zero exit codes.
-- **`BLOCKED`**: Progress halted by human gate or missing environment prerequisite.
-- **`NOT_RUN`**: Step skipped due to failed prerequisite.
-- **`NOT_APPLICABLE`**: Step bypassed due to task complexity profile (e.g. trivial edit).
+# Run project setup in initial mode
+./bin/setup-project-skills initial
+
+# Audit project dependencies and skills
+./bin/mo7i audit
+
+# Run system doctor diagnostics
+./bin/mo7i doctor
+```
 
 ---
 
 ## Reference Documentation Index
 
+- [Slash Commands Reference](references/slash-commands.md): Architecture, command specs, parameter schemas, and platform guides.
+- [Project Intelligence & Setup](references/project-intelligence.md): Technical analysis engine, Matt Pocock collection, registry schemas.
 - [Universal Task Domains](references/task-domains.md): Functional domain taxonomy, missing-service handling.
-- [Autonomous Orchestration](references/orchestration.md): 14-phase lifecycle, multi-skill sequencing, precedence.
+- [Autonomous Orchestration](references/orchestration.md): 16-phase lifecycle, multi-skill sequencing, precedence.
 - [Skill Learning Engine](references/skill-learning-engine.md): 4-phase learning loop, 6 skill states, profile schemas.
 - [Skill Discovery](references/skill-discovery.md): `find-skills` workflow, 5-dimension scoring rubric.
 - [Skill Lifecycle](references/skill-lifecycle.md): Registry tracking, atomic writes, safe cleanup.
