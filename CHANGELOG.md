@@ -5,23 +5,26 @@ All notable changes to the `mo7i-universal-intelligence` skill will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-11-15
+
+### Added
+- **Universal Intelligence Meta-Orchestrator**: Upgraded system from an agent utility into a full Universal Intelligence Layer that autonomously determines HOW to achieve goals specified by the user.
+- **The 14-Phase Autonomous Execution Lifecycle**: Implemented structured execution pipeline: `INTAKE -> CONTEXT INSPECTION -> TASK CLASSIFICATION -> CAPABILITY GAP ANALYSIS -> SKILL DISCOVERY -> SKILL LEARNING -> COMPATIBILITY VALIDATION -> EXECUTION PLANNING -> SKILL ORCHESTRATION -> EXECUTION -> QUALITY VALIDATION -> LEARNING & KNOWLEDGE UPDATE -> SAFE CLEANUP -> FINAL REPORT`.
+- **Universal Functional Domain Taxonomy**: Added support across 13 domains (Software, Mobile/Flutter, UI/UX Design, Marketing/SEO, Business Strategy, Research & Analytics, Data Processing, DevOps/Infrastructure, Technical Writing, Automation, Education, Financial Analysis, Productivity).
+- **Anti-Fabrication Missing-Service Protocol**: Created `references/task-domains.md` governing detection of missing external credentials, hardware devices, or subscriptions without simulated execution.
+- **Six-State Skill Knowledge Representation**: Explicitly tracks skills across `DISCOVERED`, `INSTALLED`, `UNDERSTOOD`, `RUNTIME_VERIFIED`, `SUCCESSFULLY_USED`, and `FAILED_OR_INCOMPATIBLE`.
+- **Expanded 18 Production Acceptance Tests**: Automated tests covering Next.js, Flutter, UI/UX, SEO, DevOps, Research, Multi-Stage Pipelines, Fallback, Dependency Probing, Conflict Precedence, Security Audit, Error Remediation, Cross-Project Knowledge, Temporary Cleanup, Pinned Protection, Crash Recovery, Missing API Credentials, and Human Gates.
+
+### Changed
+- Standardized `SKILL.md` to present the Universal Intelligence Meta-Orchestrator within 184 lines.
+- Updated `references/orchestration.md` and `references/security-policy.md` with mandatory interactive human gates for destructive operations and production releases.
+
 ## [1.1.0] - 2026-11-15
 
 ### Added
-- **Universal Skill Intelligence & Learning Engine**: Implemented 4-phase learning loop (Inspection, Understanding, Integration, Practical Validation) with structured operational profiles.
-- **16-Stage Universal Execution Protocol**: Upgraded orchestration pipeline to 16 stages spanning project identification, capability mapping, discovery, sequencing, and verification.
-- **Multi-Skill Orchestration**: Sequential context loading per stage and an explicit 6-level conflict precedence hierarchy (Safety > User Prompt > Project Rules > Specialist Skill > Preferences > Defaults).
-- **Cross-Project Memory Architecture**: Local persistent schemas in `~/.config/mo7i/universal-intelligence/` (`preferences.json`, `skill-registry.json`, `skill-knowledge.json`, `skill-usage-history.json`, `skill-compatibility.json`).
-- **Comprehensive 18-Scenario Automated Test Suite**: Verified detection, reference following, dependency validation, security auditing, multi-skill orchestration, cross-project isolation, and crash recovery.
-- **Dedicated Reference Documentation**: Created `references/skill-learning-engine.md` detailing operational profiles and compatibility contracts.
-
-### Changed
-- Refactored `SKILL.md` to integrate universal intelligence and the 16-stage protocol while strictly maintaining line count (<300 lines).
-- Enhanced `references/orchestration.md`, `references/skill-discovery.md`, `references/skill-lifecycle.md`, `references/preferences.md`, `references/security-policy.md`, and `references/execution-and-verification.md` with multi-skill and zero-trust guidelines.
-- Standardized verification statuses to `PASS`, `FAIL`, `BLOCKED`, `NOT_RUN`, `NOT_APPLICABLE`.
+- Initial 4-phase learning loop and cross-project memory architecture.
 
 ## [1.0.0] - 2026-11-15
 
 ### Added
-- Initial public release of `mo7i-universal-intelligence` Agent Skill.
-- Core orchestration lifecycle, `find-skills` integration, and trust tiers.
+- Initial public release of `mo7i-universal-intelligence`.
