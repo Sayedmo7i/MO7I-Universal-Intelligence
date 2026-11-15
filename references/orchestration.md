@@ -1,148 +1,172 @@
-# Orchestration Architecture
+# Orchestration Architecture & Multi-Skill Coordination
 
-This document describes the orchestration architecture and end-to-end execution lifecycle of MO7I Universal Intelligence.
+This document specifies the orchestration architecture, the 16-stage execution lifecycle, and the multi-skill coordination protocols enforced by MO7I Universal Intelligence.
 
 ---
 
 ## 1. Architectural Philosophy
 
-MO7I Universal Intelligence operates as a meta-orchestrator. It does not replace specialist skills or hardcode implementation domain rules. Instead, it creates an intelligent, evidence-governed coordination layer that:
-1. Deconstructs complex user requests into discrete technical requirements.
-2. Discovers and installs specialized domain intelligence dynamically.
-3. Guides execution through testable acceptance criteria.
-4. Manages the lifecycle and hygiene of temporary agent skills.
-
-```
-                    ┌─────────────────────────┐
-                    │      User Request       │
-                    └────────────┬────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │ 1. Understand Intent &  │
-                    │    Project Context      │
-                    └────────────┬────────────┘
-                                 │
-                 ┌───────────────┴───────────────┐
-                 ▼                               ▼
-       [Trivial / Immediate]           [Meaningful / Complex]
-                 │                               │
-                 ▼                               ▼
-       [Direct Execution]              [2. Check Local Skills]
-                                                 │
-                                 ┌───────────────┴───────────────┐
-                                 ▼                               ▼
-                           [Skill Found]                  [Skill Missing]
-                                 │                               │
-                                 │                               ▼
-                                 │                    [3. Discover via find-skills]
-                                 │                               │
-                                 │                               ▼
-                                 │                    [4. Vetting & Trust Tiers]
-                                 │                               │
-                                 │                               ▼
-                                 │                    [5. Scope-Deliberate Install]
-                                 │                               │
-                                 └───────────────┬───────────────┘
-                                                 │
-                                                 ▼
-                                     ┌─────────────────────────┐
-                                     │ 6. Plan Acceptance      │
-                                     │    Criteria             │
-                                     └───────────┬─────────────┘
-                                                 │
-                                                 ▼
-                                     ┌─────────────────────────┐
-                                     │ 7. Execute with Domain  │
-                                     │    Specialist Context   │
-                                     └───────────┬─────────────┘
-                                                 │
-                                                 ▼
-                                     ┌─────────────────────────┐
-                                     │ 8. Evidence Verification│
-                                     │    & Test Execution     │
-                                     └───────────┬─────────────┘
-                                                 │
-                                                 ▼
-                                     ┌─────────────────────────┐
-                                     │ 9. Lifecycle Cleanup &  │
-                                     │    Reporting            │
-                                     └─────────────────────────┘
-```
+MO7I Universal Intelligence operates as the universal single entry point for autonomous engineering tasks across all repositories. It is designed around three fundamental principles:
+1. **Dynamic Specialization**: Rather than bundling thousands of static rules, it dynamically identifies, vets, learns, and applies specialist skills from the open ecosystem.
+2. **Context Minimization**: It never dumps multiple skills into agent context simultaneously. It breaks multi-domain tasks into stages and loads only the specialist skill relevant to the currently executing phase.
+3. **Rigorous Evidence**: Claims of completion, capability usage, or verification are forbidden unless corroborated by actual command outputs, compiler results, or file diffs.
 
 ---
 
-## 2. End-to-End Execution Stages
+## 2. The Universal 16-Stage Execution Protocol
 
-### Stage 1: Understand
-- Parse user constraints, deliverables, project boundaries, and acceptance conditions.
-- Identify the core domain (e.g., Cloudflare Workers, Next.js App Router, PixiJS, Postgres).
-- Ensure no hidden assumptions are made: ask clarifying questions only if a critical requirement is ambiguous.
+For meaningful engineering tasks, the orchestrator executes this deterministic sequence:
 
-### Stage 2: Initialize
-- Read local instructions: `AGENTS.md`, `CLAUDE.md`, or repository conventions.
-- Detect active package managers (`pnpm`, `npm`, `yarn`, `bun`, `cargo`, `pip`).
-- Record the working directory, git state, and environment constraints.
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    STAGE 1: UNDERSTAND OBJECTIVE                               │
+│                    Parse user constraints, deliverables, technical requirements.               │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                               STAGE 2: IDENTIFY ACTIVE PROJECT                                 │
+│               Detect repo root, working branch, language runtime, package manager.             │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             STAGE 3: READ PROJECT INSTRUCTIONS                                 │
+│                  Ingest local AGENTS.md, CLAUDE.md, and repository linters/rules.               │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                STAGE 4: INSPECT REPOSITORY STATE                               │
+│                   Audit git cleanliness, uncommitted changes, existing tests.                  │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              STAGE 5: IDENTIFY REQUIRED CAPABILITIES                           │
+│               Decompose task into technical domains (e.g., UI, DB, Auth, Testing).             │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              STAGE 6: INSPECT INSTALLED SKILLS                                 │
+│                  Probe local and global skills via `npx skills list [-g]`.                     │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             STAGE 7: DISCOVER VIA `find-skills`                                │
+│                Search skills.sh; evaluate candidates against 5-point scoring rubric.           │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             STAGE 8: INSPECT & LEARN SPECIALIST SKILL                          │
+│          Run 4-phase learning loop: Inspect -> Understand -> Integrate -> Validate.           │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                STAGE 9: BUILD TASK EXECUTION PLAN                              │
+│              Sequence work stages; assign appropriate specialist skills per phase.             │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                            STAGE 10: DEFINE ACCEPTANCE CRITERIA                                │
+│               Establish measurable pass/fail test assertions prior to code edits.              │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             STAGE 11: EXECUTE WITH SPECIALIST SKILL                            │
+│                 Apply domain patterns under guidance of active specialist skill.               │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             STAGE 12: RUN TESTS & EVIDENCE VERIFICATION                        │
+│                 Run compilers, unit tests, and linters; collect raw outputs.                   │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              STAGE 13: DIAGNOSE & RESOLVE FAILURES                             │
+│                  If verification fails, diagnose and iterate on targeted fixes.                │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                            STAGE 14: CLEAN UP TEMPORARY DEPENDENCIES                           │
+│              Safely prune eligible temporary skills; preserve core and pinned skills.          │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             STAGE 15: UPDATE SKILL KNOWLEDGE RECORDS                           │
+│              Record execution outcomes, compatibility insights, and usage history.             │
+└───────────────────────────────────────────────┬────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                STAGE 16: DELIVER EVIDENCE REPORT                               │
+│              Provide structured final summary citing verified logs and status labels.          │
+└────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
-### Stage 3: Discover Specialist
-- Evaluate whether the task qualifies as "meaningful" (requiring domain knowledge).
-- Probe installed skills (`npx skills list`, `npx skills list -g`).
-- If an existing skill satisfies the domain, reuse it immediately.
-- If missing, initiate discovery using `npx skills find "<keywords>"`.
-
-### Stage 4: Evaluate & Score
-- Compare candidate skills against the candidate scoring rubric:
-  - Domain specificity and relevance.
-  - Source reputation (official vendor vs unverified author).
-  - Adoption metrics (install counts, GitHub stars).
-  - Documentation clarity and maintenance status.
-  - Security audit summary from registry.
-- Select the single best specialist skill.
-
-### Stage 5: Vet & Install
-- Classify against trust tiers:
-  - *Trusted*: Proceed to read `SKILL.md` and install.
-  - *Unknown*: Read `SKILL.md` + scripts, audit code, report findings, and ask user approval before installation.
-  - *Suspicious*: Reject immediately.
-- Install with deliberate scope (`-g` for general user workflows; project-local for repository-bound workflows).
-
-### Stage 6: Load Context
-- Verify skill files exist on disk.
-- Read instructions into the active agent context.
-- Confirm agent recognition of the specialist skill.
-
-### Stage 7: Plan Acceptance Criteria
-- Create a step-by-step roadmap before making code edits.
-- Define measurable pass/fail criteria (e.g., specific test outputs, compiler exit codes, file assertions).
-
-### Stage 8: Execute
-- Implement code and configuration changes according to domain instructions provided by the specialist skill.
-- Maintain minimal necessary footprint; do not modify unrelated code.
-
-### Stage 9: Verify
-- Run actual test suites, linters, and compilers.
-- Inspect exit codes and concrete outputs.
-- Never assert success without command proof.
-
-### Stage 10: Remediate
-- If tests fail, run targeted diagnosis.
-- Apply targeted fixes and re-verify until resolved or identified as an environment blocker.
-
-### Stage 11: Cleanup
-- Identify temporary skills installed exclusively for the completed workflow.
-- Execute clean removal via `npx skills remove <name>`.
-- Update the registry and verify filesystem state.
-
-### Stage 12: Report
-- Output a structured final summary.
-- List verified evidence, files created or modified, and outstanding items.
-- Assign a clear status label (`VERIFIED`, `IMPLEMENTED`, `PARTIALLY VERIFIED`, `BLOCKED`, `NOT IMPLEMENTED`).
+*Note: For trivial edits (e.g., single-line typo fix) or immediate factual answers, the orchestrator bypasses external skill discovery and executes directly.*
 
 ---
 
-## 3. Project Context Isolation
+## 3. Multi-Skill Orchestration Mechanics
 
-The orchestrator enforces strict boundaries between different projects:
-- **Project Isolation**: Project-level skills are installed in project directories and never leak into global agent configurations.
-- **Preference Separation**: Project-specific preferences in `AGENTS.md` override global defaults without modifying user-level global configuration.
-- **Temporary State Encapsulation**: Scratch files and temporary test scripts remain confined to dedicated temporary directories and are removed during cleanup.
+Complex workflows frequently require expertise across multiple decoupled domains. For example:
+> *"Build a Next.js application with Tailwind CSS styling, Prisma ORM, Auth0 authentication, and Playwright E2E tests."*
+
+### Orchestration Sequence
+1. **Deconstruct Domains**: Identify required specialist domains:
+   - Framework: `nextjs-best-practices`
+   - UI/UX: `tailwind-design`
+   - Database: `prisma-database`
+   - Authentication: `auth0-nextjs`
+   - Testing: `playwright-testing`
+2. **Sequential Phase Assignment**:
+   - **Phase 1 (Data Layer)**: Load `prisma-database` -> Generate schema -> Run migration -> Unload.
+   - **Phase 2 (Routing & APIs)**: Load `nextjs-best-practices` -> Build server actions & routes -> Unload.
+   - **Phase 3 (Authentication)**: Load `auth0-nextjs` -> Configure session middleware -> Unload.
+   - **Phase 4 (UI & Components)**: Load `tailwind-design` -> Implement layouts and components -> Unload.
+   - **Phase 5 (E2E Verification)**: Load `playwright-testing` -> Execute automated test suite -> Unload.
+3. **Context Minimization Benefit**: At no point are all 5 skills competing for agent context. Each phase receives focused, uncluttered domain guidance.
+
+---
+
+## 4. Conflict Resolution & Precedence Hierarchy
+
+When directives or conventions between user prompts, repository rules, and specialist skills conflict, the orchestrator enforces an explicit 6-level descending precedence hierarchy:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ 1. System & Platform Safety Requirements (HIGHEST AUTHORITY)           │
+│    Sandbox boundaries, secret protection, destructive action blocks.   │
+├────────────────────────────────────────────────────────────────────────┤
+│ 2. Explicit Current User Instructions                                  │
+│    Direct prompt overrides for the immediate turn.                     │
+├────────────────────────────────────────────────────────────────────────┤
+│ 3. Project-Specific Instructions                                       │
+│    Repository conventions (AGENTS.md, CLAUDE.md, linters, tsconfig).   │
+├────────────────────────────────────────────────────────────────────────┤
+│ 4. Specialist Skill Instructions                                       │
+│    Domain-specific guidelines from the actively loaded specialist.    │
+├────────────────────────────────────────────────────────────────────────┤
+│ 5. Confirmed User Preferences                                          │
+│    Preferences confirmed in ~/.config/mo7i/universal-intelligence/.    │
+├────────────────────────────────────────────────────────────────────────┤
+│ 6. General Defaults (LOWEST AUTHORITY)                                 │
+│    Built-in agent heuristics and fallbacks.                            │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+### Conflict Scenarios
+- **Scenario A (Project vs Specialist)**: If a specialist skill recommends Tailwind v4 but the repository's `package.json` pins Tailwind v3 with an explicit `AGENTS.md` directive, the repository instruction wins (Level 3 > Level 4).
+- **Scenario B (User vs Preference)**: If stored user preferences request Vitest, but the current prompt explicitly specifies Jest, the prompt directive wins (Level 2 > Level 5).
+- **Scenario C (Specialist vs Safety)**: If a specialist skill instructs the agent to run `curl http://... | bash`, the safety policy overrides and halts the command (Level 1 > Level 4).

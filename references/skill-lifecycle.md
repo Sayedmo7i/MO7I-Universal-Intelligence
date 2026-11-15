@@ -1,138 +1,93 @@
-# Skill Registry & Lifecycle Management
+# Skill Lifecycle Management & Registry Governance
 
-This document defines the schema, persistence guarantees, and lifecycle transition rules for skills managed by MO7I Universal Intelligence.
-
----
-
-## 1. Registry Architecture & Location
-
-The orchestrator maintains an explicit, audited inventory of all installed skills to prevent ghost dependencies, version conflicts, and storage bloat.
-
-### File Locations
-- **Primary Location**: `~/.config/mo7i/universal-intelligence/skill-registry.json`
-- **Fallback Location**: `~/.mo7i/universal-intelligence/skill-registry.json`
-
-The directory is created automatically on first initialization with strict user read/write permissions (`0700` directory, `0600` file).
+This document specifies the lifecycle classification, persistent registry schemas, atomic storage patterns, and safe cleanup protocols implemented by MO7I Universal Intelligence.
 
 ---
 
-## 2. Registry Schema
+## 1. Skill Classifications
 
-The registry stores structured metadata for each registered skill. Secrets, auth tokens, passwords, and private API keys are strictly forbidden.
+Every skill managed by or known to the orchestrator is classified into one of four explicit categories:
+
+| Classification | Definition | Cleanup Policy |
+| :--- | :--- | :--- |
+| **`core`** | Fundamental infrastructure skills required by the orchestrator (e.g., `find-skills`). | **PERMANENT**. Never automatically removed or pruned under any circumstance. |
+| **`pinned`** | Skills explicitly protected or flagged by the user as permanent project or global assets. | **PERMANENT**. Requires explicit, interactive user authorization to remove. |
+| **`persistent`** | Multi-session skills used regularly across projects. Retained across workflow runs. | Retained across sessions; eligible for review only during explicit maintenance. |
+| **`temporary`** | Installed dynamically to solve a specific sub-task or immediate workflow need. | **ELIGIBLE FOR AUTOMATED CLEANUP** upon task completion if no other project depends on it. |
+
+---
+
+## 2. Persistent Storage Architecture
+
+Persistent skill metadata and audit trails are maintained in:
+`~/.config/mo7i/universal-intelligence/` (fallback: `~/.mo7i/universal-intelligence/`)
+
+### File Manifest
+- `skill-registry.json`: Canonical inventory of installed skills, scopes, and classifications.
+- `skill-knowledge.json`: Operational profiles and capability contracts derived by the learning engine.
+- `skill-usage-history.json`: Auditable append-only log of executions, timestamps, and outcomes.
+- `skill-compatibility.json`: Matrix of pairwise synergies, sequencing rules, and known conflicts.
+
+---
+
+## 3. Auditable History Schema (`skill-usage-history.json`)
 
 ```json
 {
-  "version": "1.0.0",
-  "updated_at": "2026-11-15T18:00:00Z",
-  "skills": {
-    "nextjs-developer": {
-      "name": "nextjs-developer",
-      "source": "jeffallan/claude-skills@nextjs-developer",
-      "scope": "project",
-      "install_date": "2026-11-15T18:00:00Z",
-      "installed_by": "mo7i-universal-intelligence",
-      "type": "temporary",
-      "last_used": "2026-11-15T18:30:00Z",
-      "verification_status": "VERIFIED",
-      "dependencies": [],
-      "cleanup_eligibility": true,
-      "project_path": "/workspace/my-nextjs-app"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.1.0",
+  "history": [
+    {
+      "session_id": "32eaa9ef-5dd1-430a-a505-e7668ca77635",
+      "timestamp": "2026-11-15T18:15:00Z",
+      "project_path": "/root/github.com/Sayedmo7i/seha_v2",
+      "skill_name": "nextjs-best-practices",
+      "action": "LOAD_AND_APPLY",
+      "phase": "ROUTING_OPTIMIZATION",
+      "status": "PASS",
+      "notes": "Applied unstable_cache and server action revalidation patterns."
     }
-  }
+  ]
 }
 ```
 
-### Field Definitions
-- `name` (string, required): Lowercase hyphenated skill slug matching directory name.
-- `source` (string, required): GitHub repository identifier, git URL, or local path.
-- `scope` (string, enum: `["global", "project"]`): Scope of installation.
-- `install_date` (string, ISO 8601): Timestamp of initial install.
-- `installed_by` (string): Identifies installer agent/process (`"mo7i-universal-intelligence"` or `"user"`).
-- `type` (string, enum: `["core", "pinned", "persistent", "temporary"]`):
-  - `core`: Orchestrator dependencies (e.g., `find-skills`). Never automatically uninstalled.
-  - `pinned`: User-explicit permanent skills. Never automatically uninstalled.
-  - `persistent`: Multi-session skills retained across runs.
-  - `temporary`: Task-specific skills installed for immediate workflow execution. Eligible for cleanup.
-- `last_used` (string, ISO 8601): Timestamp of most recent execution.
-- `verification_status` (string, enum: `["VERIFIED", "UNVERIFIED", "FAILED"]`): Status of post-install probe.
-- `dependencies` (array of strings): Other skill slugs or tools required by this skill.
-- `cleanup_eligibility` (boolean): `true` only if `type === "temporary"` and `installed_by === "mo7i-universal-intelligence"`.
-- `project_path` (string, optional): Absolute path of the project when scope is `project`.
-
 ---
 
-## 3. Atomic Write & Recovery Protocol
+## 4. Atomic Write & Recovery Guarantees
 
-To prevent registry corruption during unexpected process interruptions:
-
-1. **Pre-Write Backup**: Before modifying `skill-registry.json`, copy the existing file to `skill-registry.json.bak`.
-2. **Atomic Write Pattern**:
-   - Write updated contents to a temporary sibling file: `skill-registry.json.tmp.<pid>`.
-   - Flush and sync to disk.
-   - Atomically rename `skill-registry.json.tmp.<pid>` over `skill-registry.json`.
-3. **Recovery on Corruption**:
-   - If `skill-registry.json` is missing or contains invalid JSON, attempt to parse `skill-registry.json.bak`.
-   - If both fail, regenerate a clean empty registry initialized with detected core skills.
-   - Log an explicit warning detailing the recovery event.
-
----
-
-## 4. Lifecycle Transitions & State Machine
-
-Skills transition through the following lifecycle states:
-
-```
-[DISCOVERED] ──► [VETTED] ──► [INSTALLED] ──► [VERIFIED] ──► [ACTIVE]
-                                                                │
-                                ┌───────────────────────────────┘
-                                ▼
-                       [WORKFLOW COMPLETE]
-                                │
-                 ┌──────────────┴──────────────┐
-                 ▼                             ▼
-       [type === "temporary"]        [type !== "temporary"]
-                 │                             │
-                 ▼                             ▼
-      [Execute Safe Cleanup]                 [RETAIN]
-                 │                      (Update last_used)
-                 ▼
-       [npx skills remove]
-                 │
-                 ▼
-       [Verify Deletion]
-                 │
-                 ▼
-        [Deregister Entry]
-```
+All registry writes follow an atomic pattern to prevent file corruption during unexpected crashes:
+1. **Pre-Write Backup**: Copy active registry to `<file>.bak`.
+2. **Write to Temporary File**: Write new JSON payload to `<file>.tmp.<pid>`.
+3. **Atomic Replace**: Atomically rename `<file>.tmp.<pid>` over `<file>`.
+4. **Crash Recovery**: If `<file>` is corrupted or invalid JSON, automatically restore from `<file>.bak`.
 
 ---
 
 ## 5. Safe Automated Cleanup Protocol
 
-Automated cleanup removes temporary skills at workflow completion to maintain system cleanliness:
+At the conclusion of a task, the orchestrator executes automated cleanup:
 
-### Cleanup Eligibility Gate
-A skill is eligible for automated removal **ONLY IF ALL** conditions are satisfied:
-1. `installed_by === "mo7i-universal-intelligence"` (the orchestrator installed it).
-2. `type === "temporary"`.
-3. `type !== "core"` AND `type !== "pinned"`.
-4. No other concurrent project or active workflow depends on the skill.
+### Step 1: Candidate Identification
+Scan `skill-registry.json` for skills satisfying all criteria:
+- `installed_by === "mo7i-universal-intelligence"`
+- `type === "temporary"`
+- `type !== "core"` AND `type !== "pinned"`
 
-### Ambiguity Rule
-If there is any ambiguity regarding whether another project uses the skill, or if the skill was pre-existing before the orchestrator session:
-- **DO NOT DELETE**.
-- Mark the registry entry as `"cleanup_candidate"`: `true`.
-- Notify the user of the candidate status in the final summary report.
+### Step 2: Cross-Project Dependency Check
+Before deleting any skill:
+- Check whether another active project directory has linked or recorded dependencies on the skill.
+- Check `skill-usage-history.json` to verify if the skill is actively used by concurrent sessions.
+- **Ambiguity Rule**: If there is any doubt whether another project relies on the skill, **DO NOT REMOVE**. Mark the entry as `"cleanup_candidate": true` and notify the user.
 
-### Removal Execution Steps
-1. Determine exact removal command based on scope:
+### Step 3: Clean Uninstallation & Verification
+1. Execute removal via Skills CLI:
    ```bash
-   # For global scope:
-   npx skills remove <name> -g -y
-
    # For project scope:
    npx skills remove <name> -y
+
+   # For global scope:
+   npx skills remove <name> -g -y
    ```
-2. Verify removal from filesystem (confirm directory in `.agents/skills/<name>` no longer exists).
-3. Remove entry from `skill-registry.json` using atomic write protocol.
-4. Record removal action in final report.
+2. Verify filesystem removal (confirm `.agents/skills/<name>` no longer exists).
+3. Update `skill-registry.json` and append cleanup entry to `skill-usage-history.json`.
+4. Report removal in the task summary.
