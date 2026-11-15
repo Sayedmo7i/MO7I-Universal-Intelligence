@@ -1,36 +1,24 @@
 # MO7I Universal Intelligence
 
-> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.2.0)**  
+> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.3.0)**  
 > *The user specifies WHAT needs to be accomplished. MO7I determines HOW to accomplish it.*
 
 MO7I Universal Intelligence is an autonomous intelligence layer, task meta-orchestrator, project intelligence engine, and native slash command system built on the open [Agent Skills](https://skills.sh) standard. It operates as the single autonomous entry point across all engineering repositories and domains.
 
-Rather than expecting users to manually configure tools or remember complex prompts, MO7I provides direct native slash command entry points (`/mo7i`, `/setup-project-skills`, `/mo7i audit`, etc.), automatically inspects projects, detects frameworks and architectures, provisions project-scoped specialist skills (including the verified Matt Pocock collection), learns operational contracts, coordinates multi-skill pipelines, enforces zero-trust safety boundaries, and verifies outcomes with real execution evidence.
+Rather than expecting users to manually configure tools or remember complex prompts, MO7I provides direct native slash command entry points (`/mo7i`, `/setup-project-skills`, `/mo7i audit`, etc.) and native T3 Code autocomplete chips (`$mo7i`, `$setup-project-skills`), automatically inspects projects, detects frameworks and architectures, provisions project-scoped specialist skills (including the verified Matt Pocock collection), handles post-install setup companions with Human Gate guards, learns operational contracts, coordinates multi-skill pipelines, enforces zero-trust safety boundaries, and verifies outcomes with real execution evidence.
 
 ---
 
-## What's New in v2.2.0: Official Slash Commands System
+## What's New in v2.3.0: T3 Code Entry Points, Post-Install Setups & Hardening
 
-Version 2.2.0 introduces native, executable Slash Commands across all supported agent environments:
+Version 2.3.0 resolves T3 Code skill discovery, introduces automated post-install setup handling, and hardens the orchestrator core:
 
-```text
-User Slash Commands
-  ├── /mo7i [task]              -> Autonomous Universal Intelligence Meta-Orchestrator
-  ├── /mo7i help                -> Command catalog, usage syntax, and platform guides
-  ├── /setup-project-skills     -> Project Intelligence & Skill Setup (mo7i-project-setup)
-  ├── /mo7i audit               -> Read-only project stack, skills, and configuration audit
-  ├── /mo7i learn [skill]       -> 4-phase Skill Learning Engine (Inspect -> Understand -> Integrate -> Validate)
-  ├── /mo7i discover <query>    -> find-skills dynamic discovery with 5-dimension scoring
-  ├── /mo7i status              -> System telemetry, project archetype, and installed skills inventory
-  ├── /mo7i doctor              -> Diagnostics for runtimes, scripts, registries, and links
-  └── /mo7i update              -> Dependency drift detection and safe registry synchronization
-```
-
-### Key Highlights:
-1. **Real Native Slash Commands**: Registered and discoverable in Claude Code (`.claude/commands/`), Cursor (`.cursor/rules/`), and universal shell/agents (`bin/mo7i`).
-2. **Unified Command Router**: Reuses core engines without duplicating business logic; features input tokenization and strict path traversal protection.
-3. **Safety & Read-Only Strictness**: Inspection commands (`audit`, `status`, `doctor`, `help`, `discover`) are guaranteed non-destructive.
-4. **Approval Gate Integration**: Destructive actions and package updates require explicit user authorization.
+1. **Native T3 Code Entry Points**: Directly invokable via `$mo7i` and `$setup-project-skills` chips in T3 Code through compliant `.agents/skills/` manifests.
+2. **Post-Install Setup Engine**: Automatically detects companion setups (`setup-*`, `init-*`, `onboard*`) required by installed collections (e.g., Matt Pocock skills requiring `setup-matt-pocock-skills`).
+3. **Strict Human Gate for Interactive Setups**: Never fabricates or silently guesses answers for interactive setup skills; surfaces prominent notices when human input is needed.
+4. **Setup State Tracking & Verification**: Tracks setup lifecycle states (`not-required`, `pending`, `in-progress`, `completed`, `skipped`, `failed`) and verifies completion against real on-disk artifact evidence.
+5. **Platform Truth & Verification**: Explicitly marks verified runtimes (`t3-code`, universal CLI, Claude Code CLI outside T3 Code) versus unverified runtimes (`cursor`, `codex`, `gemini-cli`).
+6. **Orchestrator Hardening**: Fast Path for trivial tasks with phase telemetry, dynamic TCP port probing for preview servers, capability-gap analysis for uncovered domains, and strict path traversal defense.
 
 ---
 
@@ -87,13 +75,17 @@ User Slash Commands
 
 ## Platform Compatibility & Discovery
 
-| Platform | Native Location | Registration Mechanism |
-| :--- | :--- | :--- |
-| **Claude Code** | `.claude/commands/` and `~/.claude/commands/` | Native Markdown slash commands (`mo7i.md`, `setup-project-skills.md`) |
-| **Cursor & Windsurf** | `.cursor/rules/` and `.cursorrules` | MDC rule-based command dispatch (`mo7i-commands.mdc`) |
-| **OpenAI Codex** | `.codex/prompts/` | Prompt command files |
-| **Gemini CLI** | `.gemini/commands/` | Command extensions |
-| **Universal Shell & Agent** | `bin/mo7i`, `bin/setup-project-skills` | Executable Node.js binary via `npx mo7i` or local path |
+| Platform | Native Location | Registration Mechanism | Verification Status |
+| :--- | :--- | :--- | :--- |
+| **T3 Code** | `.agents/skills/mo7i/` | Native `$mo7i` autocomplete chip & trigger | **Verified Working** (Directory name + frontmatter) |
+| **Universal Shell & CLI** | `bin/mo7i`, `bin/setup-project-skills` | Executable Node.js binary CLI | **Verified Working** (Tested end-to-end) |
+| **Claude Code CLI** | `.claude/commands/mo7i.md` | Slash command (standalone Claude Code) | **Verified Working** (Outside T3 Code runtime) |
+| **Cursor / Windsurf** | `.cursor/rules/mo7i-commands.mdc` | MDC rule-based command dispatch | *Unverified in T3 Code* (Preserved for compatibility) |
+| **OpenAI Codex** | `.codex/prompts/mo7i.md` | Prompt command files | *Unverified in T3 Code* (Preserved for compatibility) |
+| **Gemini CLI** | `.gemini/commands/mo7i.toml` | Extension command definitions | *Unverified in T3 Code* (Preserved for compatibility) |
+
+> [!NOTE]
+> In T3 Code, skills are discovered via `.agents/skills/<name>/SKILL.md` (invoked as `$name`). T3 Code does not read `.claude/commands`, `.cursor/rules`, `.codex/prompts`, or `.gemini/commands`.
 
 ---
 
@@ -101,17 +93,21 @@ User Slash Commands
 
 Install using the Skills CLI (`npx skills`) or run directly via Node.js / npx:
 
+### T3 Code & Project Scope (Recommended)
+```bash
+# Add main MO7I orchestrator (invokable as $mo7i in T3 Code)
+npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i -y
+
+# Add project setup companion (invokable as $setup-project-skills in T3 Code)
+npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill setup-project-skills -y
+```
+
 ### Global Scope (Universal Meta-Orchestrator)
 ```bash
-npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-universal-intelligence -g -y
+npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i -g -y
 ```
 
-### Project Scope (Companion Skill & Project Setup)
-```bash
-npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-project-setup -y
-```
-
-### CLI Execution
+### CLI & Script Execution
 ```bash
 # Display help and commands catalog
 ./bin/mo7i help
@@ -125,8 +121,11 @@ npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-project-setup 
 # Audit project dependencies and skills
 ./bin/mo7i audit
 
-# Run system doctor diagnostics
-./bin/mo7i doctor
+# Run system doctor diagnostics (JSON or formatted text)
+./bin/mo7i doctor --json
+
+# Check system status and post-install setups
+./bin/mo7i status --json
 ```
 
 ---

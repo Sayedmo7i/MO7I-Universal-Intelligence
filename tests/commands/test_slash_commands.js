@@ -176,7 +176,7 @@ runTest(16, 'Platform-specific command file registration and discovery', () => {
 runTest(17, 'Actual command-to-engine integration (CLI End-to-End)', () => {
   const out = cp.execSync(`${REPO_DIR}/bin/mo7i status --json`, { cwd: REPO_DIR }).toString();
   const parsed = JSON.parse(out);
-  assert.strictEqual(parsed.version, '2.2.0');
+  assert.strictEqual(parsed.version, '2.3.0');
   assert.strictEqual(parsed.registeredCommandsCount, 9);
 });
 

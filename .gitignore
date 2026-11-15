@@ -1,0 +1,6 @@
+# Backups
+*.bak
+
+# Node & Temp
+node_modules/
+.DS_Store

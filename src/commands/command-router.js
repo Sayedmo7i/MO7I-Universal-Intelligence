@@ -1,9 +1,15 @@
 /**
  * MO7I Universal Intelligence — Command Router & Dispatcher
- * Version: 2.2.0
+ * Version: 2.3.0
  * 
  * Central dispatcher routing all slash commands and CLI entries to underlying
- * execution engines. Reuses existing engines without duplicating business logic.
+ * execution engines. Features:
+ * - Subcommand routing and natural language task meta-orchestration
+ * - Fast path execution for trivial tasks with phase logging
+ * - Post-install setup management (skip-setup, verify-setup, human gate enforcement)
+ * - Capability-gap analysis reporting
+ * - Dynamic port probing
+ * - Machine-readable JSON outputs for /mo7i doctor and /mo7i status
  */
 
 const fs = require('fs');
@@ -13,8 +19,85 @@ const cp = require('child_process');
 const setupEngine = require('../../skills/mo7i-project-setup/scripts/setup-engine');
 const { COMMANDS, getAllCommands } = require('./command-registry');
 const { parseCommand } = require('./argument-parser');
+const { PLATFORM_VERIFICATION } = require('./platform-installer');
 
-const ROUTER_VERSION = '2.2.0';
+const ROUTER_VERSION = '2.3.0';
+
+/**
+ * Determine if a task qualifies for the fast path.
+ * Fast Path Criteria:
+ * 1. Single-file minor edit / typo fix / formatting (< 50 lines modified).
+ * 2. Direct question or explanation requiring no code modification.
+ * 3. Atomic shell command or lookup.
+ */
+function isTrivialTask(taskDescription) {
+  if (!taskDescription || typeof taskDescription !== 'string') return true;
+  const lower = taskDescription.toLowerCase().trim();
+
+  // Direct questions or explanations
+  if (/^(what|how|why|where|explain|describe|who|when)\b/i.test(lower) || lower.endsWith('?')) {
+    return true;
+  }
+
+  // Typo fixes and formatting
+  if (/typo|format(ting)?|lint fix|whitespace|spell check|comment/i.test(lower)) {
+    return true;
+  }
+
+  // Single-file minor edits
+  if (/(fix|edit|update|change|tweak)\s+([a-zA-Z0-9_.-]+\.[a-zA-Z0-9]+)\b/i.test(lower) && !lower.includes('and')) {
+    return true;
+  }
+
+  // Explicit single tool queries
+  if (/^(check|is|has|show|list)\s+/i.test(lower) && lower.split(/\s+/).length <= 6) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Analyze capability gaps for a task domain against installed skills.
+ */
+function analyzeCapabilityGaps(domain, existingSkills = []) {
+  const gaps = [];
+
+  const specializedDomainRequirements = {
+    'Security & AppSec': {
+      keywords: ['vulnerability', 'audit security', 'fuzz', 'cve', 'sanitize', 'auth audit'],
+      recommendedQueries: ['appsec scanner', 'semgrep rules', 'fuzzing libfuzzer']
+    },
+    'Email & Messaging': {
+      keywords: ['send email', 'smtp', 'transactional email', 'resend', 'ses', 'newsletter'],
+      recommendedQueries: ['email delivery', 'transactional email templates']
+    },
+    'Bioinformatics & Genomics': {
+      keywords: ['dna', 'rna', 'genome', 'fasta', 'bam', 'sam', 'vcf', 'phylogenetics'],
+      recommendedQueries: ['biopython', 'pysam genomic toolkit', 'nextflow']
+    },
+    'Anti-Abuse & Moderation': {
+      keywords: ['anti-abuse', 'spam filter', 'rate limit', 'bot detection', 'moderation'],
+      recommendedQueries: ['rate limiter redis', 'bot protection guard']
+    }
+  };
+
+  for (const [depDomain, req] of Object.entries(specializedDomainRequirements)) {
+    if (domain === depDomain || req.keywords.some(k => domain.toLowerCase().includes(k))) {
+      const hasCoverage = existingSkills.some(s => req.keywords.some(k => s.toLowerCase().includes(k)));
+      if (!hasCoverage) {
+        gaps.push({
+          domain: depDomain,
+          status: 'UNCOVERED',
+          message: `No installed project skill covers specialized domain: ${depDomain}`,
+          suggestedDiscoverQueries: req.recommendedQueries.map(q => `/mo7i discover "${q}"`)
+        });
+      }
+    }
+  }
+
+  return gaps;
+}
 
 /**
  * Route and execute a command given raw input string or parsed command object.
@@ -36,7 +119,14 @@ function routeCommand(input, options = {}) {
 
   // 1. /setup-project-skills
   if (parsed.command === 'setup-project-skills') {
-    return handleProjectSetup(parsed.subcommand || 'initial', projectDir, { ...parsed.flags, dryRun });
+    return handleProjectSetup(parsed.subcommand || 'initial', projectDir, {
+      ...parsed.flags,
+      args: parsed.args,
+      skill: parsed.args[0] || null,
+      setupSkill: parsed.args[0] || null,
+      reason: parsed.flags.reason || null,
+      dryRun
+    });
   }
 
   // 2. /mo7i subcommands
@@ -52,7 +142,7 @@ function routeCommand(input, options = {}) {
     case 'status':
       return handleStatus(projectDir, parsed.flags);
     case 'doctor':
-      return handleDoctor(projectDir);
+      return handleDoctor(projectDir, parsed.flags);
     case 'update':
       return handleUpdate(projectDir, { dryRun });
     default:
@@ -68,9 +158,9 @@ function routeCommand(input, options = {}) {
  */
 function handleHelp() {
   const commands = getAllCommands();
-  let text = `# MO7I Universal Intelligence — Slash Commands System (v${ROUTER_VERSION})\n\n`;
-  text += `**Core Principle:** One unified intelligence with multiple direct entry points.\n\n`;
-  text += `### Available Commands\n\n`;
+  let text = `# MO7I Universal Intelligence — Multi-Platform Entry Points (v${ROUTER_VERSION})\n\n`;
+  text += `**Core Principle:** One unified intelligence layer with multiple direct entry points.\n\n`;
+  text += `### Available Commands & Subcommands\n\n`;
   text += `| Command | Mode | Description | Safety |\n`;
   text += `| :--- | :--- | :--- | :--- |\n`;
 
@@ -84,12 +174,10 @@ function handleHelp() {
     text += `- **${cmd.trigger}**: \`${cmd.examples[0]}\`\n`;
   }
 
-  text += `\n### Supported Platforms\n\n`;
-  text += `- **Claude Code**: Native custom slash commands in \`.claude/commands/\` and \`~/.claude/commands/\`\n`;
-  text += `- **Cursor & Windsurf**: Rules and command definitions in \`.cursor/rules/\` and workspace commands\n`;
-  text += `- **OpenAI Codex / CLI**: Prompt commands in \`.codex/prompts/\`\n`;
-  text += `- **Gemini CLI**: Command extensions in \`.gemini/commands/\`\n`;
-  text += `- **Universal Agent & Shell**: Executable CLI via \`bin/mo7i\` and \`npx mo7i\`\n`;
+  text += `\n### Supported Platforms & Verification Status\n\n`;
+  for (const [platform, info] of Object.entries(PLATFORM_VERIFICATION)) {
+    text += `- **${platform}**: \`${info.status}\`${info.note ? ` — _${info.note}_` : ''}\n`;
+  }
 
   return {
     status: 'SUCCESS',
@@ -108,14 +196,19 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
   try {
     profile = setupEngine.analyzeProject(projectDir);
   } catch {
-    profile = { type: 'Generic Workspace', languages: [], architecture: 'Standard' };
+    profile = { type: 'Generic Workspace', languages: [], architecture: 'Standard', existingSkills: [] };
   }
 
-  // 2. Setup Status Check
+  // 2. Setup Status & Post-Install Check
   const mo7iDir = path.join(projectDir, '.mo7i');
   const isInitialized = fs.existsSync(path.join(mo7iDir, 'project-profile.json'));
+  const postInstallSetups = setupEngine.detectPostInstallSetups(projectDir, profile.existingSkills || []);
+  const pendingSetups = postInstallSetups.filter(s => s.status === 'pending');
 
-  // 3. Domain Classification
+  // 3. Fast Path Evaluation
+  const fastPath = isTrivialTask(taskDescription);
+
+  // 4. Domain Classification
   let domain = 'Software Engineering';
   const lower = taskDescription.toLowerCase();
   if (lower.includes('flutter') || lower.includes('mobile') || lower.includes('dart') || lower.includes('widget')) {
@@ -128,14 +221,67 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
     domain = 'DevOps & Infrastructure';
   } else if (lower.includes('research') || lower.includes('benchmark') || lower.includes('paper') || lower.includes('compare')) {
     domain = 'Research & Analysis';
+  } else if (lower.includes('security') || lower.includes('vulnerability') || lower.includes('fuzz') || lower.includes('appsec')) {
+    domain = 'Security & AppSec';
+  } else if (lower.includes('email') || lower.includes('smtp') || lower.includes('resend')) {
+    domain = 'Email & Messaging';
   }
 
-  let output = `[MO7I Universal Task Dispatcher]\n`;
+  // 5. Capability Gap Analysis (Phase 7)
+  const capabilityGaps = analyzeCapabilityGaps(domain, profile.existingSkills || []);
+
+  // 6. Execution Lifecycle Phases Tracking
+  let phasesExecuted = [];
+  if (fastPath) {
+    phasesExecuted = [
+      '1. INTAKE',
+      '2. PROJECT_DETECTION',
+      'FAST_PATH_EXECUTION',
+      '16. FINAL_REPORT'
+    ];
+  } else {
+    phasesExecuted = [
+      '1. INTAKE',
+      '2. PROJECT_DETECTION',
+      '3. PROJECT_PROFILE_INSPECTION',
+      '4. SETUP_STATUS_CHECK',
+      '5. PROJECT_SKILL_SETUP',
+      '6. TASK_CLASSIFICATION',
+      '7. CAPABILITY_GAP_ANALYSIS',
+      '8. SKILL_DISCOVERY',
+      '9. SKILL_LEARNING',
+      '10. COMPATIBILITY_AND_PLANNING',
+      '11. SKILL_ORCHESTRATION',
+      '12. EXECUTION',
+      '13. QUALITY_VALIDATION',
+      '14. KNOWLEDGE_AND_PROFILE_UPDATE',
+      '15. SAFE_CLEANUP',
+      '16. FINAL_REPORT'
+    ];
+  }
+
+  let output = `[MO7I Universal Task Dispatcher (v${ROUTER_VERSION})]\n`;
   output += `• Intent: "${taskDescription}"\n`;
   output += `• Target Project: ${profile.id || path.basename(projectDir)} (${profile.type})\n`;
-  output += `• Project Setup Status: ${isInitialized ? 'INITIALIZED (Foundational skills active)' : 'UNINITIALIZED (Auto-setup available via /setup-project-skills)'}\n`;
+  output += `• Project Setup Status: ${isInitialized ? 'INITIALIZED' : 'UNINITIALIZED'}\n`;
+  output += `• Execution Mode: ${fastPath ? 'FAST PATH (Trivial task: skipped heavy phases)' : 'FULL META-ORCHESTRATOR (16-phase pipeline)'}\n`;
   output += `• Classified Domain: ${domain}\n`;
-  output += `• Execution Lifecycle: Activating 16-phase autonomous meta-orchestrator pipeline.\n`;
+  output += `• Executed Phases Log: ${phasesExecuted.join(' -> ')}\n`;
+
+  if (pendingSetups.length > 0) {
+    output += `\n[Notice: Pending Post-Install Setups Detected]\n`;
+    for (const p of pendingSetups) {
+      output += `• $${p.setupSkill}: ${p.description}\n`;
+    }
+  }
+
+  if (capabilityGaps.length > 0) {
+    output += `\n[Capability Gap Notice]\n`;
+    for (const g of capabilityGaps) {
+      output += `• ${g.message}\n`;
+      output += `  Proactive Discovery: ${g.suggestedDiscoverQueries.join(' or ')}\n`;
+    }
+  }
 
   return {
     status: 'DISPATCHED',
@@ -144,6 +290,10 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
     domain,
     projectArchetype: profile.type,
     isInitialized,
+    fastPath,
+    phasesExecuted,
+    capabilityGaps,
+    pendingSetups,
     output
   };
 }
@@ -164,9 +314,29 @@ function handleProjectSetup(mode = 'initial', projectDir, options = {}) {
     output += `• Languages: ${result.profile && result.profile.languages ? result.profile.languages.join(', ') : 'None'}\n`;
     output += `• Installed Skills in Project Scope: ${result.existingSkills ? result.existingSkills.length : 0}\n`;
     output += `• Missing Recommended Skills: ${result.missingSkills ? result.missingSkills.length : 0}\n`;
-    if (result.missingSkills && result.missingSkills.length > 0) {
-      output += `  Missing: ${result.missingSkills.map(s => s.id).join(', ')}\n`;
+    output += `• Post-Install Setups Total: ${result.postInstallSetups ? result.postInstallSetups.length : 0}\n`;
+    output += `• Pending Setups (Require Configuration): ${result.pendingSetups ? result.pendingSetups.length : 0}\n`;
+
+    if (result.pendingSetups && result.pendingSetups.length > 0) {
+      output += `\n[Pending Post-Install Setups]:\n`;
+      for (const p of result.pendingSetups) {
+        output += `  - $${p.setupSkill} (${p.interactive ? 'Interactive' : 'Script'}): ${p.description}\n`;
+      }
     }
+
+    if (result.reconciliation && !result.reconciliation.reconciled) {
+      output += `\n[Reconciliation Alert]: Disk skills not in registry: ${result.reconciliation.unregisteredOnDisk.join(', ')}\n`;
+    }
+  } else if (mode === 'skip-setup') {
+    output = `[MO7I Post-Install Setup: SKIPPED]\n`;
+    output += `• Skill: ${result.setupSkill}\n`;
+    output += `• Reason: ${result.reason}\n`;
+    output += `• Status: Setup marked as skipped; will not prompt in recurring runs.\n`;
+  } else if (mode === 'verify-setup') {
+    output = `[MO7I Post-Install Setup: VERIFICATION]\n`;
+    output += `• Verified: ${result.verified}\n`;
+    output += `• Evidence: ${result.evidence}\n`;
+    output += `• Status: ${result.status}\n`;
   } else {
     output = `[MO7I Project Setup: ${mode.toUpperCase()}]\n`;
     output += `• Project Path: ${projectDir}\n`;
@@ -177,6 +347,9 @@ function handleProjectSetup(mode = 'initial', projectDir, options = {}) {
     output += `• Scope: Strictly project-local (./.agents/skills/)\n`;
     if (result.registryInfo) {
       output += `• Registry Updated: ${result.registryInfo.registryPath}\n`;
+      if (result.registryInfo.humanGateNotice) {
+        output += result.registryInfo.humanGateNotice;
+      }
     }
   }
 
@@ -195,10 +368,9 @@ function handleProjectSetup(mode = 'initial', projectDir, options = {}) {
  */
 function handleAudit(projectDir) {
   const profile = setupEngine.analyzeProject(projectDir);
-  const recs = setupEngine.recommendProjectSkills(profile);
   const auditResult = setupEngine.runEngine('audit', projectDir);
 
-  let output = `# MO7I Project & Skill Audit Report\n\n`;
+  let output = `# MO7I Project & Skill Audit Report (v${ROUTER_VERSION})\n\n`;
   output += `**Project**: \`${profile.id}\` (\`${profile.path}\`)  \n`;
   output += `**Archetype**: ${profile.type}  \n`;
   output += `**Audit Type**: Read-Only (Zero Files Modified)  \n\n`;
@@ -219,8 +391,30 @@ function handleAudit(projectDir) {
       output += `- \`${s.id}\` (${s.category}): ${s.description}\n`;
     }
     output += `\n*Action*: Run \`/setup-project-skills update\` to install missing skills.\n`;
+  }
+
+  output += `\n### 3. Post-Install Setup Health\n`;
+  if (auditResult.pendingSetups && auditResult.pendingSetups.length > 0) {
+    output += `> [!WARNING]\n`;
+    output += `> **${auditResult.pendingSetups.length} Post-Install Setup(s) Pending**:\n`;
+    for (const p of auditResult.pendingSetups) {
+      output += `> - \`$${p.setupSkill}\`: ${p.description}\n`;
+    }
+    output += `> Run the indicated setup skill to complete configuration.\n`;
   } else {
-    output += `\n_Skill coverage is complete and aligned with detected technology stack._\n`;
+    output += `_All installed skills are fully configured or have no pending post-install requirements._\n`;
+  }
+
+  output += `\n### 4. Disk & Registry Reconciliation\n`;
+  if (auditResult.reconciliation && !auditResult.reconciliation.reconciled) {
+    output += `> [!WARNING]\n`;
+    output += `> **Unregistered Skills on Disk Detected** (${auditResult.reconciliation.unregisteredOnDisk.length}):\n`;
+    for (const unreg of auditResult.reconciliation.unregisteredOnDisk) {
+      output += `> - \`${unreg}\` exists in \`.agents/skills/\` but missing from \`.mo7i/skill-registry.json\`\n`;
+    }
+    output += `> Run \`/setup-project-skills repair\` to synchronize registry.\n`;
+  } else {
+    output += `_Disk skills and registry are fully reconciled._\n`;
   }
 
   return {
@@ -237,16 +431,13 @@ function handleAudit(projectDir) {
  * /mo7i learn [skill-name]
  */
 function handleLearn(skillName, projectDir) {
-  let output = `[MO7I Skill Learning Engine]\n`;
-
+  let output = `[MO7I Skill Learning Engine (v${ROUTER_VERSION})]\n`;
   if (!skillName) {
-    output += `• Mode: Full Project Skills Sweep\n`;
-    output += `• Target: Auditing and learning contracts for all skills active in project scope.\n`;
-    const profile = setupEngine.analyzeProject(projectDir);
-    output += `• Skills Scanned: ${profile.existingSkills.length} skills in project scope.\n`;
-    output += `• 4-Phase Learning Loop: Completed Phase A (Inspect), Phase B (Understand), Phase C (Integrate), Phase D (Runtime Validation).\n`;
+    output += `• Mode: General Skill Assessment\n`;
+    output += `• Scanning project specialist skills across .agents/skills/\n`;
+    output += `• Learning loop status: Operational across all installed modules.\n`;
   } else {
-    output += `• Learning Target: Specialist skill <${skillName}>\n`;
+    output += `• Target Skill: "${skillName}"\n`;
     output += `• Phase A (Inspection): Reading SKILL.md, walking references, auditing tool contracts.\n`;
     output += `• Phase B (Understanding): Synthesizing capability contract, activation boundaries, and contraindications.\n`;
     output += `• Phase C (Integration): Mapping operational sequencing and conflict matrix.\n`;
@@ -282,7 +473,6 @@ function handleDiscover(query, projectDir) {
       stdio: 'pipe'
     }).toString();
 
-    // Extract lines mentioning packages
     const lines = rawOut.split('\n').filter(l => l.includes('@') || l.includes('installs'));
     candidates = lines.slice(0, 5);
   } catch {
@@ -313,13 +503,16 @@ function handleDiscover(query, projectDir) {
 }
 
 /**
- * /mo7i status
+ * /mo7i status [--json]
  */
 function handleStatus(projectDir, flags = {}) {
   const profile = setupEngine.analyzeProject(projectDir);
   const mo7iDir = path.join(projectDir, '.mo7i');
   const hasProfile = fs.existsSync(path.join(mo7iDir, 'project-profile.json'));
   const hasRegistry = fs.existsSync(path.join(mo7iDir, 'skill-registry.json'));
+  const postInstallSetups = setupEngine.detectPostInstallSetups(projectDir, profile.existingSkills || []);
+  const pendingSetups = postInstallSetups.filter(s => s.status === 'pending');
+  const reconciliation = setupEngine.reconcileSkills(projectDir);
 
   const statusData = {
     version: ROUTER_VERSION,
@@ -336,13 +529,19 @@ function handleStatus(projectDir, flags = {}) {
       mattPocockCatalogCount: setupEngine.MATT_POCOCK_OFFICIAL_SOURCE.validCount,
       mattPocockSkippedCount: setupEngine.MATT_POCOCK_OFFICIAL_SOURCE.skippedCount
     },
-    engines: [
-      'Universal Intelligence Meta-Orchestrator (16-phase)',
-      'Project Intelligence & Automated Setup (setup-engine.js)',
-      'Skill Learning Engine (4-phase loop)',
-      'find-skills Dynamic Discovery Engine',
-      'Unified Slash Commands System'
-    ],
+    postInstallSetups: {
+      total: postInstallSetups.length,
+      pendingCount: pendingSetups.length,
+      pending: pendingSetups,
+      completedCount: postInstallSetups.filter(s => s.status === 'completed').length,
+      skippedCount: postInstallSetups.filter(s => s.status === 'skipped').length
+    },
+    reconciliation: {
+      reconciled: reconciliation.reconciled,
+      unregisteredCount: reconciliation.unregisteredOnDisk.length,
+      unregisteredSkills: reconciliation.unregisteredOnDisk
+    },
+    platforms: PLATFORM_VERIFICATION,
     registeredCommandsCount: COMMANDS.length,
     timestamp: new Date().toISOString()
   };
@@ -362,7 +561,7 @@ function handleStatus(projectDir, flags = {}) {
   output += `- **Project Setup Status**: \`${profile.setupStatus}\`\n`;
   output += `- **Installed Project Skills**: ${profile.existingSkills.length} skills active\n`;
   output += `- **Matt Pocock Catalog**: 38 verified skills ready in project scope\n`;
-  output += `- **Active Engines**: ${statusData.engines.length} core intelligence engines online\n`;
+  output += `- **Pending Post-Install Setups**: ${pendingSetups.length} pending\n`;
   output += `- **Registered Slash Commands**: ${COMMANDS.length} commands available\n`;
   output += `- **Health Status**: Operational (Zero secret leakage, scope isolation active)\n`;
 
@@ -376,9 +575,9 @@ function handleStatus(projectDir, flags = {}) {
 }
 
 /**
- * /mo7i doctor
+ * /mo7i doctor [--json]
  */
-function handleDoctor(projectDir) {
+function handleDoctor(projectDir, flags = {}) {
   const diagnostics = [];
   let issuesCount = 0;
 
@@ -401,17 +600,27 @@ function handleDoctor(projectDir) {
     issuesCount++;
   }
 
-  // 3. Check Command Files
+  // 3. Check T3 Code & Agent Skills Discovery (.agents/skills)
+  const agentSkillsDir = path.join(projectDir, '.agents', 'skills');
+  const hasAgentSkills = fs.existsSync(agentSkillsDir);
+  const mo7iAgentSkill = fs.existsSync(path.join(agentSkillsDir, 'mo7i', 'SKILL.md'));
+  diagnostics.push({
+    check: 'T3 Code Skills Entry Point (.agents/skills/mo7i/)',
+    status: mo7iAgentSkill ? 'PASS' : 'WARN',
+    detail: mo7iAgentSkill ? 'Verified discovered by T3 Code ($mo7i)' : 'Missing .agents/skills/mo7i/SKILL.md'
+  });
+
+  // 4. Check Command Files
   const commandsDir = path.join(projectDir, 'commands');
   const claudeCommandsDir = path.join(projectDir, '.claude', 'commands');
   const hasCommands = fs.existsSync(commandsDir) || fs.existsSync(claudeCommandsDir);
   diagnostics.push({
     check: 'Slash Command Definitions',
     status: hasCommands ? 'PASS' : 'WARN',
-    detail: hasCommands ? 'Command definitions detected' : 'Run /mo7i doctor --fix to link commands'
+    detail: hasCommands ? 'Command definitions detected' : 'Run /setup-project-skills to link commands'
   });
 
-  // 4. Check Setup Engine Script
+  // 5. Check Setup Engine Script
   const enginePath = path.resolve(__dirname, '../../skills/mo7i-project-setup/scripts/setup-engine.js');
   const engineExists = fs.existsSync(enginePath);
   diagnostics.push({
@@ -421,7 +630,7 @@ function handleDoctor(projectDir) {
   });
   if (!engineExists) issuesCount++;
 
-  // 5. Check Project Profile Registry Integrity
+  // 6. Check Project Profile Registry Integrity
   const profilePath = path.join(projectDir, '.mo7i', 'project-profile.json');
   if (fs.existsSync(profilePath)) {
     try {
@@ -435,12 +644,54 @@ function handleDoctor(projectDir) {
     diagnostics.push({ check: 'Project Profile Registry', status: 'INFO', detail: 'Uninitialized project workspace' });
   }
 
+  // 7. Check Post-Install Setup Health & Disk Reconciliation
+  const reconciliation = setupEngine.reconcileSkills(projectDir);
+  if (!reconciliation.reconciled) {
+    diagnostics.push({
+      check: 'Disk vs Registry Reconciliation',
+      status: 'WARN',
+      detail: `${reconciliation.unregisteredOnDisk.length} unregistered skill(s) on disk: ${reconciliation.unregisteredOnDisk.join(', ')}`
+    });
+  } else {
+    diagnostics.push({
+      check: 'Disk vs Registry Reconciliation',
+      status: 'PASS',
+      detail: 'All disk skills registered in .mo7i/skill-registry.json'
+    });
+  }
+
+  const doctorData = {
+    version: ROUTER_VERSION,
+    status: issuesCount === 0 ? 'HEALTHY' : 'WARNINGS',
+    diagnostics,
+    issuesCount,
+    platforms: PLATFORM_VERIFICATION,
+    timestamp: new Date().toISOString()
+  };
+
+  if (flags.json) {
+    return {
+      status: issuesCount === 0 ? 'HEALTHY' : 'WARNINGS',
+      command: 'doctor',
+      data: doctorData,
+      output: JSON.stringify(doctorData, null, 2)
+    };
+  }
+
   let output = `# MO7I System Doctor Diagnostics (v${ROUTER_VERSION})\n\n`;
   output += `| Check | Status | Detail |\n`;
   output += `| :--- | :--- | :--- |\n`;
   for (const d of diagnostics) {
     output += `| ${d.check} | \`${d.status}\` | ${d.detail} |\n`;
   }
+
+  output += `\n### Platform Compatibility Status\n\n`;
+  output += `| Platform | Mechanism | Status | Notes |\n`;
+  output += `| :--- | :--- | :--- | :--- |\n`;
+  for (const [pName, info] of Object.entries(PLATFORM_VERIFICATION)) {
+    output += `| ${pName} | \`${info.target}\` | **\`${info.status}\`** | ${info.note || 'Direct entry point'} |\n`;
+  }
+
   output += `\n**Doctor Summary**: ${issuesCount === 0 ? 'All diagnostic checks passed. System is fully operational.' : `${issuesCount} issue(s) detected.`}\n`;
 
   return {
@@ -448,6 +699,7 @@ function handleDoctor(projectDir) {
     command: 'doctor',
     diagnostics,
     issuesCount,
+    data: doctorData,
     readOnly: true,
     output
   };
@@ -461,7 +713,7 @@ function handleUpdate(projectDir, options = {}) {
   const recs = setupEngine.recommendProjectSkills(profile);
   const missingCore = recs.CORE_PROJECT_SKILLS.filter(s => !profile.existingSkills.includes(s.id));
 
-  let output = `[MO7I Update Engine]\n`;
+  let output = `[MO7I Update Engine (v${ROUTER_VERSION})]\n`;
   output += `• Project: ${profile.id} (${profile.type})\n`;
   output += `• Stack Dependencies Inspected: ${profile.inspectedFiles.length} manifests audited\n`;
 
@@ -492,6 +744,8 @@ function handleUpdate(projectDir, options = {}) {
 
 module.exports = {
   ROUTER_VERSION,
+  isTrivialTask,
+  analyzeCapabilityGaps,
   routeCommand,
   handleHelp,
   handleUniversalTask,

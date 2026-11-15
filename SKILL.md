@@ -1,11 +1,11 @@
 ---
-name: mo7i-universal-intelligence
-description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.2.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes official slash commands (/mo7i, /setup-project-skills, /mo7i audit, /mo7i learn, /mo7i status, /mo7i doctor). Autonomously analyzes project stacks, provisions essential project skills (including the verified Matt Pocock collection), learns operational contracts, plans, executes, verifies, and maintains project intelligence."
+name: mo7i
+description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Multi-Platform Entry Point (v2.3.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands ($mo7i audit, learn, status, doctor, update, help, or a free task). Autonomously analyzes project stacks, provisions essential project skills (including the verified Matt Pocock collection), manages post-install setup lifecycles, plans, executes, verifies, and maintains project intelligence."
 ---
 
 # MO7I Universal Intelligence
 
-Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, and Official Slash Commands System (v2.2.0).
+Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, and Multi-Platform Entry Point (v2.3.0).
 
 MO7I Universal Intelligence serves as the single autonomous entry point across all repositories and engineering tasks. It operates on a core principle: **The user specifies WHAT needs to be accomplished; MO7I determines HOW to accomplish it.** It independently analyzes project codebases, provisions foundational project-scoped specialist skills, learns operational contracts, orchestrates multi-skill pipelines, enforces zero-trust security boundaries, and provides direct, native slash-command entry points across all supported agent environments.
 

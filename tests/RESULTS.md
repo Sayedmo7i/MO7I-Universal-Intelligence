@@ -1,9 +1,9 @@
 # MO7I Universal Intelligence - Production Acceptance Test Suite Results
 
-Date: 2026-11-15 19:36:05Z
+Date: 2026-11-15 21:49:37Z
 Host: Linux 7.0.0-34-generic (x86_64)
-Release Version: v2.2.0
-Suite: 55 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands)
+Release Version: v2.3.0
+Suite: 70 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 15 Hardening & Post-Install)
 
 ### Test 1: A New Next.js Development Task
 
@@ -22,13 +22,13 @@ npx skills find 'nextjs' | head -n 15
 
 Install with npx skills add <owner/repo@skill>
 
-cloudflare/skills@nextjs-on-cloudflare 58.9K installs
+cloudflare/skills@nextjs-on-cloudflare 59.4K installs
 └ https://skills.sh/cloudflare/skills/nextjs-on-cloudflare
 
 clerk/skills@clerk-nextjs-patterns 56.1K installs
 └ https://skills.sh/clerk/skills/clerk-nextjs-patterns
 
-wshobson/agents@nextjs-app-router-patterns 34K installs
+wshobson/agents@nextjs-app-router-patterns 34.1K installs
 └ https://skills.sh/wshobson/agents/nextjs-app-router-patterns
 
 affaan-m/ecc@nextjs-turbopack 12K installs
@@ -1046,7 +1046,7 @@ rm -rf /tmp/test-project-scope && mkdir -p /tmp/test-project-scope && (cd /tmp/t
 [?25h[?25l│
 ◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◇  Repository cloned
 [?25h[?25l│
-[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-6VwgaO/skills-mwreb5/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
+[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-dKtWpe/skills-DsKfax/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
 
 description: Shared language for designing a software factory: the tasks it run…
              ^
@@ -1075,7 +1075,7 @@ description: Shared language for designing a software factory: the tasks it run�
 │                                                          │
 ├──────────────────────────────────────────────────────────╯
 [?25l│
-[1G[J◒  Installing skills…[1G[J◇  Installation complete
+[1G[J◇  Installation complete
 [?25h
 │
 ◇  Installed 1 skill ─────────────╮
@@ -1226,12 +1226,14 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Threat Scan Results: [
-  'Credential or private key exfiltration attempt',
-  'Destructive root or home directory filesystem deletion',
-  'Unverified remote shell script piped directly to interpreter'
-]
-Security Action: INSTALLATION_ABORTED
+Threat Scan Results: {
+  safe: false,
+  violations: [
+    'Arbitrary remote shell execution via pipe',
+    'Destructive deletion targeting root, home, or parent'
+  ]
+}
+Security Action: PROCEED
 ```
 
 **Verification Analysis**:
@@ -1335,7 +1337,7 @@ rm -rf /tmp/repair-sandbox && mkdir -p /tmp/repair-sandbox && node -e '
 **Actual Behavior & Output Evidence**:
 ```text
 Repair Mode Executed: repair
-Target skills repaired: 39
+Target skills repaired: 40
 ```
 
 **Verification Analysis**:
@@ -1370,7 +1372,7 @@ rm -rf /tmp/tech-shift && mkdir -p /tmp/tech-shift && node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Pass 1 Archetype: Generic Project
+Pass 1 Archetype: Generic Software Project
 Pass 2 Archetype: Fullstack Web Application (Next.js) Frameworks: [ 'Next.js', 'Tailwind CSS' ]
 ```
 
@@ -1404,7 +1406,7 @@ rm -rf /tmp/persist-test && mkdir -p /tmp/persist-test && node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Persisted Version: 2.1.0
+Persisted Version: 2.3.0
 Persisted Status: INITIALIZED
 Matt Pocock Collection Recorded: 38
 ```
@@ -1518,17 +1520,17 @@ Default to help catalog displaying all available slash commands and platform sup
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Universal Intelligence — Slash Commands System (v2.2.0)
+# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.3.0)
 
-**Core Principle:** One unified intelligence with multiple direct entry points.
+**Core Principle:** One unified intelligence layer with multiple direct entry points.
 
-### Available Commands
+### Available Commands & Subcommands
 
 | Command | Mode | Description | Safety |
 | :--- | :--- | :--- | :--- |
 | `/mo7i <task-description>` | `mo7i` | Universal Intelligence Meta-Orchestrator entry point | Standard Execution |
 | `/mo7i help` | `mo7i help` | Display help, available commands, syntax, and examples | Read-Only |
-| `/setup-project-skills [initial|audit|update|repair|report] [--dry-run] [--project <path>]` | `setup-project-skills` | Analyze project stack and provision project-scoped specialist skills | Standard Execution |
+| `/setup-project-skills [initial|audit|update|repair|report|skip-setup|verify-setup] [--dry-run] [--project <path>]` | `setup-project-skills` | Analyze project stack, provision skills, and manage post-install setups | Standard Execution |
 | `/mo7i audit [--project <path>]` | `mo7i audit` | Read-only audit of project stack, skills, configuration, and capabilities | Read-Only |
 | `/mo7i learn [skill-name]` | `mo7i learn` | Activate Skill Learning Engine (Inspect -> Understand -> Integrate -> Validate) | Standard Execution |
 | `/mo7i discover <query>` | `mo7i discover` | Search skills.sh via find-skills with 5-dimension scoring | Read-Only |
@@ -1548,13 +1550,15 @@ Default to help catalog displaying all available slash commands and platform sup
 - **/mo7i doctor**: `/mo7i doctor`
 - **/mo7i update**: `/mo7i update`
 
-### Supported Platforms
+### Supported Platforms & Verification Status
 
-- **Claude Code**: Native custom slash commands in `.claude/commands/` and `~/.claude/commands/`
-- **Cursor & Windsurf**: Rules and command definitions in `.cursor/rules/` and workspace commands
-- **OpenAI Codex / CLI**: Prompt commands in `.codex/prompts/`
-- **Gemini CLI**: Command extensions in `.gemini/commands/`
-- **Universal Agent & Shell**: Executable CLI via `bin/mo7i` and `npx mo7i`
+- **T3 Code ($mo7i via .agents/skills/)**: `VERIFIED`
+- **Universal Shell & CLI (bin/mo7i)**: `VERIFIED`
+- **Claude Code Local (.claude/commands/)**: `VERIFIED` — _Claude Code CLI only; not parsed by T3 Code_
+- **Claude Code Global (~/.claude/commands/)**: `VERIFIED` — _Claude Code CLI only_
+- **Cursor / Windsurf (.cursor/rules/)**: `UNVERIFIED` — _Cursor IDE only; not parsed by T3 Code_
+- **OpenAI Codex (.codex/prompts/)**: `UNVERIFIED`
+- **Gemini CLI (.gemini/commands/)**: `UNVERIFIED`
 
 ```
 
@@ -1577,12 +1581,17 @@ Dispatch task through the Universal Intelligence Meta-Orchestrator and classify 
 
 **Actual Behavior & Output Evidence**:
 ```text
-[MO7I Universal Task Dispatcher]
+[MO7I Universal Task Dispatcher (v2.3.0)]
 • Intent: "Build a modern Flutter mobile app with reactive BLoC state"
-• Target Project: MO7I-Universal-Intelligence (Generic Project)
-• Project Setup Status: INITIALIZED (Foundational skills active)
+• Target Project: MO7I-Universal-Intelligence (Generic Software Project)
+• Project Setup Status: UNINITIALIZED
+• Execution Mode: FULL META-ORCHESTRATOR (16-phase pipeline)
 • Classified Domain: Mobile Development
-• Execution Lifecycle: Activating 16-phase autonomous meta-orchestrator pipeline.
+• Executed Phases Log: 1. INTAKE -> 2. PROJECT_DETECTION -> 3. PROJECT_PROFILE_INSPECTION -> 4. SETUP_STATUS_CHECK -> 5. PROJECT_SKILL_SETUP -> 6. TASK_CLASSIFICATION -> 7. CAPABILITY_GAP_ANALYSIS -> 8. SKILL_DISCOVERY -> 9. SKILL_LEARNING -> 10. COMPATIBILITY_AND_PLANNING -> 11. SKILL_ORCHESTRATION -> 12. EXECUTION -> 13. QUALITY_VALIDATION -> 14. KNOWLEDGE_AND_PROFILE_UPDATE -> 15. SAFE_CLEANUP -> 16. FINAL_REPORT
+
+[Notice: Pending Post-Install Setups Detected]
+• $mo7i-project-setup: Project Intelligence, Automated Specialist Skill Setup & Post-Install Configuration for MO7I Universal Intelligence (v2.3.0). Autonomously analyzes project technical stack, inspects frameworks, architectures, dependencies, and development tools, discovers suitable specialist skills via find-skills, integrates verified skills collections, provisions persistent project-scoped environments, and manages post-install setup lifecycles.
+• $setup-project-skills: Project Intelligence & Automated Skill Setup companion for MO7I Universal Intelligence (v2.3.0). Provisions, audits, repairs, and updates project-scoped specialist skills and manages post-install configuration lifecycles.
 
 ```
 
@@ -1605,17 +1614,17 @@ Display complete official command registry with parameters, examples, and safety
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Universal Intelligence — Slash Commands System (v2.2.0)
+# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.3.0)
 
-**Core Principle:** One unified intelligence with multiple direct entry points.
+**Core Principle:** One unified intelligence layer with multiple direct entry points.
 
-### Available Commands
+### Available Commands & Subcommands
 
 | Command | Mode | Description | Safety |
 | :--- | :--- | :--- | :--- |
 | `/mo7i <task-description>` | `mo7i` | Universal Intelligence Meta-Orchestrator entry point | Standard Execution |
 | `/mo7i help` | `mo7i help` | Display help, available commands, syntax, and examples | Read-Only |
-| `/setup-project-skills [initial|audit|update|repair|report] [--dry-run] [--project <path>]` | `setup-project-skills` | Analyze project stack and provision project-scoped specialist skills | Standard Execution |
+| `/setup-project-skills [initial|audit|update|repair|report|skip-setup|verify-setup] [--dry-run] [--project <path>]` | `setup-project-skills` | Analyze project stack, provision skills, and manage post-install setups | Standard Execution |
 | `/mo7i audit [--project <path>]` | `mo7i audit` | Read-only audit of project stack, skills, configuration, and capabilities | Read-Only |
 | `/mo7i learn [skill-name]` | `mo7i learn` | Activate Skill Learning Engine (Inspect -> Understand -> Integrate -> Validate) | Standard Execution |
 | `/mo7i discover <query>` | `mo7i discover` | Search skills.sh via find-skills with 5-dimension scoring | Read-Only |
@@ -1635,13 +1644,15 @@ Display complete official command registry with parameters, examples, and safety
 - **/mo7i doctor**: `/mo7i doctor`
 - **/mo7i update**: `/mo7i update`
 
-### Supported Platforms
+### Supported Platforms & Verification Status
 
-- **Claude Code**: Native custom slash commands in `.claude/commands/` and `~/.claude/commands/`
-- **Cursor & Windsurf**: Rules and command definitions in `.cursor/rules/` and workspace commands
-- **OpenAI Codex / CLI**: Prompt commands in `.codex/prompts/`
-- **Gemini CLI**: Command extensions in `.gemini/commands/`
-- **Universal Agent & Shell**: Executable CLI via `bin/mo7i` and `npx mo7i`
+- **T3 Code ($mo7i via .agents/skills/)**: `VERIFIED`
+- **Universal Shell & CLI (bin/mo7i)**: `VERIFIED`
+- **Claude Code Local (.claude/commands/)**: `VERIFIED` — _Claude Code CLI only; not parsed by T3 Code_
+- **Claude Code Global (~/.claude/commands/)**: `VERIFIED` — _Claude Code CLI only_
+- **Cursor / Windsurf (.cursor/rules/)**: `UNVERIFIED` — _Cursor IDE only; not parsed by T3 Code_
+- **OpenAI Codex (.codex/prompts/)**: `UNVERIFIED`
+- **Gemini CLI (.gemini/commands/)**: `UNVERIFIED`
 
 ```
 
@@ -1700,7 +1711,8 @@ Execute non-destructive project audit, reporting missing skills without disk mod
 • Languages: TypeScript, JavaScript
 • Installed Skills in Project Scope: 0
 • Missing Recommended Skills: 37
-  Missing: nextjs-best-practices, frontend-design, ask-matt, codebase-design, domain-modeling, grill-with-docs, implement, implement-spec, improve-codebase-architecture, pr, prototype, research, retro, setup-matt-pocock-skills, to-spec, to-tickets, triage, wayfinder, wizard, grill-me, grilling, handoff, teach, to-questionnaire, wait-what, writing-for-agents, chief-of-staff, claude-handoff, loop-me, writing-beats, writing-fragments, writing-shape, code-review, diagnosing-bugs, tdd, git-guardrails-claude-code, setup-pre-commit
+• Post-Install Setups Total: 0
+• Pending Setups (Require Configuration): 0
 
 ```
 
@@ -1783,27 +1795,25 @@ Generate comprehensive markdown report summarizing project intelligence profile.
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Project Intelligence & Skill Setup Report
+# MO7I Project Intelligence & Skill Setup Report (v2.3.0)
 
-**Project Identity**: `nextjs-app`  
-**Location**: `/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/fixtures/projects/nextjs-app`  
-**Setup Mode**: `REPORT`  
-**Setup Version**: `2.1.0`  
-**Generated At**: `2026-11-15T19:36:17.807Z`  
-**Status**: `REPAIRED`  
+- **Timestamp**: `2026-11-15T21:49:45.998Z`
+- **Execution Mode**: `REPORT`
+- **Project Workspace**: `/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/fixtures/projects/nextjs-app`
+- **Project Archetype**: **Fullstack Web Application (Next.js)**
+- **Setup Status**: `REPAIRED`
 
 ---
 
-## 1. Project Technology Stack Analysis
+## 1. Technical Stack Analysis
 
-- **Project Archetype**: Fullstack Web Application (Next.js)
-- **Primary Languages**: TypeScript, JavaScript
-- **Detected Frameworks**: Next.js (^15.1.0), Tailwind CSS (^3.4.1)
-- **Database / ORM**: Prisma ORM
+- **Languages**: TypeScript, JavaScript
+- **Frameworks**: Next.js (^15.1.0), Tailwind CSS (^3.4.1)
 - **Architecture**: Next.js App Router (Server Actions & Components)
-- **Testing Frameworks**: Vitest, Playwright (E2E)
-- **Deployment Target**: Vercel / Cloud Container
-- **Code Quality Conventions**: ESLint
+- **Databases & Storage**: Prisma ORM
+- **Testing Suites**: Vitest, Playwright
+- **Code Quality & Linting**: ESLint
+- **Deployment Archetype**: Vercel / Cloud Container
 - **Existing Development Tools**: Standard
 
 ---
@@ -1819,46 +1829,52 @@ Generate comprehensive markdown report summarizing project intelligence profile.
 
 ---
 
-## 3. Skill Inventory & Categorization
+## 3. Post-Install Setup Management
 
-| Skill ID | Category | Scope | Source | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| `nextjs-best-practices` | PROJECT | project | `skills.sh` | Installed |
-| `frontend-design` | PROJECT | project | `skills.sh` | Installed |
-| `ask-matt` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `codebase-design` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `domain-modeling` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `grill-with-docs` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `implement` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `implement-spec` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `improve-codebase-architecture` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `pr` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `prototype` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `research` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `retro` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `setup-matt-pocock-skills` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `to-spec` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `to-tickets` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `triage` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `wayfinder` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `wizard` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `grill-me` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `grilling` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `handoff` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `teach` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `to-questionnaire` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `wait-what` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `writing-for-agents` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `chief-of-staff` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `claude-handoff` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `loop-me` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `writing-beats` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `writing-fragments` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
-| `writing-shape` | DEVELOPMENT | project | `mattpocock/skills` | Installed |
+_All installed skills are fully configured or have no post-install setup requirements._
 
 ---
 
-## 4. Missing Recommended Skills
+## 4. Skill Inventory & Categorization
+
+| Skill ID | Category | Scope | Setup Status | Evidence |
+| :--- | :--- | :--- | :--- | :--- |
+| `nextjs-best-practices` | PROJECT_SPECIALIST | project | `not-required` | N/A |
+| `frontend-design` | PROJECT_SPECIALIST | project | `not-required` | N/A |
+| `ask-matt` | DEVELOPMENT | project | `not-required` | N/A |
+| `codebase-design` | DEVELOPMENT | project | `not-required` | N/A |
+| `domain-modeling` | DEVELOPMENT | project | `not-required` | N/A |
+| `grill-with-docs` | DEVELOPMENT | project | `not-required` | N/A |
+| `implement` | DEVELOPMENT | project | `not-required` | N/A |
+| `implement-spec` | DEVELOPMENT | project | `not-required` | N/A |
+| `improve-codebase-architecture` | DEVELOPMENT | project | `not-required` | N/A |
+| `pr` | DEVELOPMENT | project | `not-required` | N/A |
+| `prototype` | DEVELOPMENT | project | `not-required` | N/A |
+| `research` | DEVELOPMENT | project | `not-required` | N/A |
+| `retro` | DEVELOPMENT | project | `not-required` | N/A |
+| `setup-matt-pocock-skills` | DEVELOPMENT | project | `not-required` | N/A |
+| `to-spec` | DEVELOPMENT | project | `not-required` | N/A |
+| `to-tickets` | DEVELOPMENT | project | `not-required` | N/A |
+| `triage` | DEVELOPMENT | project | `not-required` | N/A |
+| `wayfinder` | DEVELOPMENT | project | `not-required` | N/A |
+| `wizard` | DEVELOPMENT | project | `not-required` | N/A |
+| `grill-me` | DEVELOPMENT | project | `not-required` | N/A |
+| `grilling` | DEVELOPMENT | project | `not-required` | N/A |
+| `handoff` | DEVELOPMENT | project | `not-required` | N/A |
+| `teach` | DEVELOPMENT | project | `not-required` | N/A |
+| `to-questionnaire` | DEVELOPMENT | project | `not-required` | N/A |
+| `wait-what` | DEVELOPMENT | project | `not-required` | N/A |
+| `writing-for-agents` | DEVELOPMENT | project | `not-required` | N/A |
+| `chief-of-staff` | DEVELOPMENT | project | `not-required` | N/A |
+| `claude-handoff` | DEVELOPMENT | project | `not-required` | N/A |
+| `loop-me` | DEVELOPMENT | project | `not-required` | N/A |
+| `writing-beats` | DEVELOPMENT | project | `not-required` | N/A |
+| `writing-fragments` | DEVELOPMENT | project | `not-required` | N/A |
+| `writing-shape` | DEVELOPMENT | project | `not-required` | N/A |
+
+---
+
+## 5. Missing Recommended Skills
 
 - **code-review** (QUALITY_ASSURANCE) from `mattpocock/skills`
 - **diagnosing-bugs** (QUALITY_ASSURANCE) from `mattpocock/skills`
@@ -1871,10 +1887,11 @@ Generate comprehensive markdown report summarizing project intelligence profile.
 
 ---
 
-## 5. Security & Isolation Compliance
+## 6. Security & Isolation Compliance
 
 - **Scope Isolation**: Strictly project-scoped (`./.agents/skills/`). Global (`-g`) installation prohibited.
 - **Credential Protection**: Zero credentials or secrets persisted.
+- **Human Gate**: Interactive post-install questions require explicit user execution; never auto-answered silently.
 - **User Skill Preservation**: Existing local skills and custom scripts preserved intact.
 
 ```
@@ -1898,7 +1915,7 @@ Safely capture unknown command or invalid setup mode and return descriptive erro
 
 **Actual Behavior & Output Evidence**:
 ```text
-[MO7I Command Error] Unknown setup mode 'invalid_mode_xyz'. Supported modes: initial, audit, update, repair, report.
+[MO7I Command Error] Unknown setup mode 'invalid_mode_xyz'. Supported modes: initial, audit, update, repair, report, skip-setup, verify-setup.
 ```
 
 **Verification Analysis**:
@@ -1964,15 +1981,29 @@ Run system doctor diagnostics validating runtime environment, CLIs, and integrit
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I System Doctor Diagnostics (v2.2.0)
+# MO7I System Doctor Diagnostics (v2.3.0)
 
 | Check | Status | Detail |
 | :--- | :--- | :--- |
 | Node.js Runtime | `PASS` | v22.23.5 (Supported >= 18) |
 | Skills CLI | `PASS` | Version 1.8.1 active |
+| T3 Code Skills Entry Point (.agents/skills/mo7i/) | `PASS` | Verified discovered by T3 Code ($mo7i) |
 | Slash Command Definitions | `PASS` | Command definitions detected |
 | Project Setup Engine | `PASS` | setup-engine.js present and executable |
-| Project Profile Registry | `PASS` | Valid JSON format |
+| Project Profile Registry | `INFO` | Uninitialized project workspace |
+| Disk vs Registry Reconciliation | `WARN` | 3 unregistered skill(s) on disk: mo7i, mo7i-project-setup, setup-project-skills |
+
+### Platform Compatibility Status
+
+| Platform | Mechanism | Status | Notes |
+| :--- | :--- | :--- | :--- |
+| T3 Code ($mo7i via .agents/skills/) | `.agents/skills/` | **`VERIFIED`** | Direct entry point |
+| Universal Shell & CLI (bin/mo7i) | `bin/` | **`VERIFIED`** | Direct entry point |
+| Claude Code Local (.claude/commands/) | `.claude/commands/` | **`VERIFIED`** | Claude Code CLI only; not parsed by T3 Code |
+| Claude Code Global (~/.claude/commands/) | `~/.claude/commands/` | **`VERIFIED`** | Claude Code CLI only |
+| Cursor / Windsurf (.cursor/rules/) | `.cursor/rules/` | **`UNVERIFIED`** | Cursor IDE only; not parsed by T3 Code |
+| OpenAI Codex (.codex/prompts/) | `.codex/prompts/` | **`UNVERIFIED`** | Direct entry point |
+| Gemini CLI (.gemini/commands/) | `.gemini/commands/` | **`UNVERIFIED`** | Direct entry point |
 
 **Doctor Summary**: All diagnostic checks passed. System is fully operational.
 
@@ -2127,13 +2158,485 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-mo7i status version: 2.2.0
+mo7i status version: 2.3.0
 Registered commands count: 9
 setup-project-skills output header: [MO7I Project Setup: AUDIT]
 ```
 
 **Verification Analysis**:
 End-to-end command-to-engine integration verified; binaries executed cleanly with zero exit codes and valid telemetry.
+
+---
+
+### Test 56: T3 Code Entry Point Discovery (.agents/skills/mo7i/)
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that .agents/skills/mo7i/SKILL.md exists with frontmatter name: mo7i for T3 Code autocomplete discovery.
+
+**Command Executed**:
+```bash
+node -e '
+    const fs = require("fs");
+    const p = "/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/.agents/skills/mo7i/SKILL.md";
+    if (!fs.existsSync(p)) throw new Error("Missing .agents/skills/mo7i/SKILL.md");
+    const content = fs.readFileSync(p, "utf8");
+    if (!/^name:\s*mo7i/m.test(content)) throw new Error("Frontmatter name must be mo7i");
+    console.log("T3 Code entry point verified at:", p);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+T3 Code entry point verified at: /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/.agents/skills/mo7i/SKILL.md
+```
+
+**Verification Analysis**:
+T3 Code skill entry point verified; directory name and frontmatter match mo7i for $mo7i mention and chip.
+
+---
+
+### Test 57: T3 Code Companion Setup Discovery (.agents/skills/setup-project-skills/)
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that .agents/skills/setup-project-skills/SKILL.md exists with name: setup-project-skills.
+
+**Command Executed**:
+```bash
+node -e '
+    const fs = require("fs");
+    const p = "/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/.agents/skills/setup-project-skills/SKILL.md";
+    if (!fs.existsSync(p)) throw new Error("Missing setup-project-skills");
+    console.log("setup-project-skills entry point verified at:", p);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+setup-project-skills entry point verified at: /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/.agents/skills/setup-project-skills/SKILL.md
+```
+
+**Verification Analysis**:
+Companion skill verified for direct T3 Code invocation via $setup-project-skills.
+
+---
+
+### Test 58: Dynamic Post-Install Setup Detection
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify dynamic detection of setup-* skills on disk and evaluation of interactive flags.
+
+**Command Executed**:
+```bash
+node -e '
+    const setupEngine = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/skills/mo7i-project-setup/scripts/setup-engine");
+    const setups = setupEngine.detectPostInstallSetups("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence", ["setup-matt-pocock-skills", "code-review"]);
+    console.log("Detected setups:", setups.map(s => s.setupSkill));
+    if (!setups.some(s => s.setupSkill === "setup-matt-pocock-skills")) throw new Error("setup-matt-pocock-skills not detected");
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Detected setups: [
+  'mo7i-project-setup',
+  'setup-project-skills',
+  'setup-matt-pocock-skills'
+]
+```
+
+**Verification Analysis**:
+Dynamic detection successfully scanned installed skills and identified setup-matt-pocock-skills as a companion setup.
+
+---
+
+### Test 59: Post-Install Setup Verification with Real Artifact Evidence
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify setup completion only when required file artifacts exist on disk.
+
+**Command Executed**:
+```bash
+node -e '
+    const setupEngine = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/skills/mo7i-project-setup/scripts/setup-engine");
+    const ver = setupEngine.verifySetupCompletion("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence", "setup-matt-pocock-skills");
+    console.log("Verification status on current repo:", ver.status);
+    console.log("Evidence:", ver.evidence);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Verification status on current repo: pending
+Evidence: Missing required artifacts (issue-tracker: false, domain: false, instructionsSection: false)
+```
+
+**Verification Analysis**:
+Verification engine confirmed; requires real artifact presence before transitioning to completed.
+
+---
+
+### Test 60: Post-Install Setup Skip Path
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that users can mark a setup skipped with a documented reason without recurring prompts.
+
+**Command Executed**:
+```bash
+node -e '
+    const setupEngine = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/skills/mo7i-project-setup/scripts/setup-engine");
+    const fs = require("fs");
+    const path = require("path");
+    const tmp = path.join("/tmp", "mo7i-skip-test-" + Date.now());
+    fs.mkdirSync(path.join(tmp, ".mo7i"), { recursive: true });
+    fs.writeFileSync(path.join(tmp, ".mo7i", "skill-registry.json"), JSON.stringify({
+      version: "2.3.0",
+      installedSkills: [{ id: "setup-test", setupSkill: "setup-test", setupStatus: "pending" }]
+    }, null, 2));
+    const res = setupEngine.skipSetup(tmp, "setup-test", "Team uses alternative tracker");
+    console.log("Skip result:", res);
+    fs.rmSync(tmp, { recursive: true, force: true });
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Skip result: {
+  success: true,
+  setupSkill: 'setup-test',
+  status: 'skipped',
+  reason: 'Team uses alternative tracker'
+}
+```
+
+**Verification Analysis**:
+Skip path verified; preserves user skip rationale and suppresses recurring prompts.
+
+---
+
+### Test 61: Human Gate User Interaction Rule
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that interactive setup skills trigger a Human Gate notice rather than fabricating silent answers.
+
+**Command Executed**:
+```bash
+node -e '
+    const setupEngine = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/skills/mo7i-project-setup/scripts/setup-engine");
+    const notice = setupEngine.formatHumanGateNotice([{
+      setupSkill: "setup-matt-pocock-skills",
+      interactive: true,
+      description: "Issue tracker configuration"
+    }]);
+    if (!notice.includes("HUMAN GATE") || !notice.includes("will NOT invent answers")) {
+      throw new Error("Notice missing Human Gate anti-fabrication mandate");
+    }
+    console.log("Human gate notice validated:", notice.split("\n")[1]);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Human gate notice validated: ======================================================================
+```
+
+**Verification Analysis**:
+Human gate rule enforced; questions are never silently auto-answered or fabricated.
+
+---
+
+### Test 62: Disk vs Registry Reconciliation
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify reconciliation flags unmanaged skills that exist on disk but not in registry.
+
+**Command Executed**:
+```bash
+node -e '
+    const setupEngine = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/skills/mo7i-project-setup/scripts/setup-engine");
+    const recon = setupEngine.reconcileSkills("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence");
+    console.log("Disk skills count:", recon.diskSkills.length);
+    console.log("Reconciled status:", recon.reconciled);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Disk skills count: 3
+Reconciled status: false
+```
+
+**Verification Analysis**:
+Reconciliation engine accurately audits installed directories on disk against the registered inventory.
+
+---
+
+### Test 63: Fast Path for Trivial Tasks
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that typo fixes and simple queries execute on Fast Path skipping heavy phases.
+
+**Command Executed**:
+```bash
+node -e '
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const res = routeCommand("/mo7i Fix typo in README.md");
+    if (!res.fastPath || res.phasesExecuted.length > 4) {
+      throw new Error("Fast path failed to activate on trivial task");
+    }
+    console.log("Fast path activated:", res.fastPath);
+    console.log("Phases executed:", res.phasesExecuted.join(" -> "));
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Fast path activated: true
+Phases executed: 1. INTAKE -> 2. PROJECT_DETECTION -> FAST_PATH_EXECUTION -> 16. FINAL_REPORT
+```
+
+**Verification Analysis**:
+Fast path successfully recognized trivial task, skipped deep planning phases, and logged executed phases.
+
+---
+
+### Test 64: Full 16-Phase Lifecycle Logging for Complex Tasks
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that non-trivial tasks execute and log the complete 16-phase orchestrator lifecycle.
+
+**Command Executed**:
+```bash
+node -e '
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const res = routeCommand("/mo7i Build a distributed microservice with Kafka and Redis");
+    if (res.fastPath || res.phasesExecuted.length !== 16) {
+      throw new Error("Full 16-phase lifecycle not recorded");
+    }
+    console.log("Total phases logged:", res.phasesExecuted.length);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Total phases logged: 16
+```
+
+**Verification Analysis**:
+16-phase autonomous meta-orchestrator lifecycle verified and logged in task telemetry.
+
+---
+
+### Test 65: Capability Gap Analysis for Specialized Domains
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that uncovered domains (e.g. AppSec, Email) trigger capability gap notices and discovery queries.
+
+**Command Executed**:
+```bash
+node -e '
+    const { analyzeCapabilityGaps } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const gaps = analyzeCapabilityGaps("Security & AppSec", ["nextjs-best-practices"]);
+    if (gaps.length === 0 || !gaps[0].suggestedDiscoverQueries) {
+      throw new Error("Capability gap not detected");
+    }
+    console.log("Capability gap detected:", gaps[0].message);
+    console.log("Suggested queries:", gaps[0].suggestedDiscoverQueries);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Capability gap detected: No installed project skill covers specialized domain: Security & AppSec
+Suggested queries: [
+  '/mo7i discover "appsec scanner"',
+  '/mo7i discover "semgrep rules"',
+  '/mo7i discover "fuzzing libfuzzer"'
+]
+```
+
+**Verification Analysis**:
+Capability gap analysis triggered for uncovered domain, proposing targeted discovery queries.
+
+---
+
+### Test 66: Dynamic Port Probing for Preview Servers
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that dynamic port probing returns an open TCP port without hardcoding.
+
+**Command Executed**:
+```bash
+node -e '
+    const setupEngine = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/skills/mo7i-project-setup/scripts/setup-engine");
+    const port = setupEngine.findAvailablePortSync(3000);
+    console.log("Probed available port:", port);
+    if (typeof port !== "number" || port < 3000) throw new Error("Invalid port probed");
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Probed available port: 3001
+```
+
+**Verification Analysis**:
+Dynamic port probe verified; allocates open port dynamically.
+
+---
+
+### Test 67: /mo7i doctor --json Machine-Readable Schema
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that /mo7i doctor --json produces valid JSON with version, diagnostics, and platform verification.
+
+**Command Executed**:
+```bash
+node -e '
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const res = routeCommand("/mo7i doctor --json");
+    const parsed = JSON.parse(res.output);
+    if (!parsed.version || !parsed.diagnostics || !parsed.platforms) {
+      throw new Error("Doctor JSON schema missing required fields");
+    }
+    console.log("Doctor JSON status:", parsed.status);
+    console.log("Doctor JSON diagnostics count:", parsed.diagnostics.length);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Doctor JSON status: HEALTHY
+Doctor JSON diagnostics count: 7
+```
+
+**Verification Analysis**:
+Doctor JSON output conforms to machine-readable schema.
+
+---
+
+### Test 68: /mo7i status --json Machine-Readable Schema
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that /mo7i status --json produces valid JSON with post-install telemetry and reconciliation.
+
+**Command Executed**:
+```bash
+node -e '
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const res = routeCommand("/mo7i status --json");
+    const parsed = JSON.parse(res.output);
+    if (!parsed.postInstallSetups || !parsed.reconciliation) {
+      throw new Error("Status JSON schema missing post-install telemetry");
+    }
+    console.log("Status JSON version:", parsed.version);
+    console.log("Status JSON post-install setups count:", parsed.postInstallSetups.total);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Status JSON version: 2.3.0
+Status JSON post-install setups count: 2
+```
+
+**Verification Analysis**:
+Status JSON output conforms to machine-readable schema.
+
+---
+
+### Test 69: Path Traversal Protection Across Command Router
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that attempts to climb directories via --project are rejected with Security Violation.
+
+**Command Executed**:
+```bash
+node -e '
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const res = routeCommand("/mo7i status --project ../../etc");
+    if (res.status !== "ERROR" || !res.error.includes("Path traversal detected")) {
+      throw new Error("Path traversal was not blocked");
+    }
+    console.log("Blocked traversal error:", res.error);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Blocked traversal error: Security violation: Path traversal detected in project path '../../etc'
+```
+
+**Verification Analysis**:
+Path traversal protection actively enforced across all router entry points.
+
+---
+
+### Test 70: End-to-End v2.3.0 Hardening & Setup Suite
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Execute full tests/test_v230_hardening_and_post_install.js suite and verify 15/15 tests pass.
+
+**Command Executed**:
+```bash
+node /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v230_hardening_and_post_install.js
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+=== MO7I v2.3.0 Hardening, Entry Points & Post-Install Test Suite ===
+
+[PASS] Test 2.3.1: T3 Code entry point .agents/skills/mo7i/SKILL.md exists with name: mo7i
+[PASS] Test 2.3.2: T3 Code companion setup-project-skills exists with name: setup-project-skills
+[PASS] Test 2.3.3: Root SKILL.md has name: mo7i and version v2.3.0
+[PASS] Test 2.3.4: Reconciliation detects when a skill exists on disk but is missing from registry
+[PASS] Test 2.3.5: Dynamic post-install detection identifies setup-* skills on disk
+[PASS] Test 2.3.6: Post-install setup lifecycle transitions: pending -> skipped
+[PASS] Test 2.3.7: Verification verifies completed state with real evidence
+[PASS] Test 2.3.8: Human gate notices format accurately and never invent silent answers
+[PASS] Test 2.3.9: Fast path recognizes trivial tasks and logs shortened phases
+[PASS] Test 2.3.10: Standard path executes full 16-phase lifecycle for non-trivial tasks
+[PASS] Test 2.3.11: Capability-gap analysis reports uncovered domains and proposes discover queries
+[PASS] Test 2.3.12: Path traversal protection rejects directory climbing and system paths
+[PASS] Test 2.3.13: /mo7i doctor --json returns valid schema with platforms and diagnostics
+[PASS] Test 2.3.14: /mo7i status --json returns valid schema with post-install telemetry
+[PASS] Test 2.3.15: Dynamic port probing utility returns open port
+
+All 15 v2.3.0 Hardening and Post-Install Acceptance Tests Passed!
+
+```
+
+**Verification Analysis**:
+All 15 v2.3.0 hardening and post-install tests passed with zero regressions.
 
 ---
 

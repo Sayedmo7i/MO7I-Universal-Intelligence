@@ -142,6 +142,12 @@ function parseCommand(input) {
       }
     } else if (token.startsWith('--project=')) {
       flags.project = token.split('=')[1];
+    } else if (token === '--reason') {
+      if (i + 1 < remainingTokens.length) {
+        flags.reason = remainingTokens[++i];
+      }
+    } else if (token.startsWith('--reason=')) {
+      flags.reason = token.split('=')[1];
     } else if (token === '--help' || token === '-h') {
       flags.help = true;
     } else {
@@ -168,10 +174,11 @@ function parseCommand(input) {
   let task = null;
 
   if (command === 'setup-project-skills') {
-    const supportedModes = ['initial', 'audit', 'update', 'repair', 'report'];
+    const supportedModes = ['initial', 'audit', 'update', 'repair', 'report', 'skip-setup', 'verify-setup'];
     const modeCandidate = positionalArgs[0] ? positionalArgs[0].toLowerCase() : 'initial';
     if (supportedModes.includes(modeCandidate)) {
       subcommand = modeCandidate;
+      positionalArgs.shift();
     } else if (positionalArgs.length === 0) {
       subcommand = 'initial';
     } else {
@@ -183,7 +190,7 @@ function parseCommand(input) {
         args: positionalArgs,
         flags,
         valid: false,
-        error: `Unknown setup mode '${positionalArgs[0]}'. Supported modes: initial, audit, update, repair, report.`
+        error: `Unknown setup mode '${positionalArgs[0]}'. Supported modes: initial, audit, update, repair, report, skip-setup, verify-setup.`
       };
     }
   } else if (command === 'mo7i') {
