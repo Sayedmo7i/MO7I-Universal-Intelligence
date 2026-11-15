@@ -1,6 +1,6 @@
 ---
 name: mo7i-project-setup
-description: "Project Intelligence & Automated Specialist Skill Setup for MO7I Universal Intelligence. Autonomously analyzes project technical stack, inspects frameworks, architectures, dependencies, and development tools, discovers suitable specialist skills via find-skills, integrates the verified official Matt Pocock skills collection, and provisions persistent, project-scoped specialist skill environments with zero global pollution."
+description: "Project Intelligence, Automated Specialist Skill Setup & Post-Install Configuration for MO7I Universal Intelligence (v2.3.0). Autonomously analyzes project technical stack, inspects frameworks, architectures, dependencies, and development tools, discovers suitable specialist skills via find-skills, integrates verified skills collections, provisions persistent project-scoped environments, and manages post-install setup lifecycles."
 ---
 
 # MO7I Project Intelligence & Automated Skill Setup

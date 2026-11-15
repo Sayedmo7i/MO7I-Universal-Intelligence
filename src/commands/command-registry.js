@@ -1,6 +1,6 @@
 /**
  * MO7I Universal Intelligence — Command Registry
- * Version: 2.2.0
+ * Version: 2.3.0
  * 
  * Canonical registry of all official slash commands, descriptions, parameters,
  * safety profiles, and platform mappings.
@@ -22,7 +22,7 @@ const COMMANDS = [
     ],
     readOnly: false,
     requiresApproval: false, // Orchestrator gates only on destructive actions
-    supportedPlatforms: ['claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   },
   {
     id: 'mo7i-help',
@@ -36,26 +36,28 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   },
   {
     id: 'setup-project-skills',
     trigger: '/setup-project-skills',
     alias: 'setup-project-skills',
-    summary: 'Analyze project stack and provision project-scoped specialist skills',
-    description: 'Analyzes project dependencies and architecture, integrates verified Matt Pocock skills and stack specialists into project scope without global pollution.',
-    usage: '/setup-project-skills [initial|audit|update|repair|report] [--dry-run] [--project <path>]',
+    summary: 'Analyze project stack, provision skills, and manage post-install setups',
+    description: 'Analyzes project dependencies and architecture, integrates verified Matt Pocock skills and stack specialists into project scope, and tracks post-install setup lifecycles.',
+    usage: '/setup-project-skills [initial|audit|update|repair|report|skip-setup|verify-setup] [--dry-run] [--project <path>]',
     examples: [
       '/setup-project-skills initial',
       '/setup-project-skills initial --dry-run',
       '/setup-project-skills audit',
       '/setup-project-skills update',
       '/setup-project-skills repair',
-      '/setup-project-skills report'
+      '/setup-project-skills report',
+      '/setup-project-skills skip-setup setup-matt-pocock-skills --reason "custom tracking"',
+      '/setup-project-skills verify-setup setup-matt-pocock-skills'
     ],
     readOnly: false,
     requiresApproval: false,
-    supportedPlatforms: ['claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   },
   {
     id: 'mo7i-audit',
@@ -70,7 +72,7 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   },
   {
     id: 'mo7i-learn',
@@ -86,7 +88,7 @@ const COMMANDS = [
     ],
     readOnly: false,
     requiresApproval: false,
-    supportedPlatforms: ['claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   },
   {
     id: 'mo7i-discover',
@@ -102,7 +104,7 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   },
   {
     id: 'mo7i-status',
@@ -117,7 +119,7 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   },
   {
     id: 'mo7i-doctor',
@@ -131,7 +133,7 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   },
   {
     id: 'mo7i-update',
@@ -146,7 +148,7 @@ const COMMANDS = [
     ],
     readOnly: false,
     requiresApproval: true, // Gate before updating packages
-    supportedPlatforms: ['claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   }
 ];
 

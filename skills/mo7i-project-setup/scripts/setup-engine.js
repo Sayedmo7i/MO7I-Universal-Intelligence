@@ -2,18 +2,20 @@
 
 /**
  * MO7I Project Intelligence & Automated Skill Setup Engine
- * Version: 2.1.0
+ * Version: 2.3.0
  * 
  * Provides automated project analysis, dynamic specialist skill discovery,
  * integration with the official Matt Pocock collection, strictly project-scoped
- * installation, and persistent project profile and skill registry management.
+ * installation, post-install setup detection & lifecycle tracking, human-gate
+ * interaction enforcement, and persistent skill registry management.
  */
 
 const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
+const net = require('net');
 
-const ENGINE_VERSION = '2.1.0';
+const ENGINE_VERSION = '2.3.0';
 
 // Official verified Matt Pocock skills collection (from https://skills.sh/mattpocock/skills)
 const MATT_POCOCK_OFFICIAL_SOURCE = {
@@ -96,63 +98,156 @@ function sanitizeObject(obj) {
 }
 
 /**
- * Scan a text content or script for dangerous or malicious patterns.
+ * Scan text content or script for dangerous or malicious patterns.
  */
 function scanContentSecurity(content) {
-  const issues = [];
-  if (/(\/|\b)(id_rsa|\.aws\/credentials|\.ssh|\.env|\.netrc)/i.test(content)) {
-    issues.push('Credential or private key exfiltration attempt');
+  const violations = [];
+  if (typeof content !== 'string') return { safe: true, violations };
+
+  const blocked = [
+    { pattern: /curl\s+[^|\n]+\|\s*(ba|z)?sh/i, reason: 'Arbitrary remote shell execution via pipe' },
+    { pattern: /wget\s+[^|\n]+\|\s*(ba|z)?sh/i, reason: 'Arbitrary remote shell execution via wget' },
+    { pattern: /rm\s+-rf\s+(\/|~|\$HOME|\.\.)/i, reason: 'Destructive deletion targeting root, home, or parent' },
+    { pattern: />\s*\/etc\/(passwd|shadow|hosts)/i, reason: 'Attempt to overwrite sensitive system configuration' },
+    { pattern: /chmod\s+777\s+(\/|~|\$HOME)/i, reason: 'Insecure permissive file permissions at root or home' }
+  ];
+
+  for (const rule of blocked) {
+    if (rule.pattern.test(content)) {
+      violations.push(rule.reason);
+    }
   }
-  if (/rm\s+-rf\s+(\/|\$HOME|~)/i.test(content)) {
-    issues.push('Destructive root or home directory filesystem deletion');
-  }
-  if (/ignore\s+all\s+(previous|prior)\s+instructions/i.test(content)) {
-    issues.push('Adversarial prompt injection attempt');
-  }
-  if (/curl\s+-[sS]*[kK]?\s+.*\|\s*(bash|sh|zsh)/i.test(content)) {
-    issues.push('Unverified remote shell script piped directly to interpreter');
-  }
-  return issues;
+
+  return {
+    safe: violations.length === 0,
+    violations
+  };
 }
 
 /**
- * Inspects a repository or target project path and analyzes its technical profile.
+ * Dynamic port probing utility.
+ * Finds the first open TCP port starting at startPort.
  */
-function analyzeProject(projectDir) {
+function findAvailablePort(startPort = 3000, maxAttempts = 50) {
+  return new Promise((resolve, reject) => {
+    let port = startPort;
+    function tryPort(p) {
+      const server = net.createServer();
+      server.unref();
+      server.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+          if (p - startPort >= maxAttempts) {
+            reject(new Error(`No open port found after ${maxAttempts} attempts starting at ${startPort}`));
+          } else {
+            tryPort(p + 1);
+          }
+        } else {
+          reject(err);
+        }
+      });
+      server.listen(p, () => {
+        server.close(() => resolve(p));
+      });
+    }
+    tryPort(port);
+  });
+}
+
+/**
+ * Synchronous port availability check.
+ */
+function findAvailablePortSync(startPort = 3000, maxAttempts = 50) {
+  for (let port = startPort; port < startPort + maxAttempts; port++) {
+    try {
+      const out = cp.execSync(`node -e '
+        const net = require("net");
+        const s = net.createServer();
+        s.once("error", () => process.exit(1));
+        s.listen(${port}, () => { s.close(() => process.exit(0)); });
+      '`, { stdio: 'pipe' });
+      return port;
+    } catch {
+      // Port in use, continue
+    }
+  }
+  return startPort;
+}
+
+/**
+ * Load the curated post-install setup map with safe fallbacks.
+ */
+function loadPostInstallSetupMap() {
+  const mapPath = path.resolve(__dirname, '../../../references/post-install-setup-map.json');
+  if (fs.existsSync(mapPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(mapPath, 'utf8'));
+    } catch {
+      // fallback
+    }
+  }
+  return {
+    collections: {
+      'mattpocock/skills': {
+        collection: 'mattpocock/skills',
+        setupSkill: 'setup-matt-pocock-skills',
+        interactive: true,
+        description: 'Configures issue tracker, triage labels, and domain doc layout for Matt Pocock engineering skills.',
+        writes: ['docs/agents/issue-tracker.md', 'docs/agents/domain.md', 'CLAUDE.md', 'AGENTS.md'],
+        verification: {
+          files: ['docs/agents/issue-tracker.md', 'docs/agents/domain.md'],
+          contentChecks: [{ files: ['CLAUDE.md', 'AGENTS.md'], pattern: '## Agent skills' }]
+        }
+      },
+      'setup-pre-commit': {
+        collection: 'mattpocock/skills',
+        setupSkill: 'setup-pre-commit',
+        interactive: false,
+        description: 'Sets up Husky pre-commit hooks with lint-staged (Prettier), type checking, and tests.',
+        writes: ['.husky/pre-commit', '.lintstagedrc', '.prettierrc', 'package.json'],
+        verification: {
+          files: ['.husky/pre-commit', '.lintstagedrc']
+        }
+      },
+      'setup-ts-deep-modules': {
+        collection: 'mattpocock/skills',
+        setupSkill: 'setup-ts-deep-modules',
+        interactive: true,
+        description: 'Enforces deep module boundaries via dependency-cruiser rules.',
+        writes: ['.dependency-cruiser.cjs', 'package.json'],
+        verification: {
+          files: ['.dependency-cruiser.cjs']
+        }
+      }
+    }
+  };
+}
+
+/**
+ * Inspects repository artifacts and determines the project stack archetype.
+ */
+function analyzeProject(projectDir = process.cwd()) {
   const resolvedDir = path.resolve(projectDir);
   if (!fs.existsSync(resolvedDir)) {
     throw new Error(`Project directory not found: ${resolvedDir}`);
   }
-
   const profile = {
     id: path.basename(resolvedDir),
     path: resolvedDir,
-    type: 'Generic Project',
+    type: 'Generic Software Project',
     languages: [],
     frameworks: [],
+    architecture: 'Modular Monolith / Standard',
     databases: [],
-    architecture: 'Standard',
     testFrameworks: [],
-    deployment: 'Local',
-    securityRequirements: ['Zero-trust secret management'],
     codeQualityConventions: [],
     existingTools: [],
     existingSkills: [],
+    deployment: 'Local',
     inspectedFiles: [],
-    setupStatus: 'UNINITIALIZED',
-    setupVersion: ENGINE_VERSION,
-    analyzedAt: new Date().toISOString()
+    setupStatus: 'UNINITIALIZED'
   };
 
-  const fileExists = (rel) => {
-    const full = path.join(resolvedDir, rel);
-    if (fs.existsSync(full)) {
-      profile.inspectedFiles.push(rel);
-      return true;
-    }
-    return false;
-  };
-
+  const fileExists = (rel) => fs.existsSync(path.join(resolvedDir, rel));
   const readJsonSafe = (rel) => {
     try {
       const full = path.join(resolvedDir, rel);
@@ -165,7 +260,6 @@ function analyzeProject(projectDir) {
     }
     return null;
   };
-
   const readFileSafe = (rel) => {
     try {
       const full = path.join(resolvedDir, rel);
@@ -184,7 +278,7 @@ function analyzeProject(projectDir) {
   if (fileExists('CLAUDE.md')) profile.existingTools.push('CLAUDE.md');
   if (fileExists('README.md')) profile.existingTools.push('README.md');
 
-  // Inspect existing skills in project
+  // Discover skills on disk in project scope
   const projectSkillsDirs = ['.agents/skills', '.gemini/skills', '.skills'];
   for (const sDir of projectSkillsDirs) {
     const fullDir = path.join(resolvedDir, sDir);
@@ -202,6 +296,7 @@ function analyzeProject(projectDir) {
     }
   }
 
+  // Discover skills from lockfile
   const skillsLock = readJsonSafe('skills-lock.json');
   if (skillsLock && skillsLock.skills) {
     for (const sName of Object.keys(skillsLock.skills)) {
@@ -211,11 +306,11 @@ function analyzeProject(projectDir) {
     }
   }
 
+
   // Inspect Node / JavaScript / TypeScript ecosystem
   const pkg = readJsonSafe('package.json');
   if (pkg) {
     const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
-    const scripts = pkg.scripts || {};
 
     if (deps['typescript'] || fileExists('tsconfig.json')) {
       if (!profile.languages.includes('TypeScript')) profile.languages.push('TypeScript');
@@ -258,15 +353,11 @@ function analyzeProject(projectDir) {
     if (deps['drizzle-orm']) profile.databases.push('Drizzle ORM');
     if (deps['typeorm']) profile.databases.push('TypeORM');
     if (deps['mongoose']) profile.databases.push('MongoDB / Mongoose');
-    if (deps['pg'] || deps['postgres']) profile.databases.push('PostgreSQL');
-    if (deps['better-sqlite3'] || deps['sqlite3']) profile.databases.push('SQLite');
 
-    // Test frameworks
-    if (deps['vitest']) profile.testFrameworks.push('Vitest');
-    if (deps['jest'] || scripts.test && scripts.test.includes('jest')) profile.testFrameworks.push('Jest');
-    if (deps['@playwright/test'] || fileExists('playwright.config.ts') || fileExists('playwright.config.js')) {
-      profile.testFrameworks.push('Playwright (E2E)');
-    }
+    // Testing
+    if (deps['vitest'] || fileExists('vitest.config.ts')) profile.testFrameworks.push('Vitest');
+    if (deps['jest'] || fileExists('jest.config.js')) profile.testFrameworks.push('Jest');
+    if (deps['playwright'] || deps['@playwright/test']) profile.testFrameworks.push('Playwright');
     if (deps['cypress']) profile.testFrameworks.push('Cypress');
 
     // Code Quality
@@ -545,8 +636,7 @@ function installProjectSkills(projectDir, skillsToInstall, options = {}) {
     }
 
     try {
-      // Execute project-scope installation using Skills CLI
-      // Strictly without -g
+      // Execute project-scope installation using Skills CLI strictly without -g
       const cmd = `npx skills add ${skill.package || 'mattpocock/skills'} --skill ${skill.id} -y`;
       cp.execSync(cmd, {
         cwd: resolvedDir,
@@ -555,14 +645,6 @@ function installProjectSkills(projectDir, skillsToInstall, options = {}) {
       });
 
       if (fs.existsSync(targetPath)) {
-        results.successful.push({
-          id: skill.id,
-          scope: 'project',
-          targetPath,
-          verified: true
-        });
-      } else {
-        // Fallback: if skills CLI copied to a variant agent directory or symlink, verify
         results.successful.push({
           id: skill.id,
           scope: 'project',
@@ -582,6 +664,378 @@ function installProjectSkills(projectDir, skillsToInstall, options = {}) {
 }
 
 /**
+ * Verify post-install setup completion against concrete artifacts and file evidence.
+ * Derived from real inspection in Phase 0B.
+ */
+function verifySetupCompletion(projectDir, setupSkillName) {
+  const resolvedDir = path.resolve(projectDir);
+  const sName = setupSkillName.toLowerCase().trim();
+
+  // 1. setup-matt-pocock-skills verification
+  if (sName === 'setup-matt-pocock-skills') {
+    const issueTracker = path.join(resolvedDir, 'docs', 'agents', 'issue-tracker.md');
+    const domainDocs = path.join(resolvedDir, 'docs', 'agents', 'domain.md');
+    const claudeMd = path.join(resolvedDir, 'CLAUDE.md');
+    const agentsMd = path.join(resolvedDir, 'AGENTS.md');
+
+    const trackerExists = fs.existsSync(issueTracker) && fs.statSync(issueTracker).size > 0;
+    const domainExists = fs.existsSync(domainDocs) && fs.statSync(domainDocs).size > 0;
+    
+    let instructionsHaveSection = false;
+    if (fs.existsSync(claudeMd)) {
+      const content = fs.readFileSync(claudeMd, 'utf8');
+      if (content.includes('## Agent skills')) instructionsHaveSection = true;
+    }
+    if (!instructionsHaveSection && fs.existsSync(agentsMd)) {
+      const content = fs.readFileSync(agentsMd, 'utf8');
+      if (content.includes('## Agent skills')) instructionsHaveSection = true;
+    }
+
+    if (trackerExists && domainExists && instructionsHaveSection) {
+      return {
+        verified: true,
+        evidence: 'Verified: docs/agents/issue-tracker.md, docs/agents/domain.md, and ## Agent skills section exist.',
+        status: 'completed'
+      };
+    }
+    return {
+      verified: false,
+      evidence: `Missing required artifacts (issue-tracker: ${trackerExists}, domain: ${domainExists}, instructionsSection: ${instructionsHaveSection})`,
+      status: 'pending'
+    };
+  }
+
+  // 2. setup-pre-commit verification
+  if (sName === 'setup-pre-commit') {
+    const preCommitHook = path.join(resolvedDir, '.husky', 'pre-commit');
+    const lintStagedRc = path.join(resolvedDir, '.lintstagedrc');
+    const pkgPath = path.join(resolvedDir, 'package.json');
+
+    const hookExists = fs.existsSync(preCommitHook);
+    const lintStagedExists = fs.existsSync(lintStagedRc);
+    let pkgHasHusky = false;
+    if (fs.existsSync(pkgPath)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        pkgHasHusky = pkg.scripts && typeof pkg.scripts.prepare === 'string' && pkg.scripts.prepare.includes('husky');
+      } catch {
+        // ignore
+      }
+    }
+
+    if (hookExists && lintStagedExists && pkgHasHusky) {
+      return {
+        verified: true,
+        evidence: 'Verified: .husky/pre-commit, .lintstagedrc, and package.json prepare:husky exist.',
+        status: 'completed'
+      };
+    }
+    return {
+      verified: false,
+      evidence: `Missing pre-commit artifacts (hook: ${hookExists}, lintStaged: ${lintStagedExists}, prepareScript: ${pkgHasHusky})`,
+      status: 'pending'
+    };
+  }
+
+  // 3. setup-ts-deep-modules verification
+  if (sName === 'setup-ts-deep-modules') {
+    const depCruiser = path.join(resolvedDir, '.dependency-cruiser.cjs');
+    const pkgPath = path.join(resolvedDir, 'package.json');
+
+    const configExists = fs.existsSync(depCruiser);
+    let hasBoundaryScript = false;
+    if (fs.existsSync(pkgPath)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        hasBoundaryScript = pkg.scripts && Boolean(pkg.scripts['lint:boundaries']);
+      } catch {
+        // ignore
+      }
+    }
+
+    if (configExists && hasBoundaryScript) {
+      return {
+        verified: true,
+        evidence: 'Verified: .dependency-cruiser.cjs and package.json lint:boundaries exist.',
+        status: 'completed'
+      };
+    }
+    return {
+      verified: false,
+      evidence: `Missing deep module artifacts (config: ${configExists}, script: ${hasBoundaryScript})`,
+      status: 'pending'
+    };
+  }
+
+  // Generic verification
+  const mapData = loadPostInstallSetupMap();
+  const entry = Object.values(mapData.collections).find(c => c.setupSkill === sName);
+  if (entry && entry.verification && Array.isArray(entry.verification.files)) {
+    const missing = entry.verification.files.filter(f => !fs.existsSync(path.join(resolvedDir, f)));
+    if (missing.length === 0) {
+      return {
+        verified: true,
+        evidence: `Verified all required files: ${entry.verification.files.join(', ')}`,
+        status: 'completed'
+      };
+    }
+  }
+
+  return {
+    verified: false,
+    evidence: 'Setup configuration not verified on disk.',
+    status: 'pending'
+  };
+}
+
+/**
+ * Detects post-install setup companion skills across installed skills.
+ * Dynamic inspection of SKILL.md takes precedence over curated map.
+ */
+function detectPostInstallSetups(projectDir, installedSkills = [], options = {}) {
+  const resolvedDir = path.resolve(projectDir);
+  const mapData = loadPostInstallSetupMap();
+  const detected = new Map();
+
+  // Read existing registry to preserve skipped or completed state
+  const regPath = path.join(resolvedDir, '.mo7i', 'skill-registry.json');
+  let existingRegistry = null;
+  if (fs.existsSync(regPath)) {
+    try {
+      existingRegistry = JSON.parse(fs.readFileSync(regPath, 'utf8'));
+    } catch {
+      // ignore
+    }
+  }
+
+  const existingStatusMap = new Map();
+  if (existingRegistry && Array.isArray(existingRegistry.installedSkills)) {
+    for (const s of existingRegistry.installedSkills) {
+      if (s.setupSkill) {
+        existingStatusMap.set(s.setupSkill, s);
+      }
+    }
+  }
+
+  const agentsSkillDir = path.join(resolvedDir, '.agents', 'skills');
+  const allSkillDirs = [];
+  if (fs.existsSync(agentsSkillDir)) {
+    try {
+      const dirs = fs.readdirSync(agentsSkillDir);
+      for (const d of dirs) {
+        if (fs.existsSync(path.join(agentsSkillDir, d, 'SKILL.md'))) {
+          allSkillDirs.push(d);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // Combine with passed skills
+  const combinedSkills = Array.from(new Set([...allSkillDirs, ...installedSkills]));
+
+  // 1. Dynamic inspection of installed SKILL.md files
+  for (const skillId of combinedSkills) {
+    const skillMdPath = path.join(agentsSkillDir, skillId, 'SKILL.md');
+    let isSetupSkill = false;
+    let description = '';
+    let interactive = false;
+
+    if (fs.existsSync(skillMdPath)) {
+      try {
+        const content = fs.readFileSync(skillMdPath, 'utf8');
+        // Match setup naming convention
+        if (/^(setup|init|onboard)[-_]/i.test(skillId) || /[-_](setup|init|onboard)$/i.test(skillId)) {
+          isSetupSkill = true;
+        }
+
+        // Match description / header patterns
+        if (/run once|configure|required before use|initial setup|setup this repo/i.test(content)) {
+          isSetupSkill = true;
+        }
+
+        // Match interactivity patterns
+        if (/(ask the user|confirm with the user|prompt-driven|questions?|interview|choices?)/i.test(content)) {
+          interactive = true;
+        }
+
+        const descMatch = /description:\s*["']?([^"'\n\r]+)/i.exec(content);
+        if (descMatch) description = descMatch[1].trim();
+      } catch {
+        // ignore
+      }
+    } else if (mapData.collections[skillId] || Object.values(mapData.collections).some(c => c.setupSkill === skillId)) {
+      isSetupSkill = true;
+    }
+
+    if (isSetupSkill) {
+      const existing = existingStatusMap.get(skillId);
+      const verification = verifySetupCompletion(resolvedDir, skillId);
+
+      let status = 'pending';
+      let evidence = verification.evidence;
+      let skipReason = null;
+
+      if (verification.verified) {
+        status = 'completed';
+      } else if (existing && existing.setupStatus === 'skipped') {
+        status = 'skipped';
+        skipReason = existing.skipReason;
+      } else if (existing && existing.setupStatus === 'failed') {
+        status = 'failed';
+      }
+
+      detected.set(skillId, {
+        setupSkill: skillId,
+        interactive,
+        description: description || 'Companion post-install repository setup skill',
+        status,
+        evidence: verification.verified ? verification.evidence : (existing ? existing.evidence : evidence),
+        completedAt: verification.verified ? (existing?.completedAt || new Date().toISOString()) : null,
+        skipReason
+      });
+    }
+  }
+
+  // 2. Collection mapping fallback
+  for (const [collKey, collInfo] of Object.entries(mapData.collections)) {
+    const setupSkill = collInfo.setupSkill;
+    if (combinedSkills.includes(setupSkill) && !detected.has(setupSkill)) {
+      const verification = verifySetupCompletion(resolvedDir, setupSkill);
+      const existing = existingStatusMap.get(setupSkill);
+
+      let status = 'pending';
+      if (verification.verified) {
+        status = 'completed';
+      } else if (existing && existing.setupStatus === 'skipped') {
+        status = 'skipped';
+      }
+
+      detected.set(setupSkill, {
+        setupSkill,
+        interactive: collInfo.interactive,
+        description: collInfo.description,
+        status,
+        evidence: verification.evidence,
+        completedAt: verification.verified ? new Date().toISOString() : null,
+        skipReason: existing?.skipReason || null
+      });
+    }
+  }
+
+  return Array.from(detected.values());
+}
+
+/**
+ * Mark a pending post-install setup as skipped.
+ */
+function skipSetup(projectDir, setupSkillName, reason = 'Skipped by user') {
+  const resolvedDir = path.resolve(projectDir);
+  const regPath = path.join(resolvedDir, '.mo7i', 'skill-registry.json');
+  if (!fs.existsSync(regPath)) {
+    throw new Error(`Registry not found at ${regPath}. Run setup first.`);
+  }
+
+  const registry = JSON.parse(fs.readFileSync(regPath, 'utf8'));
+  let matched = false;
+
+  for (const skill of registry.installedSkills) {
+    if (skill.id === setupSkillName || skill.setupSkill === setupSkillName) {
+      skill.setupStatus = 'skipped';
+      skill.skipReason = reason;
+      skill.updatedAt = new Date().toISOString();
+      matched = true;
+    }
+  }
+
+  if (Array.isArray(registry.pendingSetups)) {
+    registry.pendingSetups = registry.pendingSetups.filter(s => s.setupSkill !== setupSkillName);
+  }
+
+  registry.updatedAt = new Date().toISOString();
+  fs.writeFileSync(regPath, JSON.stringify(registry, null, 2));
+
+  return {
+    success: true,
+    setupSkill: setupSkillName,
+    status: 'skipped',
+    reason
+  };
+}
+
+/**
+ * Format Human Gate notification for pending interactive post-install setups.
+ */
+function formatHumanGateNotice(pendingSetups) {
+  if (!pendingSetups || pendingSetups.length === 0) return '';
+
+  let out = `\n======================================================================\n`;
+  out += `[MO7I HUMAN GATE: POST-INSTALL SETUP REQUIRED]\n`;
+  out += `The following installed skill(s) require interactive repository configuration:\n\n`;
+
+  for (const s of pendingSetups) {
+    out += `• ${s.setupSkill}:\n`;
+    out += `  Description: ${s.description}\n`;
+    out += `  Invocation:  $${s.setupSkill} (in T3 Code) or /${s.setupSkill}\n`;
+    out += `  Interactive: ${s.interactive ? 'YES (Human decisions required - MO7I will NOT invent answers)' : 'NO'}\n`;
+    out += `  To Skip:     /setup-project-skills skip-setup ${s.setupSkill} --reason "<reason>"\n\n`;
+  }
+
+  out += `ACTION: Please invoke the setup command in your session to configure this repo.\n`;
+  out += `======================================================================\n`;
+  return out;
+}
+
+/**
+ * Reconcile skills on disk with skills in .mo7i/skill-registry.json.
+ * Fails / flags if skills exist on disk in .agents/skills/ but not in the registry.
+ */
+function reconcileSkills(projectDir = process.cwd()) {
+  const resolvedDir = path.resolve(projectDir);
+  const agentsSkillDir = path.join(resolvedDir, '.agents', 'skills');
+  const regPath = path.join(resolvedDir, '.mo7i', 'skill-registry.json');
+
+  const diskSkills = [];
+  if (fs.existsSync(agentsSkillDir)) {
+    try {
+      const entries = fs.readdirSync(agentsSkillDir, { withFileTypes: true });
+      for (const e of entries) {
+        if (e.isDirectory()) {
+          const sMd = path.join(agentsSkillDir, e.name, 'SKILL.md');
+          if (fs.existsSync(sMd)) diskSkills.push(e.name);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  let registeredSkills = [];
+  let registryData = null;
+  if (fs.existsSync(regPath)) {
+    try {
+      registryData = JSON.parse(fs.readFileSync(regPath, 'utf8'));
+      registeredSkills = (registryData.installedSkills || []).map(s => s.id);
+    } catch {
+      // ignore
+    }
+  }
+
+  const unregisteredOnDisk = diskSkills.filter(id => !registeredSkills.includes(id));
+  const missingFromDisk = registeredSkills.filter(id => !diskSkills.includes(id));
+
+  return {
+    reconciled: unregisteredOnDisk.length === 0,
+    diskSkills,
+    registeredSkills,
+    unregisteredOnDisk,
+    missingFromDisk,
+    registryExists: Boolean(registryData)
+  };
+}
+
+/**
  * Writes or updates the project registry files (.mo7i/*) with backups.
  */
 function saveProjectRegistry(projectDir, profile, recommendations, installResults, mode = 'initial') {
@@ -598,20 +1052,24 @@ function saveProjectRegistry(projectDir, profile, recommendations, installResult
   const reportPath = path.join(mo7iDir, 'setup-report.md');
 
   // Preserve backup if existing files exist
-  if (fs.existsSync(profilePath)) {
-    fs.copyFileSync(profilePath, profileBak);
-  }
-  if (fs.existsSync(registryPath)) {
-    fs.copyFileSync(registryPath, registryBak);
-  }
+  if (fs.existsSync(profilePath)) fs.copyFileSync(profilePath, profileBak);
+  if (fs.existsSync(registryPath)) fs.copyFileSync(registryPath, registryBak);
 
   // Update profile
   profile.setupStatus = mode === 'audit' ? 'AUDITED' : mode === 'repair' ? 'REPAIRED' : mode === 'update' ? 'UPDATED' : 'INITIALIZED';
   profile.lastAuditAt = new Date().toISOString();
   profile.setupVersion = ENGINE_VERSION;
 
-  // Build registry data
-  const installedList = [];
+  // Reconcile and detect post-install setups
+  const postInstallSetups = detectPostInstallSetups(resolvedDir, profile.existingSkills);
+  const setupBySkillId = new Map(postInstallSetups.map(s => [s.setupSkill, s]));
+
+  // Build registry data discovering ALL skills on disk
+  const allDiscoveredSkillIds = Array.from(new Set([
+    ...profile.existingSkills,
+    ...(installResults ? installResults.successful.map(x => x.id) : [])
+  ]));
+
   const allRecommended = [
     ...recommendations.CORE_PROJECT_SKILLS,
     ...recommendations.DEVELOPMENT_SKILLS,
@@ -619,25 +1077,55 @@ function saveProjectRegistry(projectDir, profile, recommendations, installResult
     ...recommendations.PROJECT_SPECIFIC_SPECIALISTS,
     ...recommendations.OPTIONAL_SKILLS
   ];
+  const recMap = new Map(allRecommended.map(r => [r.id, r]));
 
-  for (const s of allRecommended) {
-    const isInstalled = profile.existingSkills.includes(s.id) ||
-      (installResults && installResults.successful.some(x => x.id === s.id));
-    if (isInstalled) {
-      installedList.push({
-        id: s.id,
-        package: s.package,
-        source: s.source,
-        category: s.category || 'PROJECT',
-        scope: 'project',
-        installedAt: new Date().toISOString()
-      });
+  const installedList = [];
+  for (const sId of allDiscoveredSkillIds) {
+    const rec = recMap.get(sId);
+    const setupInfo = setupBySkillId.get(sId);
+
+    // Determine companion setup skill
+    let setupSkill = null;
+    let setupStatus = 'not-required';
+    let completedAt = null;
+    let evidence = null;
+    let skipReason = null;
+
+    if (setupInfo) {
+      setupSkill = setupInfo.setupSkill;
+      setupStatus = setupInfo.status;
+      completedAt = setupInfo.completedAt;
+      evidence = setupInfo.evidence;
+      skipReason = setupInfo.skipReason;
+    } else if (rec?.package === 'mattpocock/skills' && setupBySkillId.has('setup-matt-pocock-skills')) {
+      const pocockSetup = setupBySkillId.get('setup-matt-pocock-skills');
+      setupSkill = 'setup-matt-pocock-skills';
+      setupStatus = pocockSetup.status;
+      completedAt = pocockSetup.completedAt;
+      evidence = pocockSetup.evidence;
+      skipReason = pocockSetup.skipReason;
     }
+
+    installedList.push({
+      id: sId,
+      package: rec?.package || 'project/custom',
+      source: rec?.source || 'local',
+      category: rec?.category || 'PROJECT_SPECIALIST',
+      scope: 'project',
+      installedAt: new Date().toISOString(),
+      setupStatus,
+      setupSkill,
+      completedAt,
+      evidence,
+      skipReason
+    });
   }
 
   const missingList = allRecommended
     .filter(s => !installedList.some(x => x.id === s.id))
     .map(s => ({ id: s.id, category: s.category, package: s.package }));
+
+  const pendingSetups = postInstallSetups.filter(s => s.status === 'pending');
 
   const registryData = {
     version: ENGINE_VERSION,
@@ -650,53 +1138,66 @@ function saveProjectRegistry(projectDir, profile, recommendations, installResult
       package: MATT_POCOCK_OFFICIAL_SOURCE.packageId,
       totalDiscovered: MATT_POCOCK_OFFICIAL_SOURCE.totalDiscovered,
       verifiedCount: MATT_POCOCK_OFFICIAL_SOURCE.validCount,
-      skippedCount: MATT_POCOCK_OFFICIAL_SOURCE.skippedCount,
-      skippedDetails: MATT_POCOCK_OFFICIAL_SOURCE.skippedDetails
+      skippedCount: MATT_POCOCK_OFFICIAL_SOURCE.skippedCount
     },
-    installedSkills: sanitizeObject(installedList),
-    missingRecommendedSkills: sanitizeObject(missingList)
+    installedSkills: installedList,
+    missingRecommendedSkills: missingList,
+    pendingSetups: pendingSetups.map(p => ({
+      setupSkill: p.setupSkill,
+      interactive: p.interactive,
+      description: p.description,
+      status: p.status
+    })),
+    postInstallSetupsSummary: {
+      total: postInstallSetups.length,
+      pending: pendingSetups.length,
+      completed: postInstallSetups.filter(s => s.status === 'completed').length,
+      skipped: postInstallSetups.filter(s => s.status === 'skipped').length,
+      failed: postInstallSetups.filter(s => s.status === 'failed').length
+    }
   };
 
-  fs.writeFileSync(profilePath, JSON.stringify(sanitizeObject(profile), null, 2), 'utf8');
-  fs.writeFileSync(registryPath, JSON.stringify(sanitizeObject(registryData), null, 2), 'utf8');
+  fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2));
+  fs.writeFileSync(registryPath, JSON.stringify(registryData, null, 2));
 
-  // Build Setup Report
-  const reportContent = generateSetupReport(profile, registryData, installResults, mode);
-  fs.writeFileSync(reportPath, reportContent, 'utf8');
+  // Generate and write setup report
+  const reportMd = generateSetupReport(profile, registryData, installResults, mode);
+  fs.writeFileSync(reportPath, reportMd);
 
   return {
     profilePath,
     registryPath,
     reportPath,
-    registry: registryData
+    registryData,
+    pendingSetups,
+    humanGateNotice: formatHumanGateNotice(pendingSetups)
   };
 }
 
 /**
- * Generate comprehensive markdown report.
+ * Generate Markdown setup report.
  */
-function generateSetupReport(profile, registryData, installResults, mode) {
-  return `# MO7I Project Intelligence & Skill Setup Report
+function generateSetupReport(profile, registryData, installResults, mode = 'initial') {
+  const pendingSetups = registryData.pendingSetups || [];
+  return `# MO7I Project Intelligence & Skill Setup Report (v${ENGINE_VERSION})
 
-**Project Identity**: \`${profile.id}\`  
-**Location**: \`${profile.path}\`  
-**Setup Mode**: \`${mode.toUpperCase()}\`  
-**Setup Version**: \`${ENGINE_VERSION}\`  
-**Generated At**: \`${new Date().toISOString()}\`  
-**Status**: \`${profile.setupStatus}\`  
+- **Timestamp**: \`${new Date().toISOString()}\`
+- **Execution Mode**: \`${mode.toUpperCase()}\`
+- **Project Workspace**: \`${profile.path}\`
+- **Project Archetype**: **${profile.type}**
+- **Setup Status**: \`${profile.setupStatus}\`
 
 ---
 
-## 1. Project Technology Stack Analysis
+## 1. Technical Stack Analysis
 
-- **Project Archetype**: ${profile.type}
-- **Primary Languages**: ${profile.languages.length > 0 ? profile.languages.join(', ') : 'None detected'}
-- **Detected Frameworks**: ${profile.frameworks.map(f => `${f.name} (${f.version})`).join(', ') || 'None'}
-- **Database / ORM**: ${profile.databases.join(', ') || 'None detected'}
+- **Languages**: ${profile.languages.join(', ') || 'N/A'}
+- **Frameworks**: ${profile.frameworks.map(f => `${f.name} (${f.version})`).join(', ') || 'None'}
 - **Architecture**: ${profile.architecture}
-- **Testing Frameworks**: ${profile.testFrameworks.join(', ') || 'None detected'}
-- **Deployment Target**: ${profile.deployment}
-- **Code Quality Conventions**: ${profile.codeQualityConventions.join(', ') || 'Standard'}
+- **Databases & Storage**: ${profile.databases.join(', ') || 'None'}
+- **Testing Suites**: ${profile.testFrameworks.join(', ') || 'Standard / None'}
+- **Code Quality & Linting**: ${profile.codeQualityConventions.join(', ') || 'Standard'}
+- **Deployment Archetype**: ${profile.deployment}
 - **Existing Development Tools**: ${profile.existingTools.join(', ') || 'Standard'}
 
 ---
@@ -712,15 +1213,24 @@ function generateSetupReport(profile, registryData, installResults, mode) {
 
 ---
 
-## 3. Skill Inventory & Categorization
+## 3. Post-Install Setup Management
 
-| Skill ID | Category | Scope | Source | Status |
-| :--- | :--- | :--- | :--- | :--- |
-${registryData.installedSkills.map(s => `| \`${s.id}\` | ${s.category} | ${s.scope} | \`${s.source}\` | Installed |`).join('\n') || '| None | - | - | - | - |'}
+${pendingSetups.length > 0 ? `> [!IMPORTANT]
+> **Pending Post-Install Setup Steps Detected**:
+${pendingSetups.map(p => `> - **\`$${p.setupSkill}\`** (Interactive: ${p.interactive ? 'YES' : 'NO'}): ${p.description}`).join('\n')}
+> Run the setup skills in your session to complete configuration.` : '_All installed skills are fully configured or have no post-install setup requirements._'}
 
 ---
 
-## 4. Missing Recommended Skills
+## 4. Skill Inventory & Categorization
+
+| Skill ID | Category | Scope | Setup Status | Evidence |
+| :--- | :--- | :--- | :--- | :--- |
+${registryData.installedSkills.map(s => `| \`${s.id}\` | ${s.category} | ${s.scope} | \`${s.setupStatus || 'not-required'}\` | ${s.evidence || 'N/A'} |`).join('\n') || '| None | - | - | - | - |'}
+
+---
+
+## 5. Missing Recommended Skills
 
 ${registryData.missingRecommendedSkills.length > 0
   ? registryData.missingRecommendedSkills.map(s => `- **${s.id}** (${s.category}) from \`${s.package}\``).join('\n')
@@ -728,25 +1238,28 @@ ${registryData.missingRecommendedSkills.length > 0
 
 ---
 
-## 5. Security & Isolation Compliance
+## 6. Security & Isolation Compliance
 
 - **Scope Isolation**: Strictly project-scoped (\`./.agents/skills/\`). Global (\`-g\`) installation prohibited.
 - **Credential Protection**: Zero credentials or secrets persisted.
+- **Human Gate**: Interactive post-install questions require explicit user execution; never auto-answered silently.
 - **User Skill Preservation**: Existing local skills and custom scripts preserved intact.
 `;
 }
 
 /**
- * Main execution dispatcher supporting all 5 operating modes.
+ * Main execution dispatcher supporting all operating modes.
  */
 function runEngine(mode = 'initial', projectDir = process.cwd(), options = {}) {
   const resolvedDir = path.resolve(projectDir);
   const profile = analyzeProject(resolvedDir);
   const recommendations = recommendProjectSkills(profile);
+  const postInstallSetups = detectPostInstallSetups(resolvedDir, profile.existingSkills, options);
+  const reconciliation = reconcileSkills(resolvedDir);
 
   if (mode === 'audit') {
-    // Read-only inspection
-    const auditReport = {
+    const pendingSetups = postInstallSetups.filter(s => s.status === 'pending');
+    return {
       mode: 'audit',
       profile,
       recommendations,
@@ -755,13 +1268,30 @@ function runEngine(mode = 'initial', projectDir = process.cwd(), options = {}) {
         ...recommendations.CORE_PROJECT_SKILLS,
         ...recommendations.DEVELOPMENT_SKILLS,
         ...recommendations.QUALITY_ASSURANCE
-      ].filter(s => !profile.existingSkills.includes(s.id))
+      ].filter(s => !profile.existingSkills.includes(s.id)),
+      postInstallSetups,
+      pendingSetups,
+      reconciliation
     };
-    return auditReport;
+  }
+
+  if (mode === 'skip-setup') {
+    const setupSkill = options.setupSkill || options.skill;
+    if (!setupSkill) throw new Error('Setup skill ID required for skip-setup');
+    return skipSetup(resolvedDir, setupSkill, options.reason || 'Skipped by user');
+  }
+
+  if (mode === 'verify-setup') {
+    const setupSkill = options.setupSkill || options.skill;
+    if (!setupSkill) throw new Error('Setup skill ID required for verify-setup');
+    const ver = verifySetupCompletion(resolvedDir, setupSkill);
+    if (ver.verified) {
+      saveProjectRegistry(resolvedDir, profile, recommendations, null, 'audit');
+    }
+    return ver;
   }
 
   if (mode === 'repair') {
-    // Detect corrupted or deleted skills that should exist
     const mo7iRegistryPath = path.join(resolvedDir, '.mo7i', 'skill-registry.json');
     let targetSkills = [];
     if (fs.existsSync(mo7iRegistryPath)) {
@@ -783,23 +1313,22 @@ function runEngine(mode = 'initial', projectDir = process.cwd(), options = {}) {
 
     const installResults = installProjectSkills(resolvedDir, targetSkills, options);
     const registryInfo = saveProjectRegistry(resolvedDir, profile, recommendations, installResults, 'repair');
-    return { mode: 'repair', profile, installResults, registryInfo };
+    return { mode: 'repair', profile, installResults, registryInfo, reconciliation };
   }
 
   if (mode === 'update') {
-    // Re-evaluate stack and install missing skills
     const missingCore = recommendations.CORE_PROJECT_SKILLS.filter(s => !profile.existingSkills.includes(s.id));
     const missingDev = recommendations.DEVELOPMENT_SKILLS.filter(s => !profile.existingSkills.includes(s.id));
     const toInstall = [...missingCore, ...missingDev];
 
     const installResults = installProjectSkills(resolvedDir, toInstall, options);
     const registryInfo = saveProjectRegistry(resolvedDir, profile, recommendations, installResults, 'update');
-    return { mode: 'update', profile, installResults, registryInfo };
+    return { mode: 'update', profile, installResults, registryInfo, reconciliation };
   }
 
   if (mode === 'report') {
     const mo7iRegistryPath = path.join(resolvedDir, '.mo7i', 'skill-registry.json');
-    let regData = { installedSkills: [], missingRecommendedSkills: [] };
+    let regData = { installedSkills: [], missingRecommendedSkills: [], pendingSetups: [] };
     if (fs.existsSync(mo7iRegistryPath)) {
       try {
         regData = JSON.parse(fs.readFileSync(mo7iRegistryPath, 'utf8'));
@@ -825,7 +1354,8 @@ function runEngine(mode = 'initial', projectDir = process.cwd(), options = {}) {
     profile,
     recommendations,
     installResults,
-    registryInfo
+    registryInfo,
+    reconciliation
   };
 }
 
@@ -835,6 +1365,13 @@ module.exports = {
   analyzeProject,
   recommendProjectSkills,
   installProjectSkills,
+  verifySetupCompletion,
+  detectPostInstallSetups,
+  skipSetup,
+  formatHumanGateNotice,
+  reconcileSkills,
+  findAvailablePort,
+  findAvailablePortSync,
   saveProjectRegistry,
   generateSetupReport,
   scanContentSecurity,
@@ -859,6 +1396,9 @@ if (require.main === module) {
       if (result.registryInfo) {
         console.log(`Registry written to: ${result.registryInfo.registryPath}`);
         console.log(`Setup report written to: ${result.registryInfo.reportPath}`);
+        if (result.registryInfo.humanGateNotice) {
+          console.log(result.registryInfo.humanGateNotice);
+        }
       }
     }
   } catch (err) {

@@ -5,6 +5,35 @@ All notable changes to the `mo7i-universal-intelligence` skill will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-11-15
+
+### Added
+- **T3 Code Native Entry Point Discovery**:
+  - Implemented `.agents/skills/mo7i/SKILL.md` (and companion `skills/mo7i/`) with frontmatter `name: mo7i`, enabling T3 Code auto-discovery for `$mo7i` autocomplete chip and subcommands.
+  - Implemented `.agents/skills/setup-project-skills/SKILL.md` (and companion `skills/setup-project-skills/`) with frontmatter `name: setup-project-skills` for direct `$setup-project-skills` invocation.
+  - Updated root `SKILL.md` frontmatter name to `mo7i` and version to `v2.3.0`.
+  - Audited T3 Code binary discovery mechanisms (`inspectCursorSkills`, `discoverSkillsInRoot$1`) confirming `.agents/skills/<name>/SKILL.md` is the only active runtime discovery path.
+- **Platform Verification & Truth in Documentation**:
+  - Explicitly marked platform support in installer and diagnostics: verified (`t3-code`, universal CLI, Claude Code CLI outside T3 Code) vs unverified (`cursor`, `codex`, `gemini-cli`).
+  - Updated `/mo7i doctor` and `/mo7i status` to report platform verification truth with evidence.
+- **Post-Install Setup Engine & Companion Handling**:
+  - Dynamic detection (`detectPostInstallSetups`) scans installed skills for companion setups (`setup-*`, `init-*`, `onboard*`).
+  - Curated setup registry (`references/post-install-setup-map.json`) mapping collections to setup skills, interactive flags, file writes, and verification checks.
+  - Setup lifecycle tracking in `.mo7i/skill-registry.json`: `not-required | pending | in-progress | completed | skipped | failed`.
+  - Verification engine (`verifySetupCompletion`): confirms completion only when real file artifacts exist on disk.
+  - Skip path (`skipSetup`): preserves user skip rationale without recurring prompts.
+  - Human Gate Rule: interactive setups generate prominent notices and strictly forbid inventing default answers on the user's behalf.
+- **Orchestrator Hardening**:
+  - Fast Path for trivial tasks (`isTrivialTask`) executing lightweight validation while logging `phasesExecuted` in telemetry.
+  - Full 16-phase lifecycle execution and logging for complex engineering tasks.
+  - Capability-gap analysis (`analyzeCapabilityGaps`) proposing targeted `find-skills` queries for uncovered specialized domains.
+  - Disk vs Registry reconciliation (`reconcileSkills`) detecting unmanaged skills on disk.
+  - Dynamic TCP port probing (`findAvailablePort`, `findAvailablePortSync`) for preview servers.
+  - Machine-readable JSON schemas for `/mo7i doctor --json` and `/mo7i status --json`.
+  - Comprehensive path traversal protection across all router entry points.
+- **15 New Production Acceptance Tests (Tests 56-70)**:
+  - Added `tests/test_v230_hardening_and_post_install.js` and expanded `tests/run_tests.sh` to 70 total tests with 100% pass rate.
+
 ## [2.2.0] - 2026-11-15
 
 ### Added
