@@ -675,11 +675,13 @@ function verifySetupCompletion(projectDir, setupSkillName) {
   if (sName === 'setup-matt-pocock-skills') {
     const issueTracker = path.join(resolvedDir, 'docs', 'agents', 'issue-tracker.md');
     const domainDocs = path.join(resolvedDir, 'docs', 'agents', 'domain.md');
+    const triageLabels = path.join(resolvedDir, 'docs', 'agents', 'triage-labels.md');
     const claudeMd = path.join(resolvedDir, 'CLAUDE.md');
     const agentsMd = path.join(resolvedDir, 'AGENTS.md');
 
     const trackerExists = fs.existsSync(issueTracker) && fs.statSync(issueTracker).size > 0;
     const domainExists = fs.existsSync(domainDocs) && fs.statSync(domainDocs).size > 0;
+    const triageExists = fs.existsSync(triageLabels) && fs.statSync(triageLabels).size > 0;
     
     let instructionsHaveSection = false;
     if (fs.existsSync(claudeMd)) {
@@ -691,16 +693,16 @@ function verifySetupCompletion(projectDir, setupSkillName) {
       if (content.includes('## Agent skills')) instructionsHaveSection = true;
     }
 
-    if (trackerExists && domainExists && instructionsHaveSection) {
+    if (trackerExists && domainExists && triageExists && instructionsHaveSection) {
       return {
         verified: true,
-        evidence: 'Verified: docs/agents/issue-tracker.md, docs/agents/domain.md, and ## Agent skills section exist.',
+        evidence: 'Verified: docs/agents/{issue-tracker,triage-labels,domain}.md and AGENTS.md/CLAUDE.md ## Agent skills section exist.',
         status: 'completed'
       };
     }
     return {
       verified: false,
-      evidence: `Missing required artifacts (issue-tracker: ${trackerExists}, domain: ${domainExists}, instructionsSection: ${instructionsHaveSection})`,
+      evidence: `Missing required artifacts (issue-tracker: ${trackerExists}, domain: ${domainExists}, triage-labels: ${triageExists}, instructionsSection: ${instructionsHaveSection})`,
       status: 'pending'
     };
   }
@@ -840,18 +842,20 @@ function detectPostInstallSetups(projectDir, installedSkills = [], options = {})
     const skillMdPath = path.join(agentsSkillDir, skillId, 'SKILL.md');
     let isSetupSkill = false;
     let description = '';
-    let interactive = false;
-
     if (fs.existsSync(skillMdPath)) {
       try {
         const content = fs.readFileSync(skillMdPath, 'utf8');
-        // Match setup naming convention
+        const descMatch = /description:\s*["']?([^"'\n\r]+)/i.exec(content);
+        if (descMatch) description = descMatch[1].trim();
+
+        // 1. Match setup naming convention strictly: setup-*, init-*, onboard*
         if (/^(setup|init|onboard)[-_]/i.test(skillId) || /[-_](setup|init|onboard)$/i.test(skillId)) {
           isSetupSkill = true;
         }
 
-        // Match description / header patterns
-        if (/run once|configure|required before use|initial setup|setup this repo/i.test(content)) {
+        // 2. OR match description explicitly declaring repository initialization:
+        // "run once", "before first use", "configure this repo"
+        if (/run once\b|before first use\b|configure this repo\b/i.test(description)) {
           isSetupSkill = true;
         }
 
@@ -859,9 +863,6 @@ function detectPostInstallSetups(projectDir, installedSkills = [], options = {})
         if (/(ask the user|confirm with the user|prompt-driven|questions?|interview|choices?)/i.test(content)) {
           interactive = true;
         }
-
-        const descMatch = /description:\s*["']?([^"'\n\r]+)/i.exec(content);
-        if (descMatch) description = descMatch[1].trim();
       } catch {
         // ignore
       }

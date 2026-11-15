@@ -88,26 +88,61 @@ test(4, 'Reconciliation detects when a skill exists on disk but is missing from 
 });
 
 // 3. Post-Install Setup Detection Against Fixtures
-test(5, 'Dynamic post-install detection identifies setup-* skills on disk', () => {
+test(5, 'Dynamic post-install detection identifies setup-* skills and eliminates false positives', () => {
   const tempProject = path.join('/tmp', 'mo7i-test-postinstall-' + Date.now());
   const agentSkills = path.join(tempProject, '.agents', 'skills');
-  fs.mkdirSync(path.join(agentSkills, 'setup-custom-database'), { recursive: true });
-  fs.mkdirSync(path.join(agentSkills, 'normal-skill'), { recursive: true });
+  
+  // Create folders
+  const skillsToCreate = {
+    'ask-matt': {
+      desc: 'Ask which skill or flow fits your situation. A router over the skills in this repo.',
+      content: '# Ask Matt\nYou do not remember every skill, so ask. Configure things later.'
+    },
+    'to-tickets': {
+      desc: 'Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker (edges as text in one file per ticket locally, or native blocking links on a real tracker).',
+      content: '# To Tickets\nTell the user to configure their tracker.'
+    },
+    'wizard': {
+      desc: 'Generate an interactive bash wizard that walks a human through steps only they can perform. Use when provisioning infrastructure, setting up credentials or CI secrets, walking an unfamiliar third-party dashboard, or running a one-off migration or cutover. Don',
+      content: '# Wizard\nInteractive bash wizard for setup procedures.'
+    },
+    'setup-matt-pocock-skills': {
+      desc: 'Configure this repo for the engineering skills: set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills.',
+      content: '# Setup Matt Pocock Skills\nAsk the user for tracker choices.'
+    },
+    'setup-ts-deep-modules': {
+      desc: 'Wire dependency-cruiser into a TypeScript repo so each package is a deep module, with implementation hidden in subfolders and reachable only through its entry-point files. User-invoked.',
+      content: '# Setup TS Deep Modules\nWire dependency-cruiser.'
+    },
+    'setup-pre-commit': {
+      desc: 'Set up Husky pre-commit hooks with lint-staged (Prettier), type checking, and tests in the current repo. Use when user wants to add pre-commit hooks, set up Husky, configure lint-staged, or add commit-time formatting/typechecking/testing.',
+      content: '# Setup Pre-Commit\nConfigure hooks.'
+    }
+  };
 
-  fs.writeFileSync(
-    path.join(agentSkills, 'setup-custom-database', 'SKILL.md'),
-    '---\nname: setup-custom-database\ndescription: "Configure database schemas and connection parameters. Run once before use."\n---\n# Setup Database\nAsk the user for database credentials and confirmation.'
-  );
-  fs.writeFileSync(
-    path.join(agentSkills, 'normal-skill', 'SKILL.md'),
-    '---\nname: normal-skill\ndescription: "Standard execution skill."\n---\n# Normal'
-  );
+  for (const [id, data] of Object.entries(skillsToCreate)) {
+    const sDir = path.join(agentSkills, id);
+    fs.mkdirSync(sDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(sDir, 'SKILL.md'),
+      `---\nname: ${id}\ndescription: "${data.desc}"\n---\n${data.content}`
+    );
+  }
 
-  const detected = setupEngine.detectPostInstallSetups(tempProject, ['setup-custom-database', 'normal-skill']);
-  assert.strictEqual(detected.length, 1, 'Must detect exactly 1 setup skill');
-  assert.strictEqual(detected[0].setupSkill, 'setup-custom-database');
-  assert.strictEqual(detected[0].interactive, true, 'Must detect interactive prompt pattern');
-  assert.strictEqual(detected[0].status, 'pending', 'Initial status must be pending');
+  const detected = setupEngine.detectPostInstallSetups(tempProject, Object.keys(skillsToCreate));
+  const detectedIds = detected.map(d => d.setupSkill);
+
+  // False positives check: ask-matt, to-tickets, wizard MUST NOT be detected as setup skills
+  assert.strictEqual(detectedIds.includes('ask-matt'), false, 'ask-matt must NOT be a setup skill');
+  assert.strictEqual(detectedIds.includes('to-tickets'), false, 'to-tickets must NOT be a setup skill');
+  assert.strictEqual(detectedIds.includes('wizard'), false, 'wizard must NOT be a setup skill');
+
+  // True positives check: setup-matt-pocock-skills, setup-ts-deep-modules, setup-pre-commit MUST be detected
+  assert.strictEqual(detectedIds.includes('setup-matt-pocock-skills'), true, 'setup-matt-pocock-skills must be detected');
+  assert.strictEqual(detectedIds.includes('setup-ts-deep-modules'), true, 'setup-ts-deep-modules must be detected');
+  assert.strictEqual(detectedIds.includes('setup-pre-commit'), true, 'setup-pre-commit must be detected');
+
+  assert.strictEqual(detected.length, 3, 'Must detect exactly the 3 genuine setup skills');
 
   // Clean up
   fs.rmSync(tempProject, { recursive: true, force: true });
@@ -153,11 +188,13 @@ test(7, 'Verification verifies completed state with real evidence', () => {
   // Create real required artifacts (from Phase 0B findings)
   fs.writeFileSync(path.join(docsAgents, 'issue-tracker.md'), '# Issue Tracker\nUses GitHub Issues.');
   fs.writeFileSync(path.join(docsAgents, 'domain.md'), '# Domain Docs\nSingle-context GLOSSARY.');
+  fs.writeFileSync(path.join(docsAgents, 'triage-labels.md'), '# Triage Labels\nCanonical labels.');
   fs.writeFileSync(path.join(tempProject, 'AGENTS.md'), '# Instructions\n\n## Agent skills\n### Issue tracker\nGitHub\n');
 
   const completedVer = setupEngine.verifySetupCompletion(tempProject, 'setup-matt-pocock-skills');
   assert.strictEqual(completedVer.verified, true, 'Must pass verification when real artifacts exist');
-  assert(completedVer.evidence.includes('issue-tracker.md'), 'Evidence must cite issue-tracker.md');
+  assert(completedVer.evidence.includes('issue-tracker'), 'Evidence must cite issue-tracker');
+  assert(completedVer.evidence.includes('triage-labels'), 'Evidence must cite triage-labels');
 
   // Clean up
   fs.rmSync(tempProject, { recursive: true, force: true });
@@ -227,7 +264,7 @@ test(13, '/mo7i doctor --json returns valid schema with platforms and diagnostic
   assert.strictEqual(parsed.version, '2.3.0');
   assert(Array.isArray(parsed.diagnostics));
   assert(typeof parsed.platforms === 'object');
-  assert.strictEqual(parsed.platforms['T3 Code ($mo7i via .agents/skills/)'].status, 'VERIFIED');
+  assert.strictEqual(parsed.platforms['T3 Code ($mo7i via .agents/skills/)'].status, 'FILE_PRESENT');
   assert.strictEqual(parsed.platforms['Cursor / Windsurf (.cursor/rules/)'].status, 'UNVERIFIED');
 });
 

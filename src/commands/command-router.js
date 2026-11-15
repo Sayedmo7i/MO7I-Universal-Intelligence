@@ -143,6 +143,12 @@ function routeCommand(input, options = {}) {
       return handleStatus(projectDir, parsed.flags);
     case 'doctor':
       return handleDoctor(projectDir, parsed.flags);
+    case 'setup':
+      return handleProjectSetup(parsed.args[0] || 'initial', projectDir, {
+        ...parsed.flags,
+        args: parsed.args.slice(1),
+        dryRun
+      });
     case 'update':
       return handleUpdate(projectDir, { dryRun });
     default:
@@ -606,8 +612,10 @@ function handleDoctor(projectDir, flags = {}) {
   const mo7iAgentSkill = fs.existsSync(path.join(agentSkillsDir, 'mo7i', 'SKILL.md'));
   diagnostics.push({
     check: 'T3 Code Skills Entry Point (.agents/skills/mo7i/)',
-    status: mo7iAgentSkill ? 'PASS' : 'WARN',
-    detail: mo7iAgentSkill ? 'Verified discovered by T3 Code ($mo7i)' : 'Missing .agents/skills/mo7i/SKILL.md'
+    status: mo7iAgentSkill ? 'INFO' : 'WARN',
+    detail: mo7iAgentSkill
+      ? 'file present, UI discovery unverified by code (confirmed manually in sandbox)'
+      : 'Missing .agents/skills/mo7i/SKILL.md'
   });
 
   // 4. Check Command Files
@@ -616,8 +624,10 @@ function handleDoctor(projectDir, flags = {}) {
   const hasCommands = fs.existsSync(commandsDir) || fs.existsSync(claudeCommandsDir);
   diagnostics.push({
     check: 'Slash Command Definitions',
-    status: hasCommands ? 'PASS' : 'WARN',
-    detail: hasCommands ? 'Command definitions detected' : 'Run /setup-project-skills to link commands'
+    status: hasCommands ? 'PASS' : 'INFO',
+    detail: hasCommands
+      ? 'Command definitions detected'
+      : 'Optional: Markdown slash commands not linked in project. Run /setup-project-skills or use CLI/agents.'
   });
 
   // 5. Check Setup Engine Script
@@ -632,7 +642,8 @@ function handleDoctor(projectDir, flags = {}) {
 
   // 6. Check Project Profile Registry Integrity
   const profilePath = path.join(projectDir, '.mo7i', 'project-profile.json');
-  if (fs.existsSync(profilePath)) {
+  const isInitializedProject = fs.existsSync(profilePath);
+  if (isInitializedProject) {
     try {
       JSON.parse(fs.readFileSync(profilePath, 'utf8'));
       diagnostics.push({ check: 'Project Profile Registry', status: 'PASS', detail: 'Valid JSON format' });
@@ -647,11 +658,20 @@ function handleDoctor(projectDir, flags = {}) {
   // 7. Check Post-Install Setup Health & Disk Reconciliation
   const reconciliation = setupEngine.reconcileSkills(projectDir);
   if (!reconciliation.reconciled) {
-    diagnostics.push({
-      check: 'Disk vs Registry Reconciliation',
-      status: 'WARN',
-      detail: `${reconciliation.unregisteredOnDisk.length} unregistered skill(s) on disk: ${reconciliation.unregisteredOnDisk.join(', ')}`
-    });
+    if (!isInitializedProject) {
+      // Non-alarming message for uninitialized project
+      diagnostics.push({
+        check: 'Disk vs Registry Reconciliation',
+        status: 'INFO',
+        detail: `Project not yet initialized; discovered skill(s) on disk: ${reconciliation.unregisteredOnDisk.join(', ')} (run /setup-project-skills initial to register)`
+      });
+    } else {
+      diagnostics.push({
+        check: 'Disk vs Registry Reconciliation',
+        status: 'WARN',
+        detail: `${reconciliation.unregisteredOnDisk.length} unregistered skill(s) on disk: ${reconciliation.unregisteredOnDisk.join(', ')}`
+      });
+    }
   } else {
     diagnostics.push({
       check: 'Disk vs Registry Reconciliation',
@@ -660,11 +680,15 @@ function handleDoctor(projectDir, flags = {}) {
     });
   }
 
+  const warningsCount = diagnostics.filter(d => d.status === 'WARN').length;
+  const overallStatus = issuesCount > 0 ? 'FAIL' : warningsCount > 0 ? 'WARNINGS' : 'HEALTHY';
+
   const doctorData = {
     version: ROUTER_VERSION,
-    status: issuesCount === 0 ? 'HEALTHY' : 'WARNINGS',
+    status: overallStatus,
     diagnostics,
     issuesCount,
+    warningsCount,
     platforms: PLATFORM_VERIFICATION,
     timestamp: new Date().toISOString()
   };
@@ -692,13 +716,23 @@ function handleDoctor(projectDir, flags = {}) {
     output += `| ${pName} | \`${info.target}\` | **\`${info.status}\`** | ${info.note || 'Direct entry point'} |\n`;
   }
 
-  output += `\n**Doctor Summary**: ${issuesCount === 0 ? 'All diagnostic checks passed. System is fully operational.' : `${issuesCount} issue(s) detected.`}\n`;
+  let summaryText = '';
+  if (issuesCount > 0) {
+    summaryText = `${issuesCount} critical issue(s) detected.`;
+  } else if (warningsCount > 0) {
+    summaryText = `Passed with ${warningsCount} warning(s).`;
+  } else {
+    summaryText = `All diagnostic checks passed. System is fully operational.`;
+  }
+
+  output += `\n**Doctor Summary**: ${summaryText}\n`;
 
   return {
-    status: issuesCount === 0 ? 'HEALTHY' : 'WARNINGS',
+    status: overallStatus,
     command: 'doctor',
     diagnostics,
     issuesCount,
+    warningsCount,
     data: doctorData,
     readOnly: true,
     output

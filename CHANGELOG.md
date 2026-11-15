@@ -34,6 +34,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **15 New Production Acceptance Tests (Tests 56-70)**:
   - Added `tests/test_v230_hardening_and_post_install.js` and expanded `tests/run_tests.sh` to 70 total tests with 100% pass rate.
 
+### Changed & Fixed (Sandbox Hardening)
+- **Honest Doctor Diagnostics**:
+  - T3 Code entry point check reported as `INFO` ("file present, UI discovery unverified by code (confirmed manually in sandbox)").
+  - Platform verification status calibrated to `FILE_PRESENT` with corresponding notes.
+  - Doctor summary correctly aggregates warnings count ("Passed with N warning(s)") instead of masking warnings.
+- **Eliminated False Positives in Post-Install Detection**:
+  - Tightened `detectPostInstallSetups` matching to require prefix `^(setup|init|onboard)[-_]` or explicit setup phrasing in descriptions (`run once`, `before first use`, `configure this repo`), preventing general tools (`ask-matt`, `to-tickets`, `wizard`) from false detection.
+- **Post-Install Verification Grounding**:
+  - Updated `references/post-install-setup-map.json` and `verifySetupCompletion` to verify `docs/agents/{issue-tracker,triage-labels,domain}.md` and `AGENTS.md`/`CLAUDE.md` sections for `setup-matt-pocock-skills`. Verified status reports `completed` on initialized sandboxes.
+- **Lean Installer Footprint**:
+  - Reduced skill installation size from ~492 KB to ~75 KB by provisioning only `SKILL.md` and `references/` into `.agents/skills/mo7i`.
+- **Top-Level Setup Bootstrapping**:
+  - Added `/mo7i setup [mode]` routing directly to the setup engine, enabling single-entry skill bootstrapping.
+- **Non-Alarming Diagnostics**:
+  - Formatted clear `INFO` notices for uninitialized workspaces and unlinked optional markdown commands without raising false alarms.
+
 ## [2.2.0] - 2026-11-15
 
 ### Added
