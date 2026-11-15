@@ -1,20 +1,49 @@
 ---
 name: mo7i-universal-intelligence
-description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Project Intelligence Engine (v2.1.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools. Autonomously analyzes project stacks, provisions essential project skills (including the verified Matt Pocock collection) into project scope, discovers task-specific specialists via find-skills, plans, executes, verifies, and maintains project intelligence. DO NOT ACTIVATE for: trivial single-character typo fixes or direct conversational queries requiring no tool coordination."
+description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.2.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes official slash commands (/mo7i, /setup-project-skills, /mo7i audit, /mo7i learn, /mo7i status, /mo7i doctor). Autonomously analyzes project stacks, provisions essential project skills (including the verified Matt Pocock collection), learns operational contracts, plans, executes, verifies, and maintains project intelligence."
 ---
 
 # MO7I Universal Intelligence
 
-Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, and Project Intelligence Engine (v2.1.0).
+Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, and Official Slash Commands System (v2.2.0).
 
-MO7I Universal Intelligence serves as the single autonomous entry point across all repositories and engineering tasks. It operates on a core principle: **The user specifies WHAT needs to be accomplished; MO7I determines HOW to accomplish it.** It independently analyzes project codebases, provisions foundational project-scoped specialist skills, learns operational contracts, orchestrates multi-skill pipelines, enforces zero-trust security boundaries, and manages persistent project skill intelligence across repositories.
+MO7I Universal Intelligence serves as the single autonomous entry point across all repositories and engineering tasks. It operates on a core principle: **The user specifies WHAT needs to be accomplished; MO7I determines HOW to accomplish it.** It independently analyzes project codebases, provisions foundational project-scoped specialist skills, learns operational contracts, orchestrates multi-skill pipelines, enforces zero-trust security boundaries, and provides direct, native slash-command entry points across all supported agent environments.
 
 ---
 
-## 1. Activation Guidelines
+## 1. Official Slash Commands System
+
+MO7I v2.2.0 introduces an official native Slash Commands interface:
+
+```text
+User Slash Commands
+  ├── /mo7i [task]              -> Autonomous Universal Intelligence Meta-Orchestrator
+  ├── /mo7i help                -> Command catalog, usage syntax, and platform guides
+  ├── /setup-project-skills     -> Project Intelligence & Skill Setup (mo7i-project-setup)
+  ├── /mo7i audit               -> Read-only project stack, skills, and configuration audit
+  ├── /mo7i learn [skill]       -> 4-phase Skill Learning Engine (Inspect -> Understand -> Integrate -> Validate)
+  ├── /mo7i discover <query>    -> find-skills dynamic discovery with 5-dimension scoring
+  ├── /mo7i status              -> System telemetry, project archetype, and installed skills inventory
+  ├── /mo7i doctor              -> Diagnostics for runtimes, scripts, registries, and links
+  └── /mo7i update              -> Dependency drift detection and safe registry synchronization
+```
+
+### Supported Platforms & Discovery
+- **Claude Code**: Native custom commands in `.claude/commands/` and `~/.claude/commands/` (`mo7i.md`, `setup-project-skills.md`).
+- **Cursor & Windsurf**: Rules and command triggers in `.cursor/rules/` (`mo7i-commands.mdc`).
+- **OpenAI Codex**: Custom prompt commands in `.codex/prompts/`.
+- **Gemini CLI**: Command extensions in `.gemini/commands/`.
+- **Universal Shell & Agent**: Executable CLI via `bin/mo7i`, `bin/setup-project-skills`, and `npx mo7i`.
+
+For command specifications and architecture, see [slash-commands.md](references/slash-commands.md).
+
+---
+
+## 2. Activation Guidelines
 
 ### When to Activate
 - The user presents a goal, task, or feature request across any supported domain without specifying tool mechanics.
+- The user invokes an official slash command (`/mo7i`, `/setup-project-skills`, `/mo7i audit`, etc.).
 - A new or uninitialized repository is encountered lacking an established skill environment.
 - The project introduces an unfamiliar technology stack, runtime, or deployment environment.
 - The task requires cross-domain intelligence (software, mobile, UI/UX, SEO, DevOps, research, data).
@@ -29,7 +58,7 @@ MO7I Universal Intelligence serves as the single autonomous entry point across a
 
 ---
 
-## 2. The Integrated Autonomous Execution Lifecycle
+## 3. The Integrated Autonomous Execution Lifecycle
 
 For every meaningful task, the meta-orchestrator executes this standardized lifecycle:
 
@@ -70,7 +99,7 @@ For every meaningful task, the meta-orchestrator executes this standardized life
 
 ---
 
-## 3. Project Intelligence & Automated Setup (mo7i-project-setup)
+## 4. Project Intelligence & Automated Setup (mo7i-project-setup)
 
 Foundational project setup is governed by the companion skill `mo7i-project-setup`:
 - **Strictly Project-Scoped**: Installs skills into `<projectRoot>/.agents/skills/` via Skills CLI without `-g`.
@@ -82,7 +111,7 @@ For setup architecture and registry formats, see [project-intelligence.md](refer
 
 ---
 
-## 4. Matt Pocock Skills Collection Integration
+## 5. Matt Pocock Skills Collection Integration
 
 MO7I Universal Intelligence natively integrates the official verified **Matt Pocock Skills Collection**:
 - **Source**: `https://github.com/mattpocock/skills.git` (`mattpocock/skills` on skills.sh)
@@ -91,7 +120,7 @@ MO7I Universal Intelligence natively integrates the official verified **Matt Poc
 
 ---
 
-## 5. Universal Domain Taxonomy & Realistic Execution
+## 6. Universal Domain Taxonomy & Realistic Execution
 
 MO7I orchestrates across 13 functional domains: Software Engineering, Mobile (Flutter/React Native), UI/UX Design, Technical SEO & Marketing, Business Strategy, Research & Analytics, Data Processing, DevOps & Infrastructure, Technical Writing, Automation, Education, Financial Modeling, and General Productivity.
 
@@ -101,7 +130,7 @@ For domain patterns and missing-service handling, see [task-domains.md](referenc
 
 ---
 
-## 6. Skill Learning Engine & Six State Transitions
+## 7. Skill Learning Engine & Six State Transitions
 
 Skills are tracked across 6 distinct states to prevent premature capability assumptions:
 `DISCOVERED` -> `INSTALLED` -> `UNDERSTOOD` -> `RUNTIME_VERIFIED` -> `SUCCESSFULLY_USED` (or `FAILED_OR_INCOMPATIBLE`).
@@ -116,7 +145,7 @@ For complete learning engine procedures, see [skill-learning-engine.md](referenc
 
 ---
 
-## 7. Mandatory `find-skills` Integration
+## 8. Mandatory `find-skills` Integration
 
 The `find-skills` skill (`vercel-labs/skills`) is a core dependency and the primary gateway to `skills.sh`:
 - Search using focused technical keywords: `npx skills find "<keywords>"`.
@@ -132,7 +161,7 @@ For search and scoring details, see [skill-discovery.md](references/skill-discov
 
 ---
 
-## 8. Multi-Skill Orchestration & Conflict Precedence
+## 9. Multi-Skill Orchestration & Conflict Precedence
 
 When coordinating complex workflows across multiple domains:
 1. **Context Minimization**: Load only the specialist skill relevant to the active stage.
@@ -145,19 +174,6 @@ When coordinating complex workflows across multiple domains:
    6. **General Defaults** (agent heuristics)
 
 For sequencing and conflict management, see [orchestration.md](references/orchestration.md).
-
----
-
-## 9. Global Preferences & Cross-Project Memory
-
-Maintain persistent cross-project intelligence in `~/.config/mo7i/universal-intelligence/`:
-- `preferences.json`: User tech preferences (languages, frameworks, tools, models, image engines).
-- `skill-registry.json`: Global skill classifications (`core`, `pinned`, `persistent`, `temporary`).
-- `skill-knowledge.json`: Operational profiles and capability contracts.
-- `skill-usage-history.json`: Audit log of executions, timestamps, and outcomes.
-- `skill-compatibility.json`: Pairwise synergy and conflict matrix.
-
-For memory schemas, see [preferences.md](references/preferences.md).
 
 ---
 
@@ -176,21 +192,9 @@ For security rules, see [security-policy.md](references/security-policy.md) and 
 
 ---
 
-## 11. Evidence-Based Verification & Reporting
+## 11. Reference Documentation Index
 
-Every completed task must report real evidence under standardized statuses:
-- `PASS`: Complete command output proof; all criteria met.
-- `FAIL`: Command executed and failed assertion or test.
-- `BLOCKED`: Halted by human gate or missing environment dependency.
-- `NOT_RUN`: Prerequisite unfulfilled; step skipped.
-- `NOT_APPLICABLE`: Out of scope for current task profile.
-
-For verification patterns, see [execution-and-verification.md](references/execution-and-verification.md).
-
----
-
-## 12. Reference Documentation Index
-
+- [Slash Commands Reference](references/slash-commands.md): Command architecture, adapters, parameters, platform guides.
 - [Project Intelligence & Setup](references/project-intelligence.md): Project analysis engine, Matt Pocock collection, registry schemas.
 - [Task Domains & Capabilities](references/task-domains.md): Functional domain taxonomy, missing-service handling.
 - [Autonomous Orchestration](references/orchestration.md): 16-phase lifecycle, multi-skill sequencing, precedence.

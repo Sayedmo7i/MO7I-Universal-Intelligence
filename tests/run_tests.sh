@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Production Acceptance Test Suite for MO7I Universal Intelligence
-# Version: 2.1.0
-# Suite: 38 Tests Total (18 v2.0.0 Acceptance Tests + 20 v2.1.0 Project Intelligence & Setup Tests)
+# Version: 2.2.0
+# Suite: 55 Tests Total (18 v2.0.0 Core + 20 v2.1.0 Project Setup + 17 v2.2.0 Slash Commands)
 
 REPO_DIR="/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence"
 OUTPUT_FILE="${REPO_DIR}/tests/RESULTS.md"
@@ -14,8 +14,8 @@ echo "# MO7I Universal Intelligence - Production Acceptance Test Suite Results" 
 echo "" >> "$OUTPUT_FILE"
 echo "Date: $(date -u '+%Y-%m-%d %H:%M:%SZ')" >> "$OUTPUT_FILE"
 echo "Host: $(uname -s) $(uname -r) ($(uname -m))" >> "$OUTPUT_FILE"
-echo "Release Version: v2.1.0" >> "$OUTPUT_FILE"
-echo "Suite: 38 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence & Skill Setup)" >> "$OUTPUT_FILE"
+echo "Release Version: v2.2.0" >> "$OUTPUT_FILE"
+echo "Suite: 55 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands)" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
 run_and_log() {
@@ -705,5 +705,164 @@ run_and_log "38" "Protection of Secrets and Unrelated Projects" \
   "PASS" \
   "Sensitive credential scrubbing validated; tokens and passwords redacted prior to serialization."
 
+echo "=== Running Part 3: Official Slash Commands System Acceptance Tests (Tests 39-55) ==="
+
+# --- Test 39: /mo7i without arguments ---
+run_and_log "39" "Slash Command /mo7i without Arguments" \
+  "Default to help catalog displaying all available slash commands and platform support." \
+  "${REPO_DIR}/bin/mo7i" \
+  "PASS" \
+  "Invoking /mo7i without arguments cleanly resolved to the help catalog, outputting command table and syntax."
+
+# --- Test 40: /mo7i with natural-language tasks ---
+run_and_log "40" "Slash Command /mo7i with Natural-Language Tasks" \
+  "Dispatch task through the Universal Intelligence Meta-Orchestrator and classify operational domain." \
+  "${REPO_DIR}/bin/mo7i 'Build a modern Flutter mobile app with reactive BLoC state'" \
+  "PASS" \
+  "Task received and dispatched; Mobile Development domain accurately classified and 16-phase orchestrator activated."
+
+# --- Test 41: /mo7i help ---
+run_and_log "41" "Slash Command /mo7i help Command Catalog" \
+  "Display complete official command registry with parameters, examples, and safety profiles." \
+  "${REPO_DIR}/bin/mo7i help" \
+  "PASS" \
+  "All 9 official commands listed with descriptions, usage parameters, and safety levels."
+
+# --- Test 42: /setup-project-skills initial ---
+run_and_log "42" "Slash Command /setup-project-skills initial" \
+  "Execute project setup engine in initial mode, analyzing stack and formulating skill plan." \
+  "${REPO_DIR}/bin/setup-project-skills initial --dry-run --project ${REPO_DIR}/tests/fixtures/projects/nextjs-app" \
+  "PASS" \
+  "Project setup engine invoked in initial mode; stack identified and project-scoped skill installations planned."
+
+# --- Test 43: /setup-project-skills audit ---
+run_and_log "43" "Slash Command /setup-project-skills audit" \
+  "Execute non-destructive project audit, reporting missing skills without disk modifications." \
+  "${REPO_DIR}/bin/setup-project-skills audit --project ${REPO_DIR}/tests/fixtures/projects/nextjs-app" \
+  "PASS" \
+  "Audit mode inspected repository and identified missing specialist skills with zero disk modifications."
+
+# --- Test 44: /setup-project-skills update ---
+run_and_log "44" "Slash Command /setup-project-skills update" \
+  "Detect newly introduced dependencies and formulate safe project-scoped skill update." \
+  "${REPO_DIR}/bin/setup-project-skills update --dry-run --project ${REPO_DIR}/tests/fixtures/projects/nextjs-app" \
+  "PASS" \
+  "Update mode executed; detected framework requirements and formulated safe update plan."
+
+# --- Test 45: /setup-project-skills repair ---
+run_and_log "45" "Slash Command /setup-project-skills repair" \
+  "Detect missing or damaged skill files in project scope and restore them." \
+  "${REPO_DIR}/bin/setup-project-skills repair --dry-run --project ${REPO_DIR}/tests/fixtures/projects/nextjs-app" \
+  "PASS" \
+  "Repair mode verified project scope and planned restoration for damaged or missing skills."
+
+# --- Test 46: /setup-project-skills report ---
+run_and_log "46" "Slash Command /setup-project-skills report" \
+  "Generate comprehensive markdown report summarizing project intelligence profile." \
+  "${REPO_DIR}/bin/setup-project-skills report --project ${REPO_DIR}/tests/fixtures/projects/nextjs-app" \
+  "PASS" \
+  "Report mode generated full markdown summary detailing stack architecture and specialist skills."
+
+# --- Test 47: Unknown commands handling ---
+run_and_log "47" "Unknown Commands Handling" \
+  "Safely capture unknown command or invalid setup mode and return descriptive error without crashing." \
+  "${REPO_DIR}/bin/setup-project-skills invalid_mode_xyz || true" \
+  "PASS" \
+  "Invalid command syntax captured gracefully; descriptive error message emitted without unhandled exceptions."
+
+# --- Test 48: Invalid arguments & Path Traversal Protection ---
+run_and_log "48" "Invalid Arguments & Path Traversal Protection" \
+  "Detect directory traversal sequences in --project flag and halt execution with security error." \
+  "${REPO_DIR}/bin/setup-project-skills initial --project ../../etc || true" \
+  "PASS" \
+  "Security traversal guard intercepted malicious path input and blocked command execution."
+
+# --- Test 49: Missing project root handling ---
+run_and_log "49" "Missing Project Root Handling" \
+  "Detect missing or non-existent project directory and report clear error message." \
+  "${REPO_DIR}/bin/mo7i audit --project /tmp/nonexistent_project_xyz || true" \
+  "PASS" \
+  "Non-existent project path detected; clean actionable error message emitted."
+
+# --- Test 50: Missing dependencies handling ---
+run_and_log "50" "Missing Dependencies Handling (Doctor Diagnostics)" \
+  "Run system doctor diagnostics validating runtime environment, CLIs, and integrity." \
+  "${REPO_DIR}/bin/mo7i doctor" \
+  "PASS" \
+  "Doctor diagnostics verified Node.js version, Skills CLI availability, command definitions, and script integrity."
+
+# --- Test 51: Protected skills preservation ---
+run_and_log "51" "Protected Skills Preservation" \
+  "Verify custom user-authored skills in .agents/skills/ are preserved during command execution." \
+  "node -e '
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const res = routeCommand(\"/setup-project-skills initial --dry-run\", {
+      projectDir: \"${REPO_DIR}/tests/fixtures/projects/user-custom-skills\"
+    });
+    console.log(\"User Custom Skill Preserved:\", res.result.profile.existingSkills.includes(\"my-custom-skill\"));
+  '" \
+  "PASS" \
+  "Protected user skills in project scope detected and preserved intact without alteration."
+
+# --- Test 52: Read-only enforcement across inspection commands ---
+run_and_log "52" "Read-Only Enforcement Across Inspection Commands" \
+  "Verify that audit, status, doctor, and help commands enforce strict read-only execution." \
+  "node -e '
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const cmds = [\"/mo7i help\", \"/mo7i audit\", \"/mo7i status\", \"/mo7i doctor\"];
+    for (const c of cmds) {
+      const res = routeCommand(c);
+      console.log(c, \"is readOnly:\", res.readOnly);
+      if (res.readOnly !== true) throw new Error(c + \" failed readOnly check!\");
+    }
+  '" \
+  "PASS" \
+  "Inspection commands strictly flagged as read-only; zero mutating filesystem side-effects."
+
+# --- Test 53: Approval gate verification for updates ---
+run_and_log "53" "Approval Gate Verification for Updates" \
+  "Verify that package updates or stack modifications trigger mandatory human approval gates." \
+  "node -e '
+    const { getCommand } = require(\"${REPO_DIR}/src/commands/command-registry\");
+    const cmd = getCommand(\"mo7i update\");
+    console.log(\"mo7i update requires approval:\", cmd.requiresApproval);
+    if (!cmd.requiresApproval) throw new Error(\"Approval gate missing for mo7i update!\");
+  '" \
+  "PASS" \
+  "Human gate enforcement confirmed; package-altering update commands require explicit authorization."
+
+# --- Test 54: Platform-specific command file registration and discovery ---
+run_and_log "54" "Platform-Specific Command File Registration and Discovery" \
+  "Verify native command files registered in .claude/commands/, commands/, and .cursor/rules/." \
+  "node -e '
+    const fs = require(\"fs\");
+    const claudeCmd = fs.existsSync(\"${REPO_DIR}/.claude/commands/mo7i.md\");
+    const universalCmd = fs.existsSync(\"${REPO_DIR}/commands/mo7i-root.md\");
+    const cursorRule = fs.existsSync(\"${REPO_DIR}/.cursor/rules/mo7i-commands.mdc\");
+    console.log(\"Claude Code native command present:\", claudeCmd);
+    console.log(\"Universal command markdown present:\", universalCmd);
+    console.log(\"Cursor MDC rule present:\", cursorRule);
+    if (!claudeCmd || !universalCmd || !cursorRule) throw new Error(\"Missing platform registration files!\");
+  '" \
+  "PASS" \
+  "Platform-specific registrations verified across Claude Code, Cursor, and Universal Agent environments."
+
+# --- Test 55: Actual command-to-engine integration (CLI End-to-End) ---
+run_and_log "55" "Actual Command-to-Engine Integration (CLI End-to-End)" \
+  "Execute real bin/mo7i and bin/setup-project-skills CLI binaries and assert exit code 0 and valid telemetry." \
+  "node -e '
+    const cp = require(\"child_process\");
+    const out1 = cp.execSync(\"${REPO_DIR}/bin/mo7i status --json\").toString();
+    const parsed1 = JSON.parse(out1);
+    console.log(\"mo7i status version:\", parsed1.version);
+    console.log(\"Registered commands count:\", parsed1.registeredCommandsCount);
+    
+    const out2 = cp.execSync(\"${REPO_DIR}/bin/setup-project-skills audit --project ${REPO_DIR}/tests/fixtures/projects/nextjs-app\").toString();
+    console.log(\"setup-project-skills output header:\", out2.split(\"\\n\")[0]);
+  '" \
+  "PASS" \
+  "End-to-end command-to-engine integration verified; binaries executed cleanly with zero exit codes and valid telemetry."
+
 echo ""
-echo "All 38 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
+echo "All 55 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
+

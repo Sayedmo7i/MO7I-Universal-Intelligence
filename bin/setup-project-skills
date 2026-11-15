@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+
+/**
+ * MO7I Project Intelligence & Skill Setup — Official CLI Entrypoint
+ * Version: 2.2.0
+ */
+
+const { routeCommand } = require('../src/commands/command-router');
+
+const args = process.argv.slice(2);
+const commandString = `setup-project-skills ${args.join(' ')}`;
+
+try {
+  const result = routeCommand(commandString);
+  if (result.output) {
+    console.log(result.output);
+  }
+  if (result.status === 'ERROR') {
+    process.exit(1);
+  }
+} catch (err) {
+  console.error(`[MO7I Setup Error] ${err.message}`);
+  process.exit(1);
+}

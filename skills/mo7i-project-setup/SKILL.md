@@ -115,26 +115,39 @@ Every initialized project maintains its persistent metadata inside the project r
 
 ---
 
-## 8. CLI Usage
+## 8. Slash Command & CLI Usage
 
+### Native Slash Command
+In any supported agent environment (Claude Code, Cursor, etc.):
+```text
+/setup-project-skills initial
+/setup-project-skills initial --dry-run
+/setup-project-skills audit
+/setup-project-skills update
+/setup-project-skills repair
+/setup-project-skills report
+```
+
+### Direct CLI Invocation
 Run directly via Node.js or the bundled binary:
 
 ```bash
 # Initial complete setup
-node skills/mo7i-project-setup/scripts/setup-engine.js initial /path/to/project
+setup-project-skills initial /path/to/project
+# or: node skills/mo7i-project-setup/scripts/setup-engine.js initial /path/to/project
 
 # Dry run analysis without writing changes
-node skills/mo7i-project-setup/scripts/setup-engine.js initial /path/to/project --dry-run
+setup-project-skills initial /path/to/project --dry-run
 
 # Audit project skills against current dependencies
-node skills/mo7i-project-setup/scripts/setup-engine.js audit /path/to/project
+setup-project-skills audit /path/to/project
 
 # Update skills after adding new frameworks/tools
-node skills/mo7i-project-setup/scripts/setup-engine.js update /path/to/project
+setup-project-skills update /path/to/project
 
 # Repair corrupted or missing skills
-node skills/mo7i-project-setup/scripts/setup-engine.js repair /path/to/project
+setup-project-skills repair /path/to/project
 
 # Generate and print project inventory report
-node skills/mo7i-project-setup/scripts/setup-engine.js report /path/to/project
+setup-project-skills report /path/to/project
 ```
