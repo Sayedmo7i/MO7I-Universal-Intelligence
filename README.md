@@ -1,44 +1,63 @@
 # MO7I Universal Intelligence
 
-> **Universal Intelligence Layer & Autonomous Task Meta-Orchestrator**  
+> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Project Intelligence Engine (v2.1.0)**  
 > *The user specifies WHAT needs to be accomplished. MO7I determines HOW to accomplish it.*
 
-MO7I Universal Intelligence is an autonomous intelligence layer and meta-orchestrator built on the open [Agent Skills](https://skills.sh) standard. It operates as the single autonomous entry point across all engineering repositories and domains. 
+MO7I Universal Intelligence is an autonomous intelligence layer, task meta-orchestrator, and project intelligence engine built on the open [Agent Skills](https://skills.sh) standard. It operates as the single autonomous entry point across all engineering repositories and domains.
 
-It does not simply install or manage skills; it independently analyzes project context, classifies cross-domain task requirements, discovers and vets specialist skills via Vercel Labs `find-skills`, learns their operational contracts, coordinates multi-skill pipelines, enforces zero-trust safety boundaries, verifies outcomes with real execution evidence, and preserves reusable intelligence across projects.
+Rather than expecting users to manually configure tools, MO7I automatically inspects new projects, detects their frameworks and architectures, provisions project-scoped specialist skills (including the verified official Matt Pocock skills collection), learns operational contracts, coordinates multi-skill pipelines, enforces zero-trust safety boundaries, verifies outcomes with real execution evidence, and preserves persistent intelligence across project lifecycles.
 
 ---
 
-## The 14-Phase Autonomous Execution Lifecycle
+## What's New in v2.1.0: Project Intelligence & Automated Skill Setup
+
+Version 2.1.0 introduces **MO7I Project Intelligence** and the companion skill **`mo7i-project-setup`**:
+
+1. **Automated Technical Stack Analysis**: Analyzes manifests (`package.json`, `pubspec.yaml`, `composer.json`, `requirements.txt`), lockfiles, config files, source structures, testing setups, and CI/CD pipelines to build an objective project profile.
+2. **Matt Pocock Skills Collection Integration**: Integrates the complete official collection from `mattpocock/skills` (38 verified skills ready in project scope, with upstream exceptions transparently reported).
+3. **Strict Project-Scope Isolation**: All foundational skills install into `<projectRoot>/.agents/skills/` without global (`-g`) pollution. Existing user-authored skills are strictly preserved.
+4. **Persistent Project Intelligence Registry**: Maintains `.mo7i/project-profile.json`, `.mo7i/skill-registry.json`, and `.mo7i/setup-report.md` with zero credential storage and automated `.bak` backups.
+5. **Five Operational Modes**:
+   - `initial`: Complete technical stack analysis and project skill provisioning.
+   - `audit`: Read-only inspection of installed skills vs project requirements.
+   - `update`: Safe detection and installation of newly required skills when dependencies change.
+   - `repair`: Reinstallation of missing or corrupted skills from lockfiles.
+   - `report`: Executive markdown report of project capabilities.
+
+---
+
+## The Integrated Autonomous Execution Lifecycle
 
 ```
-[1. INTAKE] ────────► [2. CONTEXT INSPECTION] ────► [3. TASK CLASSIFICATION]
+[1. INTAKE] ──► [2. PROJECT DETECTION] ──► [3. PROJECT PROFILE INSPECTION]
+                                                      │
+[6. TASK CLASSIFICATION] ◄── [5. PROJECT SETUP (WHEN NEEDED)] ◄── [4. SETUP STATUS CHECK]
+         │
+         ▼
+[7. CAPABILITY GAP ANALYSIS] ──► [8. SKILL DISCOVERY] ──► [9. SKILL LEARNING]
                                                               │
-[6. SKILL LEARNING] ◄── [5. SKILL DISCOVERY] ◄── [4. CAPABILITY GAP ANALYSIS]
+[12. EXECUTION] ◄── [11. SKILL ORCHESTRATION] ◄── [10. COMPATIBILITY & PLANNING]
          │
          ▼
-[7. COMPATIBILITY VALIDATION] ──► [8. EXECUTION PLANNING] ──► [9. SKILL ORCHESTRATION]
-                                                                          │
-[12. LEARNING & KNOWLEDGE] ◄── [11. QUALITY VALIDATION] ◄────── [10. EXECUTION]
-         │
-         ▼
-[13. SAFE CLEANUP] ─────────────► [14. FINAL REPORT]
+[13. QUALITY VALIDATION] ──► [14. KNOWLEDGE & PROFILE UPDATE] ──► [15. SAFE CLEANUP] ──► [16. FINAL REPORT]
 ```
 
 1. **INTAKE**: Deconstruct user goals, deliverables, acceptance criteria, and hard constraints.
-2. **CONTEXT INSPECTION**: Audit repository root, active branch, runtime environment, and project rules (`AGENTS.md`, `CLAUDE.md`, linters).
-3. **TASK CLASSIFICATION**: Categorize into functional domain (Software, Mobile, Design, SEO, DevOps, Research, etc.) and assess complexity tier.
-4. **CAPABILITY GAP ANALYSIS**: Determine whether installed skills suffice or external specialist skills are needed.
-5. **SKILL DISCOVERY**: Discover specialist skills via Vercel Labs `find-skills` (`npx skills find "<keywords>"`).
-6. **SKILL LEARNING**: Execute the 4-phase learning loop (Inspect -> Understand -> Integrate -> Validate).
-7. **COMPATIBILITY VALIDATION**: Verify that candidate skills do not conflict with repository conventions or each other.
-8. **EXECUTION PLANNING**: Construct a phased roadmap defining measurable acceptance criteria before making edits.
-9. **SKILL ORCHESTRATION**: Sequence specialist skills across pipeline stages, loading only the active skill into context.
-10. **EXECUTION**: Implement changes adhering to domain best practices and execute required tool commands.
-11. **QUALITY VALIDATION**: Run test suites, compilers, and linters. Enforce "evidence over claims".
-12. **LEARNING & KNOWLEDGE UPDATE**: Record operational insights, execution telemetry, and compatibility in user memory.
-13. **SAFE CLEANUP**: Prune eligible temporary skills installed by the orchestrator after checking cross-project usage.
-14. **FINAL REPORT**: Deliver structured final report citing verified outputs, changed files, and standardized status labels.
+2. **PROJECT DETECTION**: Identify project root, git repository boundaries, environment runtimes, and local rules.
+3. **PROJECT PROFILE INSPECTION**: Audit `.mo7i/project-profile.json` and `.mo7i/skill-registry.json` for existing intelligence.
+4. **SETUP STATUS CHECK**: Determine whether the project is uninitialized, missing foundational skills, or has experienced dependency drift.
+5. **PROJECT SKILL SETUP (WHEN NEEDED)**: Invoke companion skill `mo7i-project-setup` to analyze the codebase and provision project-scoped skills.
+6. **TASK CLASSIFICATION**: Categorize immediate task into one of 13 functional domains and assess complexity tier.
+7. **CAPABILITY GAP ANALYSIS**: Determine whether project-installed skills suffice or if a task-level transient skill is needed.
+8. **SKILL DISCOVERY**: Discover specialist skills via Vercel Labs `find-skills` (`npx skills find "<keywords>"`).
+9. **SKILL LEARNING**: Execute the 4-phase learning loop (Inspect -> Understand -> Integrate -> Validate).
+10. **COMPATIBILITY & PLANNING**: Verify candidate skills do not conflict with repository conventions and construct roadmap.
+11. **SKILL ORCHESTRATION**: Sequence specialist skills across pipeline stages, minimizing context by loading only the skill needed for the active phase.
+12. **EXECUTION**: Apply domain best practices and execute implementation commands with real tools.
+13. **QUALITY VALIDATION**: Run test suites, compilers, static analyzers, and linters. Enforce "evidence over claims".
+14. **KNOWLEDGE & PROFILE UPDATE**: Record operational insights in user memory and update project profile telemetry.
+15. **SAFE CLEANUP**: Prune transient task skills while strictly preserving project foundational skills and user-authored skills.
+16. **FINAL REPORT**: Deliver structured final report citing verified outputs, changed files, and standardized status labels.
 
 ---
 
@@ -66,58 +85,53 @@ MO7I orchestrates across 13 distinct functional domains:
 
 ---
 
-## Core Systems
+## Project-Level vs. Global Skills Architecture
 
-### 1. Skill Learning Engine & Six State Transitions
-The orchestrator tracks skills across six distinct states to prevent premature capability assumptions:
-`DISCOVERED` -> `INSTALLED` -> `UNDERSTOOD` -> `RUNTIME_VERIFIED` -> `SUCCESSFULLY_USED` (or `FAILED_OR_INCOMPATIBLE`).
+| Dimension | Project-Level Skills | Global Skills | Task-Level Discovered Skills |
+| :--- | :--- | :--- | :--- |
+| **Location** | `<projectRoot>/.agents/skills/` | `~/.agents/skills/` | Memory / Temporary Path |
+| **Scope** | Repository-bound | Universal cross-project | Ephemeral for single turn |
+| **Lockfile** | `<projectRoot>/skills-lock.json` | Global agent config | Pruned during cleanup |
+| **Registry** | `.mo7i/skill-registry.json` | `~/.config/mo7i/` | Transient runtime state |
+| **Global Flag** | **Prohibited** (no `-g`) | Required (`-g`) | Not applicable |
 
-Before using any skill, it executes a 4-phase learning loop:
-- **Phase A (Inspection)**: Reads full `SKILL.md`, walks linked references in `references/`, audits bundled scripts, and verifies tool requirements.
-- **Phase B (Understanding)**: Synthesizes an operational profile detailing core capabilities, activation boundaries, contraindications, required inputs, and expected artifacts.
-- **Phase C (Integration)**: Maps task categories, pairs complementary skills, identifies conflicting conventions, and establishes stage sequencing.
-- **Phase D (Practical Validation)**: Probes the runtime environment (`which <cmd>`) to distinguish between *installed on disk* and *available in runtime*.
+---
 
-### 2. Mandatory `find-skills` Integration
-MO7I Universal Intelligence designates `find-skills` (`vercel-labs/skills`) as a core discovery dependency:
-- Queries the ecosystem: `npx skills find "<keywords>"`.
-- Evaluates candidate pools across a 5-dimension scoring rubric:
-  - **Task Relevance & Stack Fit**: 35%
-  - **Publisher Reputation**: 25% (official vendors prioritized over unverified forks)
-  - **Community Adoption**: 15% (installs and stars on skills.sh)
-  - **Documentation Quality**: 15% (modular guides, clear triggers)
-  - **Security & Maintainability**: 10% (automated audit ratings)
-- Adheres to the **Primary Specialist Rule**: selects ONE best specialist skill per domain stage.
+## Matt Pocock Skills Collection Roster
 
-### 3. Multi-Skill Context Minimization & Precedence
-When coordinating complex workflows across multiple domains (e.g., Database + Backend + Frontend + E2E Tests):
-- **Context Minimization**: Sequentially loads only the skill relevant to the active stage, avoiding context bloat and token degradation.
-- **Explicit Conflict Resolution**: Resolves contradictory instructions in strict descending priority order:
-  1. *System & Platform Safety Requirements* (Highest Authority)
-  2. *Explicit Current User Instructions*
-  3. *Project-Specific Instructions* (`AGENTS.md`, `CLAUDE.md`, repository linters)
-  4. *Specialist Skill Instructions*
-  5. *Confirmed User Preferences*
-  6. *General Defaults* (Lowest Authority)
+MO7I includes native support for the 38 verified skills in `mattpocock/skills`:
 
-### 4. Global Preferences & Cross-Project Memory
-Persistent cross-project intelligence is stored in user profile space (`~/.config/mo7i/universal-intelligence/`):
-- `preferences.json`: Confirmed user tech preferences (languages, frameworks, tools, models, image engines).
-- `skill-registry.json`: Canonical inventory and classifications (`core`, `pinned`, `persistent`, `temporary`).
-- `skill-knowledge.json`: Operational profiles and capability contracts derived by the learning engine.
-- `skill-usage-history.json`: Auditable append-only execution history and outcomes.
-- `skill-compatibility.json`: Pairwise synergy and sequencing matrix.
+- **Development & Architecture**: `ask-matt`, `codebase-design`, `domain-modeling`, `grill-with-docs`, `implement`, `implement-spec`, `improve-codebase-architecture`, `pr`, `prototype`, `research`, `retro`, `setup-matt-pocock-skills`, `to-spec`, `to-tickets`, `triage`, `wayfinder`, `wizard`, `grill-me`, `grilling`, `handoff`, `teach`, `to-questionnaire`, `wait-what`, `writing-for-agents`, `chief-of-staff`, `claude-handoff`, `loop-me`, `writing-beats`, `writing-fragments`, `writing-shape`.
+- **Quality Assurance & Safety**: `code-review`, `diagnosing-bugs`, `tdd`, `git-guardrails-claude-code`, `setup-pre-commit`.
+- **Project-Specific Specialists**: `setup-ts-deep-modules`, `migrate-to-shoehorn`, `scaffold-exercises`.
 
-*Cross-Project Invariant: Global preferences never override explicit project conventions. No secrets or tokens are ever stored.*
+*Note on Upstream Exceptions: `software-factory` from `skills/in-progress/` is transparently skipped during discovery due to an upstream YAML parse error.*
 
-### 5. Security Governance & Mandatory Human Gates
-The orchestrator enforces zero-trust vetting and halts execution to request explicit interactive human approval before:
-- Destructive filesystem operations outside temporary paths (`rm -rf`).
-- Destructive database migrations or table drops.
-- Production deployments or public package/repository releases.
-- Billable cloud provisioning or financial transactions.
-- Installing unvetted community skills from unknown authors.
-- System-level privilege escalation (`sudo`).
+---
+
+## CLI & Companion Skill Usage
+
+You can invoke the companion skill `mo7i-project-setup` directly:
+
+```bash
+# Perform initial complete setup on a repository
+node skills/mo7i-project-setup/scripts/setup-engine.js initial /path/to/project
+
+# Dry-run analysis without making disk changes
+node skills/mo7i-project-setup/scripts/setup-engine.js initial /path/to/project --dry-run
+
+# Audit installed skills against project dependencies
+node skills/mo7i-project-setup/scripts/setup-engine.js audit /path/to/project
+
+# Update project skills after adding new frameworks
+node skills/mo7i-project-setup/scripts/setup-engine.js update /path/to/project
+
+# Repair corrupted or missing skills from lockfiles
+node skills/mo7i-project-setup/scripts/setup-engine.js repair /path/to/project
+
+# Generate and display the project intelligence report
+node skills/mo7i-project-setup/scripts/setup-engine.js report /path/to/project
+```
 
 ---
 
@@ -130,9 +144,9 @@ Install using the Skills CLI (`npx skills`):
 npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-universal-intelligence -g -y
 ```
 
-### Project Scope (Repository-Bound)
+### Project Scope (Companion Skill & Project Setup)
 ```bash
-npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-universal-intelligence -y
+npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-project-setup -y
 ```
 
 ---
@@ -144,14 +158,15 @@ Every task reports verifiable command evidence under standardized statuses:
 - **`FAIL`**: Execution failed assertions or returned non-zero exit codes.
 - **`BLOCKED`**: Progress halted by human gate or missing environment prerequisite.
 - **`NOT_RUN`**: Step skipped due to failed prerequisite.
-- **`NOT_APPLICABLE`**: Step bypassed due to task complexity profile (e.g. trivial edit).
+- **`NOT_APPLICABLE`**: Step bypassed due to task complexity profile.
 
 ---
 
 ## Reference Documentation Index
 
+- [Project Intelligence & Setup](references/project-intelligence.md): Technical analysis engine, Matt Pocock collection, registry schemas.
 - [Universal Task Domains](references/task-domains.md): Functional domain taxonomy, missing-service handling.
-- [Autonomous Orchestration](references/orchestration.md): 14-phase lifecycle, multi-skill sequencing, precedence.
+- [Autonomous Orchestration](references/orchestration.md): 16-phase lifecycle, multi-skill sequencing, precedence.
 - [Skill Learning Engine](references/skill-learning-engine.md): 4-phase learning loop, 6 skill states, profile schemas.
 - [Skill Discovery](references/skill-discovery.md): `find-skills` workflow, 5-dimension scoring rubric.
 - [Skill Lifecycle](references/skill-lifecycle.md): Registry tracking, atomic writes, safe cleanup.
