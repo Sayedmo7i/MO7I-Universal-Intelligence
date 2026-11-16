@@ -880,16 +880,16 @@ run_and_log "56" "T3 Code Entry Point Discovery (.agents/skills/mo7i/)" \
   "T3 Code skill entry point verified; directory name and frontmatter match mo7i for \$mo7i mention and chip."
 
 # --- Test 57: T3 Code Companion Setup Skill Discovery ---
-run_and_log "57" "T3 Code Companion Setup Discovery (.agents/skills/setup-project-skills/)" \
-  "Verify that .agents/skills/setup-project-skills/SKILL.md exists with name: setup-project-skills." \
+run_and_log "57" "T3 Code Companion Setup Discovery (.agents/skills/mo7i-project-setup/)" \
+  "Verify that .agents/skills/mo7i-project-setup/SKILL.md exists with name: mo7i-project-setup." \
   "node -e '
     const fs = require(\"fs\");
-    const p = \"${REPO_DIR}/.agents/skills/setup-project-skills/SKILL.md\";
-    if (!fs.existsSync(p)) throw new Error(\"Missing setup-project-skills\");
-    console.log(\"setup-project-skills entry point verified at:\", p);
+    const p = \"${REPO_DIR}/.agents/skills/mo7i-project-setup/SKILL.md\";
+    if (!fs.existsSync(p)) throw new Error(\"Missing mo7i-project-setup\");
+    console.log(\"mo7i-project-setup entry point verified at:\", p);
   '" \
   "PASS" \
-  "Companion skill verified for direct T3 Code invocation via \$setup-project-skills."
+  "Companion skill verified for direct T3 Code invocation via \$mo7i-project-setup."
 
 # --- Test 58: Dynamic Post-Install Setup Detection ---
 run_and_log "58" "Dynamic Post-Install Setup Detection" \

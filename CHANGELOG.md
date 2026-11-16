@@ -49,6 +49,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `/mo7i setup [mode]` routing directly to the setup engine, enabling single-entry skill bootstrapping.
 - **Non-Alarming Diagnostics**:
   - Formatted clear `INFO` notices for uninitialized workspaces and unlinked optional markdown commands without raising false alarms.
+- **Skill Deduplication & Root Cleanup**:
+  - Resolved root CLI discovery conflict: moved root `SKILL.md` to `SKILL-SPEC.md`, ensuring `npx skills add` discovers only `skills/mo7i` instead of copying the whole repository root.
+  - Removed duplicate `setup-project-skills` skill alias (`skills/setup-project-skills/` and `.agents/skills/setup-project-skills/`), unifying project setup under `mo7i-project-setup` and the top-level `/mo7i setup [mode]` command.
 
 ## [2.2.0] - 2026-11-15
 

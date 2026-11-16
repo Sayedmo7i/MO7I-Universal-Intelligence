@@ -48,18 +48,19 @@ test(1, 'T3 Code entry point .agents/skills/mo7i/SKILL.md exists with name: mo7i
   assert(content.includes('audit, learn, discover, status, doctor, update, help'), 'Must document subcommands');
 });
 
-test(2, 'T3 Code companion setup-project-skills exists with name: setup-project-skills', () => {
-  const setupSkillPath = path.join(REPO_DIR, '.agents', 'skills', 'setup-project-skills', 'SKILL.md');
-  assert(fs.existsSync(setupSkillPath), 'SKILL.md must exist in .agents/skills/setup-project-skills/');
+test(2, 'T3 Code companion mo7i-project-setup exists with name: mo7i-project-setup', () => {
+  const setupSkillPath = path.join(REPO_DIR, '.agents', 'skills', 'mo7i-project-setup', 'SKILL.md');
+  assert(fs.existsSync(setupSkillPath), 'SKILL.md must exist in .agents/skills/mo7i-project-setup/');
   const content = fs.readFileSync(setupSkillPath, 'utf8');
-  assert(/^name:\s*setup-project-skills$/m.test(content), 'Frontmatter name must be "setup-project-skills"');
+  assert(/^name:\s*mo7i-project-setup$/m.test(content), 'Frontmatter name must be "mo7i-project-setup"');
 });
 
-test(3, 'Root SKILL.md has name: mo7i and version v2.3.0', () => {
-  const rootSkillPath = path.join(REPO_DIR, 'SKILL.md');
-  const content = fs.readFileSync(rootSkillPath, 'utf8');
-  assert(/^name:\s*mo7i$/m.test(content), 'Root SKILL.md frontmatter name must be "mo7i"');
-  assert(content.includes('v2.3.0'), 'Root SKILL.md must reference v2.3.0');
+test(3, 'Specification file SKILL-SPEC.md exists with name: mo7i and version v2.3.0', () => {
+  const specSkillPath = path.join(REPO_DIR, 'SKILL-SPEC.md');
+  assert(fs.existsSync(specSkillPath), 'SKILL-SPEC.md must exist in repository root');
+  const content = fs.readFileSync(specSkillPath, 'utf8');
+  assert(/^name:\s*mo7i$/m.test(content), 'SKILL-SPEC.md frontmatter name must be "mo7i"');
+  assert(content.includes('v2.3.0'), 'SKILL-SPEC.md must reference v2.3.0');
 });
 
 // 2. Registry Reconciliation

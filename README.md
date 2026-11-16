@@ -13,7 +13,7 @@ Rather than expecting users to manually configure tools or remember complex prom
 
 Version 2.3.0 resolves T3 Code skill discovery, introduces automated post-install setup handling, and hardens the orchestrator core:
 
-1. **Native T3 Code Entry Points**: Directly invokable via `$mo7i` and `$setup-project-skills` chips in T3 Code through compliant `.agents/skills/` manifests.
+1. **Native T3 Code Entry Points**: Directly invokable via `$mo7i` (and companion `$mo7i-project-setup`) chips in T3 Code through compliant `.agents/skills/` manifests.
 2. **Post-Install Setup Engine**: Automatically detects companion setups (`setup-*`, `init-*`, `onboard*`) required by installed collections (e.g., Matt Pocock skills requiring `setup-matt-pocock-skills`).
 3. **Strict Human Gate for Interactive Setups**: Never fabricates or silently guesses answers for interactive setup skills; surfaces prominent notices when human input is needed.
 4. **Setup State Tracking & Verification**: Tracks setup lifecycle states (`not-required`, `pending`, `in-progress`, `completed`, `skipped`, `failed`) and verifies completion against real on-disk artifact evidence.
@@ -28,7 +28,7 @@ Version 2.3.0 resolves T3 Code skill discovery, introduces automated post-instal
 | :--- | :--- | :--- | :--- |
 | **`/mo7i`** | `/mo7i <task>` | Primary entry point to the 16-phase Universal Intelligence Meta-Orchestrator. | Standard Execution |
 | **`/mo7i help`** | `/mo7i help` | Displays the complete catalog of commands, syntax, and examples. | Read-Only |
-| **`/setup-project-skills`** | `/setup-project-skills [mode]` | Provisions project-scoped skills (`initial`, `audit`, `update`, `repair`, `report`). | Standard Execution |
+| **`/mo7i setup`** | `/mo7i setup [mode]` | Provisions project-scoped skills (`initial`, `audit`, `update`, `repair`, `report`). | Standard Execution |
 | **`/mo7i audit`** | `/mo7i audit` | Performs a read-only audit of project dependencies, installed skills, and drift. | Read-Only |
 | **`/mo7i learn`** | `/mo7i learn [skill]` | Executes the 4-phase learning loop and records operational capability contracts. | Standard Execution |
 | **`/mo7i discover`** | `/mo7i discover <query>` | Evaluates candidate specialists on skills.sh across 5 dimensions without auto-install. | Read-Only |
@@ -98,8 +98,8 @@ Install using the Skills CLI (`npx skills`) or run directly via Node.js / npx. M
 # Add main MO7I orchestrator (invokable as $mo7i in T3 Code)
 npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i -y
 
-# Add project setup companion (invokable as $setup-project-skills in T3 Code)
-npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill setup-project-skills -y
+# Optional: Add project setup companion (invokable as $mo7i-project-setup in T3 Code)
+npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-project-setup -y
 ```
 
 ### Direct Project Bootstrapping via `$mo7i`
