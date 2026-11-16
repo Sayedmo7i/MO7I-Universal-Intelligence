@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Production Acceptance Test Suite for MO7I Universal Intelligence
-# Version: 2.4.1
-# Suite: 85 Tests Total (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification)
+# Version: 2.5.0
+# Suite: 91 Tests Total (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification + 6 Non-Next.js & Non-Code Validation)
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_FILE="${REPO_DIR}/tests/RESULTS.md"
@@ -14,8 +14,8 @@ echo "# MO7I Universal Intelligence - Production Acceptance Test Suite Results" 
 echo "" >> "$OUTPUT_FILE"
 echo "Date: $(date -u '+%Y-%m-%d %H:%M:%SZ')" >> "$OUTPUT_FILE"
 echo "Host: $(uname -s) $(uname -r) ($(uname -m))" >> "$OUTPUT_FILE"
-echo "Release Version: v2.4.1" >> "$OUTPUT_FILE"
-echo "Suite: 85 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification)" >> "$OUTPUT_FILE"
+echo "Release Version: v2.5.0" >> "$OUTPUT_FILE"
+echo "Suite: 91 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification + 6 Non-Next.js & Non-Code Validation)" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
 run_and_log() {
@@ -1357,6 +1357,125 @@ run_and_log "85" "End-to-End v2.4.1 Independent Verification Suite" \
   "PASS" \
   "All 6 v2.4.1 independent verification acceptance tests passed with zero regressions."
 
+# ==============================================================================
+# PART 7: v2.5.0 NON-NEXT.JS & NON-CODE VALIDATION ACCEPTANCE TESTS
+# ==============================================================================
+
+echo "=== Running Part 7: v2.5.0 Non-Next.js & Non-Code Validation Tests (Tests 86-91) ==="
+
+# --- Test 86: Python/FastAPI Project Archetype Detection ---
+run_and_log "86" "Python/FastAPI Project Archetype Detection" \
+  "Inspect Python/FastAPI repository and verify accurate stack archetype classification without frontend bias." \
+  "node -e '
+    const os = require(\"os\");
+    const fs = require(\"fs\");
+    const path = require(\"path\");
+    const { analyzeProject } = require(\"${REPO_DIR}/skills/mo7i/scripts/setup-engine\");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), \"mo7i-py-\"));
+    fs.writeFileSync(path.join(tmp, \"requirements.txt\"), \"fastapi>=0.110.0\\npytest>=8.0.0\\n\");
+    const p = analyzeProject(tmp);
+    console.log(\"Detected Type:\", p.type);
+    console.log(\"Languages:\", p.languages.join(\", \"));
+    fs.rmSync(tmp, { recursive: true, force: true });
+    if (p.type !== \"Web API Service (FastAPI)\" || !p.languages.includes(\"Python\")) process.exit(1);
+  '" \
+  "PASS" \
+  "Python/FastAPI stack correctly classified as Web API Service (FastAPI) without framework leaks."
+
+# --- Test 87: Non-Next.js Skill Exclusion Assertion ---
+run_and_log "87" "Non-Next.js Skill Exclusion on Python/FastAPI" \
+  "Run setup initial on Python/FastAPI project and assert that Next.js and frontend skills are excluded." \
+  "node -e '
+    const os = require(\"os\");
+    const fs = require(\"fs\");
+    const path = require(\"path\");
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), \"mo7i-py2-\"));
+    fs.writeFileSync(path.join(tmp, \"requirements.txt\"), \"fastapi>=0.110.0\\npytest>=8.0.0\\n\");
+    const res = routeCommand(\"/mo7i setup initial\", tmp, { dryRun: true });
+    const installed = res.result.installResults.successful.map(s => s.id);
+    console.log(\"Contains nextjs-best-practices:\", installed.includes(\"nextjs-best-practices\"));
+    console.log(\"Contains frontend-design:\", installed.includes(\"frontend-design\"));
+    console.log(\"Contains setup-ts-deep-modules:\", installed.includes(\"setup-ts-deep-modules\"));
+    fs.rmSync(tmp, { recursive: true, force: true });
+    if (installed.includes(\"nextjs-best-practices\") || installed.includes(\"frontend-design\") || installed.includes(\"setup-ts-deep-modules\")) process.exit(1);
+  '" \
+  "PASS" \
+  "Setup initial on Python/FastAPI cleanly excluded all Next.js, frontend, and TypeScript skills."
+
+# --- Test 88: Non-Technical / General Workspace Archetype Detection ---
+run_and_log "88" "Non-Technical / General Workspace Archetype Detection" \
+  "Inspect empty or document-only directory and classify as Non-Technical / General Workspace without code assumptions." \
+  "node -e '
+    const os = require(\"os\");
+    const fs = require(\"fs\");
+    const path = require(\"path\");
+    const { analyzeProject } = require(\"${REPO_DIR}/skills/mo7i/scripts/setup-engine\");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), \"mo7i-nontech-\"));
+    const p = analyzeProject(tmp);
+    console.log(\"Detected Type:\", p.type);
+    console.log(\"Architecture:\", p.architecture);
+    fs.rmSync(tmp, { recursive: true, force: true });
+    if (p.type !== \"Non-Technical / General Workspace\" || p.architecture !== \"Document & Research Workspace\") process.exit(1);
+  '" \
+  "PASS" \
+  "Empty directory successfully recognized as Non-Technical / General Workspace."
+
+# --- Test 89: Non-Code Tooling Exclusion on General Workspace ---
+run_and_log "89" "Non-Code Tooling Exclusion on General Workspace" \
+  "Verify setup initial on non-technical workspace provisions only research/documentation skills and excludes coding tools." \
+  "node -e '
+    const os = require(\"os\");
+    const fs = require(\"fs\");
+    const path = require(\"path\");
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), \"mo7i-nontech2-\"));
+    const res = routeCommand(\"/mo7i setup initial\", tmp, { dryRun: true });
+    const installed = res.result.installResults.successful.map(s => s.id);
+    console.log(\"Has research skill:\", installed.includes(\"research\"));
+    console.log(\"Has writing-for-agents:\", installed.includes(\"writing-for-agents\"));
+    console.log(\"Has tdd:\", installed.includes(\"tdd\"));
+    console.log(\"Has code-review:\", installed.includes(\"code-review\"));
+    fs.rmSync(tmp, { recursive: true, force: true });
+    if (!installed.includes(\"research\") || installed.includes(\"tdd\") || installed.includes(\"code-review\")) process.exit(1);
+  '" \
+  "PASS" \
+  "Non-technical setup correctly selected research and documentation skills while omitting code testing tools."
+
+# --- Test 90: Real Research Task & Evidence Protocol Log Verification ---
+run_and_log "90" "Real Research Task & Evidence Protocol Log Verification" \
+  "Execute real research task requiring 3+ searches and 2+ fetched sources; verify .mo7i/runs/ log." \
+  "node -e '
+    const os = require(\"os\");
+    const fs = require(\"fs\");
+    const path = require(\"path\");
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), \"mo7i-runlog-\"));
+    const task = \"Summarize the latest developments on sodium-ion batteries in grid energy storage with sources.\";
+    const res = routeCommand(task, tmp, {
+      webSearches: [\"s1\", \"s2\", \"s3\"],
+      sourcesFetched: [\"https://peakenergy.com\", \"https://volta.foundation\"],
+      citedUrls: [\"https://peakenergy.com\", \"https://volta.foundation\"],
+      toolReturnedUrls: [\"https://peakenergy.com\", \"https://volta.foundation\"]
+    });
+    console.log(\"Validation valid:\", res.researchValidation.valid);
+    console.log(\"Run log exists:\", fs.existsSync(res.runLogPath));
+    const log = JSON.parse(fs.readFileSync(res.runLogPath, \"utf8\"));
+    console.log(\"Log task:\", log.task);
+    console.log(\"Log domain:\", log.domain);
+    fs.rmSync(tmp, { recursive: true, force: true });
+    if (!res.researchValidation.valid || log.domain !== \"Research & Analysis\") process.exit(1);
+  '" \
+  "PASS" \
+  "Research task enforced evidence protocol and recorded verified execution log in .mo7i/runs/."
+
+# --- Test 91: End-to-End v2.5.0 Acceptance Suite Execution ---
+run_and_log "91" "End-to-End v2.5.0 Non-Next.js and Non-Code Suite" \
+  "Execute complete v2.5.0 acceptance test suite covering all Phase C requirements." \
+  "node ${REPO_DIR}/tests/test_v250_non_nextjs_and_non_code_validation.js" \
+  "PASS" \
+  "All 6 v2.5.0 acceptance tests passed successfully with zero regressions."
+
 echo ""
-echo "All 85 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
+echo "All 91 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
 

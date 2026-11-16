@@ -1,6 +1,6 @@
 /**
  * MO7I Universal Intelligence — Independent Verification & Selftest Engine
- * Version: 2.4.1
+ * Version: 2.5.0
  * 
  * Runs a black-box verification suite against the INSTALLED skill (not repo source)
  * in an isolated temporary project. Outputs purely structured JSON (pass/fail per check, no narrative).
@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
 
-const SELFTEST_VERSION = '2.4.1';
+const SELFTEST_VERSION = '2.5.0';
 
 /**
  * Run black-box selftest suite against installed skill in a temp directory.

@@ -5,6 +5,23 @@ All notable changes to the `mo7i-universal-intelligence` skill will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-11-16
+
+### Added
+- **Non-Next.js Stack & Archetype Recognition**:
+  - Enhanced `analyzeProject` in `setup-engine.js` to accurately classify Python/FastAPI (`Web API Service (FastAPI)`), Rust (`Systems / Application Service (Rust)`), and Go (`Backend Service (Go)`).
+  - Explicitly detects empty folders and document workspaces as `Non-Technical / General Workspace` (`Document & Research Workspace`).
+- **Archetype-Tailored Skill Selection & Guardrails**:
+  - Fixed archetype leaks: prevented Next.js (`nextjs-best-practices`), frontend design (`frontend-design`), and TypeScript specialists (`setup-ts-deep-modules`, `migrate-to-shoehorn`) from being recommended on Python or non-technical projects.
+  - Non-technical workspaces now selectively receive documentation and research skills (`research`, `writing-for-agents`, `writing-shape`, `to-questionnaire`, `teach`) while omitting software testing and coding QA tools (`tdd`, `code-review`, `diagnosing-bugs`, `setup-pre-commit`).
+- **Research Evidence Protocol & Logging**:
+  - Expanded `handleUniversalTask` to recognize research and summarization prompts (`domain: Research & Analysis`).
+  - Enforced strict research evidence policy (minimum 3 web searches, 2 fetched primary sources, and anti-hallucination verification ensuring all cited URLs were returned by tool executions).
+  - Verified per-run audit logging in `.mo7i/runs/<timestamp>.json`.
+- **Command Router & Parser Enhancements**:
+  - Added `setup` to recognized subcommands in `argument-parser.js` for seamless `/mo7i setup initial` routing.
+  - Enhanced `routeCommand` to support flexible signatures (`routeCommand(input, projectDir, options)` and `routeCommand(input, options)`).
+
 ## [2.4.1] - 2026-11-16
 
 ### Added
