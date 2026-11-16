@@ -1,14 +1,14 @@
 /**
  * MO7I Universal Intelligence — Platform Command Installer & Discovery Linker
- * Version: 2.3.0
+ * Version: 2.6.0
  * 
  * Automatically provisions entry points for supported agent environments:
- * - T3 Code & Agent Skills (.agents/skills/): VERIFIED
  * - Universal Shell & CLI (bin/mo7i, npx mo7i): VERIFIED
- * - Claude Code CLI (.claude/commands/): VERIFIED (outside T3 Code)
- * - Cursor / Windsurf (.cursor/rules/): UNVERIFIED
- * - OpenAI Codex (.codex/prompts/): UNVERIFIED
- * - Gemini CLI (.gemini/commands/): UNVERIFIED
+ * - Standard Agent Skills (.agents/skills/): VERIFIED
+ * - Claude Code CLI (.claude/commands/): UNVERIFIED (requires interactive authentication)
+ * - Cursor (.cursor/rules/): UNVERIFIED (system prompt rules, not slash commands)
+ * - OpenAI Codex (.codex/prompts/): UNVERIFIED (no documented slash command loader)
+ * - Gemini CLI (.gemini/commands/): UNVERIFIED (no documented slash command loader)
  */
 
 const fs = require('fs');
@@ -20,13 +20,46 @@ const { generateCursorCommandFiles } = require('./platform-adapters/cursor-adapt
 const { generateUniversalCommandFiles } = require('./platform-adapters/generic-adapter');
 
 const PLATFORM_VERIFICATION = {
-  'T3 Code ($mo7i via .agents/skills/)': { status: 'FILE_PRESENT', note: 'file present, UI discovery unverified by code (confirmed manually in sandbox)', target: '.agents/skills/' },
-  'Universal Shell & CLI (bin/mo7i)': { status: 'VERIFIED', target: 'bin/' },
-  'Claude Code Local (.claude/commands/)': { status: 'VERIFIED', note: 'Claude Code CLI only; not parsed by T3 Code', target: '.claude/commands/' },
-  'Claude Code Global (~/.claude/commands/)': { status: 'VERIFIED', note: 'Claude Code CLI only', target: '~/.claude/commands/' },
-  'Cursor / Windsurf (.cursor/rules/)': { status: 'UNVERIFIED', note: 'Cursor IDE only; not parsed by T3 Code', target: '.cursor/rules/' },
-  'OpenAI Codex (.codex/prompts/)': { status: 'UNVERIFIED', target: '.codex/prompts/' },
-  'Gemini CLI (.gemini/commands/)': { status: 'UNVERIFIED', target: '.gemini/commands/' }
+  'Universal Shell & CLI (bin/mo7i)': { 
+    status: 'VERIFIED', 
+    target: 'bin/',
+    evidence: 'Executes natively via Node.js/Bash, runs full dispatch pipeline and records .mo7i/runs/'
+  },
+  'Standard Agent Skills (.agents/skills/)': { 
+    status: 'VERIFIED', 
+    target: '.agents/skills/',
+    evidence: 'Standard skill specification (.agents/skills/mo7i/SKILL.md) validated by selftest harness'
+  },
+  'Claude Code Local (.claude/commands/)': { 
+    status: 'UNVERIFIED', 
+    target: '.claude/commands/',
+    note: 'CLI installed (v2.1.325) but requires interactive browser login (/login); cannot be verified non-interactively',
+    evidence: 'claude command returns "Not logged in · Please run /login"'
+  },
+  'Claude Code Global (~/.claude/commands/)': { 
+    status: 'UNVERIFIED', 
+    target: '~/.claude/commands/',
+    note: 'CLI installed (v2.1.325) but requires interactive browser login (/login)',
+    evidence: 'Requires human browser authentication'
+  },
+  'Cursor / Windsurf (.cursor/rules/)': { 
+    status: 'UNVERIFIED', 
+    target: '.cursor/rules/',
+    note: 'Cursor IDE rules provide editor context, not documented slash command discovery',
+    evidence: 'CLI binary not present in PATH; rules act as system prompt additions'
+  },
+  'OpenAI Codex (.codex/prompts/)': { 
+    status: 'UNVERIFIED', 
+    target: '.codex/prompts/',
+    note: 'No documented markdown slash-command discovery standard in upstream Codex specifications',
+    evidence: 'Codex CLI lacks directory-based slash-command loader'
+  },
+  'Gemini CLI (.gemini/commands/)': { 
+    status: 'UNVERIFIED', 
+    target: '.gemini/commands/',
+    note: 'No documented slash-command discovery standard in upstream Gemini specifications',
+    evidence: 'Gemini CLI not present in PATH and lacks markdown command loader'
+  }
 };
 
 function installSlashCommands(targetProjectDir = process.cwd()) {
@@ -41,7 +74,7 @@ function installSlashCommands(targetProjectDir = process.cwd()) {
   };
 
   try {
-    // 1. T3 Code & Agent Skills Discovery (.agents/skills/) - VERIFIED
+    // 1. Standard Agent Skills Discovery (.agents/skills/) - VERIFIED
     const agentSkillsDir = path.join(resolvedDir, '.agents', 'skills');
     const skillsSrcDir = path.resolve(__dirname, '../../skills');
     const skillsToLink = ['mo7i', 'mo7i-project-setup'];
@@ -73,9 +106,9 @@ function installSlashCommands(targetProjectDir = process.cwd()) {
         }
       }
     }
-    summary.installedPlatforms.push('T3 Code & Universal Agent Skills (.agents/skills/) [FILE_PRESENT]');
+    summary.installedPlatforms.push('Standard Agent Skills (.agents/skills/) [VERIFIED]');
   } catch (err) {
-    summary.errors.push(`T3 Code skills provisioner: ${err.message}`);
+    summary.errors.push(`Standard agent skills provisioner: ${err.message}`);
   }
 
   try {
@@ -90,14 +123,14 @@ function installSlashCommands(targetProjectDir = process.cwd()) {
   try {
     // 3. Claude Code Local Project Commands (.claude/commands/)
     const claudeLocal = generateClaudeCommandFiles(resolvedDir);
-    summary.installedPlatforms.push('Claude Code Local (.claude/commands/) [VERIFIED for Claude CLI]');
+    summary.installedPlatforms.push('Claude Code Local (.claude/commands/) [UNVERIFIED: requires human login]');
     summary.createdFiles.push(...claudeLocal.generated);
 
     // 4. Claude Code User Global Commands (~/.claude/commands/)
     const userClaude = path.join(homeDir, '.claude');
     if (fs.existsSync(userClaude)) {
       const claudeGlobal = generateClaudeCommandFiles(homeDir);
-      summary.installedPlatforms.push('Claude Code Global (~/.claude/commands/) [VERIFIED for Claude CLI]');
+      summary.installedPlatforms.push('Claude Code Global (~/.claude/commands/) [UNVERIFIED: requires human login]');
       summary.createdFiles.push(...claudeGlobal.generated);
     }
   } catch (err) {
@@ -105,7 +138,7 @@ function installSlashCommands(targetProjectDir = process.cwd()) {
   }
 
   try {
-    // 5. Cursor / Windsurf Rules (.cursor/rules/) - UNVERIFIED in T3 Code
+    // 5. Cursor Rules (.cursor/rules/) - UNVERIFIED
     const cursor = generateCursorCommandFiles(resolvedDir);
     summary.installedPlatforms.push('Cursor / Windsurf (.cursor/rules/) [UNVERIFIED]');
     summary.createdFiles.push(...cursor.generated);

@@ -1,11 +1,11 @@
 ---
 name: mo7i
-description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Multi-Platform Entry Point (v2.5.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands (audit, learn, discover, status, doctor, update, self-update, selftest, help, or a free-form task). Autonomously analyzes project stacks, provisions project-scoped skills, manages post-install setup lifecycles, and executes with verifiable evidence."
+description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Multi-Platform Entry Point (v2.6.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands (bench, audit, learn, discover, status, doctor, update, self-update, selftest, help, or a free-form task). Autonomously analyzes project stacks, provisions project-scoped skills, manages post-install setup lifecycles, and executes with verifiable evidence."
 ---
 
 # MO7I Universal Intelligence
 
-Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, and Multi-Platform Entry Point (v2.5.0).
+Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, and Multi-Platform Entry Point (v2.6.0).
 
 MO7I serves as the single autonomous entry point across all repositories and engineering tasks. It operates on a core principle: **The user specifies WHAT needs to be accomplished; MO7I determines HOW to accomplish it.**
 
@@ -17,6 +17,7 @@ When invoking the skill (via `$mo7i`, `/mo7i`, or `./bin/mo7i`), you can supply 
 
 ```text
 $mo7i [subcommand or task]
+  ├── bench                  -> Benchmark execution overhead across 5 standard tasks with and without MO7I
   ├── audit                  -> Read-only project stack, skills, and configuration audit
   ├── status [--json]        -> System telemetry, project archetype, and installed skills inventory
   ├── doctor [--json]        -> Diagnostics for runtimes, scripts, registries, and platform verification
@@ -78,12 +79,12 @@ For non-trivial tasks, MO7I executes the full autonomous pipeline:
 ---
 
 ## 4. Platform Discovery & Verification
-
+ 
 | Platform | Invocation Mechanism | Verified Status |
 | :--- | :--- | :--- |
-| **T3 Code** | `$mo7i` shortcut (`.agents/skills/mo7i/SKILL.md`) | **VERIFIED** |
-| **Universal Shell & Agent** | `bin/mo7i`, `npx mo7i` | **VERIFIED** |
-| **Claude Code** | Native commands in `.claude/commands/` | **VERIFIED (Claude Code CLI only)** |
-| **Cursor & Windsurf** | MDC rules in `.cursor/rules/` | **UNVERIFIED (Cursor IDE only)** |
-| **OpenAI Codex** | Prompt commands in `.codex/prompts/` | **UNVERIFIED** |
-| **Gemini CLI** | Command extensions in `.gemini/commands/` | **UNVERIFIED** |
+| **Standard Agent Skills** | `.agents/skills/mo7i/SKILL.md` | **VERIFIED** (Parsed by standard agent skills loaders) |
+| **Universal Shell & CLI** | `bin/mo7i`, `npx mo7i` | **VERIFIED** (Native execution, full dispatch & audit log) |
+| **Claude Code CLI** | Native commands in `.claude/commands/` | **UNVERIFIED** (Installed but requires interactive login) |
+| **Cursor / Windsurf** | MDC rules in `.cursor/rules/` | **UNVERIFIED** (Editor prompt instructions, no slash command parser) |
+| **OpenAI Codex** | Prompt commands in `.codex/prompts/` | **UNVERIFIED** (No documented slash command discovery standard) |
+| **Gemini CLI** | Command extensions in `.gemini/commands/` | **UNVERIFIED** (No documented slash command discovery standard) |

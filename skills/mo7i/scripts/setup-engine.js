@@ -1098,7 +1098,7 @@ function formatHumanGateNotice(pendingSetups) {
   for (const s of pendingSetups) {
     out += `• ${s.setupSkill}:\n`;
     out += `  Description: ${s.description}\n`;
-    out += `  Invocation:  $${s.setupSkill} (in T3 Code) or /${s.setupSkill}\n`;
+    out += `  Invocation:  $${s.setupSkill} (in agent sessions) or /${s.setupSkill}\n`;
     out += `  Interactive: ${s.interactive ? 'YES (Human decisions required - MO7I will NOT invent answers)' : 'NO'}\n`;
     out += `  To Skip:     /setup-project-skills skip-setup ${s.setupSkill} --reason "<reason>"\n\n`;
   }

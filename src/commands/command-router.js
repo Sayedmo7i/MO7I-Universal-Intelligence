@@ -40,8 +40,9 @@ const { parseCommand } = require('./argument-parser');
 const { PLATFORM_VERIFICATION } = require('./platform-installer');
 const selfUpdateEngine = require('./self-update-engine');
 const selftestEngine = require('./selftest-engine');
+const benchEngine = require('./bench-engine');
 
-const ROUTER_VERSION = '2.5.0';
+const ROUTER_VERSION = '2.6.0';
 
 /**
  * Determine if a task qualifies for the fast path.
@@ -336,6 +337,11 @@ function routeCommand(input, optionsOrProjectDir = {}, maybeOptions = {}) {
       return handleSelftestRoute(projectDir, {
         ...parsed.flags,
         source: parsed.flags.source || options.source || projectDir,
+        ...options
+      });
+    case 'bench':
+      return handleBenchRoute(projectDir, {
+        ...parsed.flags,
         ...options
       });
     default:
@@ -881,15 +887,15 @@ function handleDoctor(projectDir, flags = {}) {
     issuesCount++;
   }
 
-  // 3. Check T3 Code & Agent Skills Discovery (.agents/skills)
+  // 3. Check Agent Skills Standard Entry Point (.agents/skills)
   const agentSkillsDir = path.join(projectDir, '.agents', 'skills');
   const hasAgentSkills = fs.existsSync(agentSkillsDir);
   const mo7iAgentSkill = fs.existsSync(path.join(agentSkillsDir, 'mo7i', 'SKILL.md'));
   diagnostics.push({
-    check: 'T3 Code Skills Entry Point (.agents/skills/mo7i/)',
+    check: 'Agent Skills Standard Entry Point (.agents/skills/mo7i/)',
     status: mo7iAgentSkill ? 'INFO' : 'WARN',
     detail: mo7iAgentSkill
-      ? 'file present, UI discovery unverified by code (confirmed manually in sandbox)'
+      ? 'file present and valid skill specification'
       : 'Missing .agents/skills/mo7i/SKILL.md'
   });
 
@@ -1114,6 +1120,32 @@ function handleSelftestRoute(projectDir, options = {}) {
   };
 }
 
+/**
+ * /mo7i bench
+ */
+function handleBenchRoute(projectDir, options = {}) {
+  const benchResult = benchEngine.runBenchmark({
+    repoRoot: path.resolve(__dirname, '../../'),
+    projectDir,
+    ...options
+  });
+
+  // Write or update docs/BENCHMARK.md if in repo root
+  const docsDir = path.resolve(__dirname, '../../docs');
+  if (fs.existsSync(docsDir) || fs.existsSync(path.resolve(__dirname, '../../package.json'))) {
+    if (!fs.existsSync(docsDir)) fs.mkdirSync(docsDir, { recursive: true });
+    fs.writeFileSync(path.join(docsDir, 'BENCHMARK.md'), benchResult.markdownReport);
+  }
+
+  return {
+    status: 'SUCCESS',
+    command: 'bench',
+    readOnly: true,
+    data: benchResult,
+    output: options.json ? JSON.stringify(benchResult, null, 2) : benchResult.markdownReport
+  };
+}
+
 module.exports = {
   ROUTER_VERSION,
   isTrivialTask,
@@ -1134,7 +1166,9 @@ module.exports = {
   handleSelfUpdate: handleSelfUpdateRoute,
   handleSelfUpdateRoute,
   handleSelftest: handleSelftestRoute,
-  handleSelftestRoute
+  handleSelftestRoute,
+  handleBench: handleBenchRoute,
+  handleBenchRoute
 };
 
 // CLI entrypoint

@@ -29,5 +29,5 @@ When delegating sub-tasks or launching subagents:
 
 ## 3. Harness & Provider Alignment
 
-- **Respect Host Architecture**: Adhere strictly to the host environment (e.g., Antigravity harness within T3 Code).
+- **Respect Host Architecture**: Adhere strictly to the host agent environment.
 - **Graceful Capabilities Alignment**: If a model configuration requested in preferences is unavailable in the current provider context, transparently fall back to the host default while documenting the adjustment.

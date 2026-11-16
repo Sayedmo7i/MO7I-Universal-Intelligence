@@ -1,6 +1,6 @@
 {
   "name": "mo7i-universal-intelligence",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System",
   "main": "src/commands/command-router.js",
   "bin": {
@@ -11,6 +11,7 @@
   "scripts": {
     "test": "./tests/run_tests.sh",
     "selftest": "./bin/mo7i selftest",
+    "bench": "./bin/mo7i bench",
     "doctor": "./bin/mo7i doctor",
     "status": "./bin/mo7i status"
   },

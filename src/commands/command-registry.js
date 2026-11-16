@@ -22,7 +22,7 @@ const COMMANDS = [
     ],
     readOnly: false,
     requiresApproval: false, // Orchestrator gates only on destructive actions
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   },
   {
     id: 'mo7i-help',
@@ -36,7 +36,7 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   },
   {
     id: 'setup-project-skills',
@@ -57,7 +57,7 @@ const COMMANDS = [
     ],
     readOnly: false,
     requiresApproval: false,
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   },
   {
     id: 'mo7i-audit',
@@ -72,7 +72,7 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   },
   {
     id: 'mo7i-learn',
@@ -88,7 +88,7 @@ const COMMANDS = [
     ],
     readOnly: false,
     requiresApproval: false,
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   },
   {
     id: 'mo7i-discover',
@@ -104,7 +104,7 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   },
   {
     id: 'mo7i-status',
@@ -119,7 +119,7 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   },
   {
     id: 'mo7i-doctor',
@@ -133,7 +133,7 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   },
   {
     id: 'mo7i-update',
@@ -148,7 +148,7 @@ const COMMANDS = [
     ],
     readOnly: false,
     requiresApproval: true, // Gate before updating packages
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   },
   {
     id: 'mo7i-self-update',
@@ -166,7 +166,7 @@ const COMMANDS = [
     ],
     readOnly: false,
     requiresApproval: true,
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   },
   {
     id: 'mo7i-selftest',
@@ -182,7 +182,22 @@ const COMMANDS = [
     ],
     readOnly: true,
     requiresApproval: false,
-    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
+  },
+  {
+    id: 'mo7i-bench',
+    trigger: '/mo7i bench',
+    alias: 'mo7i bench',
+    summary: 'Benchmark execution overhead across 5 standard tasks with and without MO7I',
+    description: 'Runs standard benchmark suite measuring phases run, skills loaded, footprint bytes, files read, and wall time across 5 tasks, generating docs/BENCHMARK.md.',
+    usage: '/mo7i bench [--json]',
+    examples: [
+      '/mo7i bench',
+      '/mo7i bench --json'
+    ],
+    readOnly: true,
+    requiresApproval: false,
+    supportedPlatforms: ['universal-cli', 'agent-skills', 'claude-code', 'cursor']
   }
 ];
 
