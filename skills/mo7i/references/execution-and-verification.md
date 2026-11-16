@@ -37,3 +37,32 @@ Every phase, test case, and execution summary must report one of these 5 precise
 | **`NOT_APPLICABLE`** | The step is not relevant to the current task complexity (e.g., skill discovery skipped for typo fix). | Explicit explanation of why the step was out of scope. |
 
 *Note: It is strictly forbidden to report an unexecuted test as `PASS`.*
+
+---
+
+## 4. Capability Gap Analysis & Resolution
+
+- **Sufficiency Invariant**: When existing tools and installed skills suffice for the current task, the orchestrator explicitly reports `"no gap"` (e.g. `• Gap Analysis: no gap (existing tools suffice for the current task)`).
+- **Gap Invariant**: When a specialized domain requires external tools or capabilities not available in project scope, report the uncovered domain along with proactive discovery queries.
+
+---
+
+## 5. Per-Run Logging & Research Evidence Standards
+
+### A. Per-Run Audit Logging (`.mo7i/runs/<timestamp>.json`)
+Every task execution writes a verifiable per-run execution record containing:
+- `timestamp`: ISO timestamp of execution
+- `task`: Raw intent description
+- `domain`: Classified task domain
+- `phasesExecuted`: Array of executed pipeline phases
+- `skillsRead`: Array of active specialist skills consulted
+- `skillsExcluded`: Array of excluded skills (strictly excluding MO7I internal skills `mo7i` and `mo7i-project-setup`)
+- `toolsCalled`: Array of tools invoked during the run
+- `gapReport`: Concise gap status (`no gap` or detected gaps)
+
+### B. Research Tasks Evidence Protocol
+For research and analysis tasks:
+- **Search Density**: Execute at least 3 distinct web searches (`search_web`).
+- **Source Verification**: Fetch at least 2 primary source pages (`read_url_content`) before citing figures, benchmarks, or statistics.
+- **Strict Anti-Hallucination**: Never cite URLs not returned by a tool. All cited figures must be grounded directly in tool-fetched content.
+

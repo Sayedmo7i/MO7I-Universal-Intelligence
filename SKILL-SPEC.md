@@ -86,16 +86,16 @@ For every meaningful task, the meta-orchestrator executes this standardized life
    - Discovers and installs essential core framework specialists into project scope (`./.agents/skills/`).
    - Generates `.mo7i/project-profile.json`, `.mo7i/skill-registry.json`, and `.mo7i/setup-report.md`.
 6. **TASK CLASSIFICATION**: Categorize immediate task into functional domain (Software, Mobile, Design, SEO, DevOps, etc.).
-7. **CAPABILITY GAP ANALYSIS**: Determine whether project-installed skills suffice or external transient specialist skills are needed.
+7. **CAPABILITY GAP ANALYSIS**: Determine whether project-installed skills suffice or external transient specialist skills are needed. Reports "no gap" when existing tools suffice for the current task.
 8. **SKILL DISCOVERY**: Discover specialist skills via Vercel Labs `find-skills` (`npx skills find "<keywords>"`).
 9. **SKILL LEARNING**: Execute the 4-phase learning loop (Inspect -> Understand -> Integrate -> Validate).
 10. **COMPATIBILITY & PLANNING**: Verify candidate skills do not conflict with repository conventions and construct roadmap.
 11. **SKILL ORCHESTRATION**: Sequence specialist skills across pipeline stages, loading only the active skill into context.
-12. **EXECUTION**: Implement changes adhering to domain best practices and execute required tool commands.
+12. **EXECUTION**: Implement changes adhering to domain best practices and execute required tool commands. For research tasks: execute at least 3 web searches and fetch 2 sources before citing figures; never cite URLs not returned by a tool.
 13. **QUALITY VALIDATION**: Run test suites, compilers, and linters. Enforce "evidence over claims".
 14. **KNOWLEDGE & PROFILE UPDATE**: Record operational insights in user memory and update project profile telemetry.
 15. **SAFE CLEANUP**: Prune transient task skills while preserving project foundational skills and user-authored skills.
-16. **FINAL REPORT**: Deliver structured final report citing verified outputs, changed files, and standardized status labels.
+16. **FINAL REPORT**: Deliver structured final report citing verified outputs, changed files, standardized status labels, and write a real per-run audit log (`.mo7i/runs/<timestamp>.json`) recording phases executed, skills read/excluded, and tools called.
 
 ---
 
@@ -103,6 +103,7 @@ For every meaningful task, the meta-orchestrator executes this standardized life
 
 Foundational project setup is governed by the companion skill `mo7i-project-setup`:
 - **Strictly Project-Scoped**: Installs skills into `<projectRoot>/.agents/skills/` via Skills CLI without `-g`.
+- **Internal Skill Exclusion**: MO7I's own skills (`mo7i`, `mo7i-project-setup`) are strictly excluded from post-install setup detection.
 - **5 Operating Modes**: `initial` (complete setup), `audit` (read-only verification), `update` (sync with dependency changes), `repair` (reinstall missing/corrupted skills), and `report` (summary inventory).
 - **Persistent Project Registry**: Stored under `.mo7i/` with automated `.bak` backups. Zero credentials or secrets are ever recorded.
 - **Scope Separation**: Persistent project skills remain active across all future sessions in that repository; transient task skills are pruned at completion.

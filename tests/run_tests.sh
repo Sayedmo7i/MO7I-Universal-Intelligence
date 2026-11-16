@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Production Acceptance Test Suite for MO7I Universal Intelligence
 # Version: 2.3.0
-# Suite: 70 Tests Total (18 v2.0.0 Core + 20 v2.1.0 Project Setup + 17 v2.2.0 Slash Commands + 15 v2.3.0 Hardening & Post-Install)
+# Suite: 74 Tests Total (18 v2.0.0 Core + 20 v2.1.0 Project Setup + 17 v2.2.0 Slash Commands + 19 v2.3.0 Hardening, Post-Install & Evidence)
 
 REPO_DIR="/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence"
 OUTPUT_FILE="${REPO_DIR}/tests/RESULTS.md"
@@ -14,8 +14,8 @@ echo "# MO7I Universal Intelligence - Production Acceptance Test Suite Results" 
 echo "" >> "$OUTPUT_FILE"
 echo "Date: $(date -u '+%Y-%m-%d %H:%M:%SZ')" >> "$OUTPUT_FILE"
 echo "Host: $(uname -s) $(uname -r) ($(uname -m))" >> "$OUTPUT_FILE"
-echo "Release Version: v2.3.0" >> "$OUTPUT_FILE"
-echo "Suite: 70 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 15 Hardening & Post-Install)" >> "$OUTPUT_FILE"
+echo "Release Version: v2.3.1" >> "$OUTPUT_FILE"
+echo "Suite: 74 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening, Post-Install & Evidence)" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
 run_and_log() {
@@ -1069,11 +1069,107 @@ run_and_log "69" "Path Traversal Protection Across Command Router" \
 
 # --- Test 70: End-to-End v2.3.0 Hardening & Setup Suite ---
 run_and_log "70" "End-to-End v2.3.0 Hardening & Setup Suite" \
-  "Execute full tests/test_v230_hardening_and_post_install.js suite and verify 15/15 tests pass." \
+  "Execute full tests/test_v230_hardening_and_post_install.js suite and verify 19/19 tests pass." \
   "node ${REPO_DIR}/tests/test_v230_hardening_and_post_install.js" \
   "PASS" \
-  "All 15 v2.3.0 hardening and post-install tests passed with zero regressions."
+  "All 19 v2.3.0 hardening, post-install, and evidence tests passed with zero regressions."
+
+# --- Test 71: Research Tasks Evidence Protocol ---
+run_and_log "71" "Research Tasks Evidence Protocol" \
+  "Verify that research tasks require >=3 web searches, >=2 sources fetched before citing figures, and reject non-tool URLs." \
+  "node -e '
+    const { validateResearchEvidence } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const valid = validateResearchEvidence({
+      webSearches: [\"q1\", \"q2\", \"q3\"],
+      sourcesFetched: [\"https://source1.com\", \"https://source2.com\"],
+      citedUrls: [\"https://source1.com\"],
+      toolReturnedUrls: [\"https://source1.com\", \"https://source2.com\"]
+    });
+    if (!valid.valid) throw new Error(\"Expected valid evidence to pass\");
+    const invalid = validateResearchEvidence({
+      webSearches: [\"q1\", \"q2\", \"q3\"],
+      sourcesFetched: [\"https://source1.com\", \"https://source2.com\"],
+      citedUrls: [\"https://hallucinated.com\"],
+      toolReturnedUrls: [\"https://source1.com\", \"https://source2.com\"]
+    });
+    if (invalid.valid || !invalid.error.includes(\"Anti-hallucination violation\")) throw new Error(\"Expected non-tool URL to be rejected\");
+    console.log(\"Research evidence protocol validated:\", valid.valid);
+  '" \
+  "PASS" \
+  "Research evidence validation strictly enforces 3 searches, 2 fetched sources, and rejects non-tool URLs."
+
+# --- Test 72: Gap Analysis Reports 'no gap' When Tools Suffice ---
+run_and_log "72" "Gap Analysis Reports 'no gap' When Tools Suffice" \
+  "Verify that capability gap analysis explicitly reports 'no gap' when existing tools and installed skills suffice." \
+  "node -e '
+    const { analyzeCapabilityGaps, reportCapabilityGaps, routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const gaps = analyzeCapabilityGaps(\"Software Engineering\", [\"codebase-design\", \"tdd\"]);
+    if (gaps.length !== 0 || gaps.report !== \"no gap\" || gaps.status !== \"NO_GAP\") {
+      throw new Error(\"Expected no gap reporting\");
+    }
+    const summary = reportCapabilityGaps(\"Software Engineering\", [\"codebase-design\"]);
+    if (summary !== \"no gap\") throw new Error(\"Expected reportCapabilityGaps to return no gap\");
+    const task = routeCommand(\"/mo7i Refactor auth middleware\", { projectDir: \"${REPO_DIR}\" });
+    if (task.gapReport !== \"no gap\" || !task.output.includes(\"Gap Analysis: no gap\")) {
+      throw new Error(\"Expected universal task to report no gap\");
+    }
+    console.log(\"Gap Analysis Report:\", gaps.report);
+  '" \
+  "PASS" \
+  "Gap analysis explicitly returns 'no gap' when existing tools suffice for the task."
+
+# --- Test 73: Real Per-Run Logging (.mo7i/runs/<timestamp>.json) ---
+run_and_log "73" "Real Per-Run Logging (.mo7i/runs/<timestamp>.json)" \
+  "Verify that task execution writes a real per-run log file to .mo7i/runs/<timestamp>.json with phases, skills read/excluded, and tools called." \
+  "node -e '
+    const fs = require(\"fs\");
+    const path = require(\"path\");
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const tempDir = fs.mkdtempSync(\"/tmp/mo7i-run-test-\");
+    const ts = \"2026-11-16T00-30-00-000Z\";
+    const res = routeCommand(\"/mo7i Analyze memory leak and run diagnostic profiling\", {
+      projectDir: tempDir,
+      timestamp: ts,
+      toolsCalled: [\"view_file\", \"run_command\"],
+      skillsRead: [\"diagnosing-bugs\"],
+      skillsExcluded: [\"mo7i\", \"mo7i-project-setup\"]
+    });
+    const logFile = path.join(tempDir, \".mo7i\", \"runs\", ts + \".json\");
+    if (!fs.existsSync(logFile)) throw new Error(\"Run log file not found at \" + logFile);
+    const log = JSON.parse(fs.readFileSync(logFile, \"utf8\"));
+    if (!Array.isArray(log.phasesExecuted) || log.phasesExecuted.length === 0) throw new Error(\"Invalid phasesExecuted\");
+    if (!Array.isArray(log.skillsRead) || !log.skillsRead.includes(\"diagnosing-bugs\")) throw new Error(\"Invalid skillsRead\");
+    if (!Array.isArray(log.skillsExcluded) || !log.skillsExcluded.includes(\"mo7i\") || !log.skillsExcluded.includes(\"mo7i-project-setup\")) throw new Error(\"Invalid skillsExcluded\");
+    if (!Array.isArray(log.toolsCalled) || !log.toolsCalled.includes(\"run_command\")) throw new Error(\"Invalid toolsCalled\");
+    console.log(\"Per-run log verified:\", path.basename(logFile), \"phases count:\", log.phasesExecuted.length);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '" \
+  "PASS" \
+  "Real per-run log written to disk (.mo7i/runs/<timestamp>.json) with phases, skills read/excluded, and tools called."
+
+# --- Test 74: Exclude MO7I Own Skills From Post-Install Detection ---
+run_and_log "74" "Exclude MO7I Own Skills From Post-Install Detection" \
+  "Verify that detectPostInstallSetups strictly excludes mo7i and mo7i-project-setup from companion post-install detection." \
+  "node -e '
+    const fs = require(\"fs\");
+    const path = require(\"path\");
+    const setupEngine = require(\"${REPO_DIR}/skills/mo7i-project-setup/scripts/setup-engine\");
+    const tempDir = fs.mkdtempSync(\"/tmp/mo7i-exclude-test-\");
+    const skillsDir = path.join(tempDir, \".agents\", \"skills\");
+    fs.mkdirSync(skillsDir, { recursive: true });
+    for (const s of [\"mo7i\", \"mo7i-project-setup\"]) {
+      const sDir = path.join(skillsDir, s);
+      fs.mkdirSync(sDir, { recursive: true });
+      fs.writeFileSync(path.join(sDir, \"SKILL.md\"), \"---\\nname: \" + s + \"\\ndescription: \\\"Configure this repo. Run once before first use.\\\"\\n---\\n# Test\");
+    }
+    const detected = setupEngine.detectPostInstallSetups(tempDir, [\"mo7i\", \"mo7i-project-setup\"]);
+    if (detected.length !== 0) throw new Error(\"Expected zero setup skills detected, but got: \" + detected.map(d => d.setupSkill).join(\", \"));
+    console.log(\"Internal skills excluded from post-install detection count:\", detected.length);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '" \
+  "PASS" \
+  "MO7I internal infrastructure skills are strictly excluded from post-install setup detection."
 
 echo ""
-echo "All 70 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
+echo "All 74 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
 

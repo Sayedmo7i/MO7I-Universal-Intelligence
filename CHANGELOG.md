@@ -5,6 +5,21 @@ All notable changes to the `mo7i-universal-intelligence` skill will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2026-11-16
+
+### Added
+- **Research Tasks Evidence Protocol**:
+  - Enforced minimum 3 web searches (`search_web`) and 2 primary source fetches (`read_url_content`) before citing figures, benchmarks, or statistics.
+  - Implemented anti-hallucination validation (`validateResearchEvidence`) strictly prohibiting URLs not returned by an active tool.
+- **Capability Gap Reporting**:
+  - Enhanced `analyzeCapabilityGaps` and `handleUniversalTask` to explicitly report `"no gap"` when existing tools and installed skills suffice for the current task.
+  - Added `reportCapabilityGaps` helper returning concise gap summaries.
+- **Per-Run Audit Logging**:
+  - Implemented real per-run audit logs written to `.mo7i/runs/<timestamp>.json` recording executed phases, active skills read, isolated skills excluded, and tools invoked.
+  - Exported `writeRunLog` utility with automatic timestamping and directory scaffolding.
+- **Internal Skill Setup Exclusion**:
+  - Hardened `detectPostInstallSetups` and `verifySetupCompletion` to strictly exclude MO7I's internal infrastructure skills (`mo7i`, `mo7i-project-setup`) from companion setup detection, eliminating false positive alerts.
+
 ## [2.3.0] - 2026-11-15
 
 ### Added

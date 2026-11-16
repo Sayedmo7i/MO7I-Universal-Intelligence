@@ -18,7 +18,8 @@ Version 2.3.0 resolves T3 Code skill discovery, introduces automated post-instal
 3. **Strict Human Gate for Interactive Setups**: Never fabricates or silently guesses answers for interactive setup skills; surfaces prominent notices when human input is needed.
 4. **Setup State Tracking & Verification**: Tracks setup lifecycle states (`not-required`, `pending`, `in-progress`, `completed`, `skipped`, `failed`) and verifies completion against real on-disk artifact evidence.
 5. **Platform Truth & Verification**: Explicitly marks verified runtimes (`t3-code`, universal CLI, Claude Code CLI outside T3 Code) versus unverified runtimes (`cursor`, `codex`, `gemini-cli`).
-6. **Orchestrator Hardening**: Fast Path for trivial tasks with phase telemetry, dynamic TCP port probing for preview servers, capability-gap analysis for uncovered domains, and strict path traversal defense.
+6. **Orchestrator Hardening & Evidence**: Fast Path for trivial tasks with phase telemetry, dynamic TCP port probing for preview servers, capability-gap analysis reporting "no gap" when existing tools suffice, strict path traversal defense, and real per-run audit logging (`.mo7i/runs/<timestamp>.json`) recording phases executed, skills read/excluded, and tools called.
+7. **Research Evidence Protocol & Clean Setups**: Enforces at least 3 web searches and 2 source fetches before citing figures, prohibits non-tool URLs, and strictly excludes MO7I's own skills (`mo7i`, `mo7i-project-setup`) from post-install setup detection.
 
 ---
 
