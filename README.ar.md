@@ -180,13 +180,13 @@
 
 يمكنك التثبيت عبر أداة Skills CLI (`npx skills`) أو التشغيل المباشر عبر Node.js:
 
-### إضافة المهارات للمشروع (موصى به)
+### إضافة المهارة للمشروع (بأمر واحد موحد)
 ```bash
-# تثبيت مهارة الأوركسترا الرئيسية
-npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i -y
+# تثبيت مهارة MO7I الموحدة للمشروع
+npx skills add Sayedmo7i/MO7I-Universal-Intelligence -y
 
-# اختياري: إضافة أداة تهيئة مشاريع MO7I
-npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-project-setup -y
+# أو التثبيت عالمياً عبر كافة مشاريع الجهاز
+npx skills add Sayedmo7i/MO7I-Universal-Intelligence -g -y
 ```
 
 ### التهيئة المباشرة للمشروع عبر `$mo7i`

@@ -141,8 +141,8 @@ function runBenchmark(options = {}) {
       const phasesExecuted = mo7iRes.runLog ? mo7iRes.runLog.phasesExecuted : (task.expectedFastPath ? 4 : 16);
       const phasesCount = Array.isArray(phasesExecuted) ? phasesExecuted.length : (task.expectedFastPath ? 4 : 16);
 
-      const skillsLoadedCount = task.expectedFastPath ? 1 : 3;
-      const loadedSkillNames = task.expectedFastPath ? ['mo7i'] : ['mo7i', 'mo7i-project-setup'];
+      const skillsLoadedCount = 1;
+      const loadedSkillNames = ['mo7i'];
       const skillBytes = computeSkillFootprintBytes(loadedSkillNames, repoRoot);
 
       // Estimate total files read by orchestrator (profile, registry, package.json, runs log, target files)

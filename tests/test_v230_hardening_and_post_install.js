@@ -19,7 +19,7 @@ const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
 
-const setupEngine = require('../skills/mo7i-project-setup/scripts/setup-engine');
+const setupEngine = require('../skills/mo7i/scripts/setup-engine');
 const {
   routeCommand,
   isTrivialTask,
@@ -52,14 +52,15 @@ test(1, 'T3 Code entry point .agents/skills/mo7i/SKILL.md exists with name: mo7i
   assert(fs.existsSync(mo7iSkillPath), 'SKILL.md must exist in .agents/skills/mo7i/');
   const content = fs.readFileSync(mo7iSkillPath, 'utf8');
   assert(/^name:\s*mo7i$/m.test(content), 'Frontmatter name must be "mo7i" for T3 Code autocomplete');
-  assert(content.includes('audit, learn, discover, status, doctor, update, help'), 'Must document subcommands');
+  assert(content.includes('audit, learn, discover, status, doctor, update'), 'Must document subcommands');
 });
 
-test(2, 'T3 Code companion mo7i-project-setup exists with name: mo7i-project-setup', () => {
-  const setupSkillPath = path.join(REPO_DIR, '.agents', 'skills', 'mo7i-project-setup', 'SKILL.md');
-  assert(fs.existsSync(setupSkillPath), 'SKILL.md must exist in .agents/skills/mo7i-project-setup/');
-  const content = fs.readFileSync(setupSkillPath, 'utf8');
-  assert(/^name:\s*mo7i-project-setup$/m.test(content), 'Frontmatter name must be "mo7i-project-setup"');
+test(2, 'Single-skill architecture verification: mo7i contains self-contained setup engine', () => {
+  const enginePath = path.join(REPO_DIR, 'skills', 'mo7i', 'scripts', 'setup-engine.js');
+  assert(fs.existsSync(enginePath), 'setup-engine.js must exist in skills/mo7i/scripts/');
+  const engine = require(enginePath);
+  assert.strictEqual(typeof engine.analyzeProject, 'function');
+  assert.strictEqual(typeof engine.recommendProjectSkills, 'function');
 });
 
 test(3, 'Specification file SKILL-SPEC.md exists with name: mo7i and version v2.3.0', () => {
@@ -269,10 +270,10 @@ test(13, '/mo7i doctor --json returns valid schema with platforms and diagnostic
   assert.strictEqual(res.status, 'HEALTHY');
   assert.strictEqual(res.command, 'doctor');
   const parsed = JSON.parse(res.output);
-  assert(['2.3.0', '2.4.0'].includes(parsed.version));
+  assert(['2.3.0', '2.4.0', '2.5.0', '2.6.0'].includes(parsed.version));
   assert(Array.isArray(parsed.diagnostics));
-  assert(typeof parsed.platforms === 'object');
-  assert.strictEqual(parsed.platforms['T3 Code ($mo7i via .agents/skills/)'].status, 'FILE_PRESENT');
+  assert(parsed.platforms['Standard Agent Skills (.agents/skills/)']);
+  assert.strictEqual(parsed.platforms['Standard Agent Skills (.agents/skills/)'].status, 'VERIFIED');
   assert.strictEqual(parsed.platforms['Cursor / Windsurf (.cursor/rules/)'].status, 'UNVERIFIED');
 });
 
@@ -280,7 +281,7 @@ test(14, '/mo7i status --json returns valid schema with post-install telemetry',
   const res = routeCommand('/mo7i status --json');
   assert.strictEqual(res.status, 'SUCCESS');
   const parsed = JSON.parse(res.output);
-  assert(['2.3.0', '2.4.0'].includes(parsed.version));
+  assert(['2.3.0', '2.4.0', '2.5.0', '2.6.0'].includes(parsed.version));
   assert(typeof parsed.postInstallSetups === 'object');
   assert(typeof parsed.reconciliation === 'object');
 });

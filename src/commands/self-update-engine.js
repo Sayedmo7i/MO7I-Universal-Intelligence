@@ -413,7 +413,7 @@ function handleSelfUpdate(projectDir, options = {}) {
     out += `• Target Version:    v${latestVersion} (ref: ${targetRef})\n`;
     out += `• Target Scope:      ${scope === 'global' ? 'Global (-g)' : 'Project scope'}\n`;
     out += `• Backup Safety:     Will back up MO7I skills to .mo7i/backups/<timestamp>/\n`;
-    out += `• Target Skills:     mo7i, mo7i-project-setup (other skills and files remain untouched)\n\n`;
+    out += `• Target Skills:     mo7i (other skills and files remain untouched)\n\n`;
     out += `[Changelog Summary]\n${changelogSummary}\n\n`;
     out += `To proceed with self-update, run:\n`;
     out += `  /mo7i self-update --yes\n`;
@@ -441,7 +441,6 @@ function handleSelfUpdate(projectDir, options = {}) {
     out += `• Backup Target:     ${backupSimulation.backupDir} (simulated, no files copied)\n`;
     out += `• Commands to Run:\n`;
     out += `    npx skills add ${source} --skill mo7i -y${scopeFlag}\n`;
-    out += `    npx skills add ${source} --skill mo7i-project-setup -y${scopeFlag}\n`;
     out += `• Post-Update:       Disk verification + doctor diagnostics\n`;
     out += `• Status: Dry run completed cleanly. Zero modifications applied to filesystem.\n`;
 
@@ -472,8 +471,7 @@ function handleSelfUpdate(projectDir, options = {}) {
   // Step 2 - Execute installation
   const scopeFlag = scope === 'global' ? ' -g' : '';
   const installCommands = [
-    `npx skills add ${source} --skill mo7i -y${scopeFlag}`,
-    `npx skills add ${source} --skill mo7i-project-setup -y${scopeFlag}`
+    `npx skills add ${source} --skill mo7i -y${scopeFlag}`
   ];
 
   let installSuccess = false;
@@ -537,7 +535,7 @@ function handleSelfUpdate(projectDir, options = {}) {
   output += `• New Version:      v${postInstallVersion}\n`;
   output += `• Backup Created:   ${backupManifest.backupDir}\n`;
   output += `• Scope:            ${scope === 'global' ? 'Global (-g)' : 'Project scope'}\n`;
-  output += `• Skills Updated:   mo7i, mo7i-project-setup\n`;
+  output += `• Skills Updated:   mo7i\n`;
   output += `• Disk Verified:    Verified on disk\n`;
   if (doctorOutput) {
     output += `\n[Post-Update Doctor Diagnostics]\n${doctorOutput}\n`;

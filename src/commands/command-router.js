@@ -22,8 +22,8 @@ function resolveSetupEngine(customPath) {
   }
   const candidatePaths = [
     path.resolve(__dirname, '../../skills/mo7i/scripts/setup-engine.js'),
-    path.resolve(__dirname, '../../skills/mo7i-project-setup/scripts/setup-engine.js'),
     path.resolve(process.cwd(), '.agents/skills/mo7i/scripts/setup-engine.js'),
+    path.resolve(__dirname, '../../skills/mo7i-project-setup/scripts/setup-engine.js'),
     path.resolve(process.cwd(), '.agents/skills/mo7i-project-setup/scripts/setup-engine.js')
   ];
   for (const p of candidatePaths) {
@@ -31,7 +31,7 @@ function resolveSetupEngine(customPath) {
       return require(p);
     }
   }
-  return require('../../skills/mo7i-project-setup/scripts/setup-engine');
+  return require('../../skills/mo7i/scripts/setup-engine');
 }
 
 const setupEngine = resolveSetupEngine();

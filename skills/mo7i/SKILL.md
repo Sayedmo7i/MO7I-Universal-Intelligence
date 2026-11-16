@@ -1,6 +1,6 @@
 ---
 name: mo7i
-description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Multi-Platform Entry Point (v2.6.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands (bench, audit, learn, discover, status, doctor, update, self-update, selftest, help, or a free-form task). Autonomously analyzes project stacks, provisions project-scoped skills, manages post-install setup lifecycles, and executes with verifiable evidence."
+description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, Project Intelligence & Single Multi-Platform Entry Point (v2.6.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands (setup, bench, audit, learn, discover, status, doctor, update, self-update, selftest, help, or a free-form task). Autonomously analyzes project stacks, provisions project-scoped skills, manages post-install setup lifecycles, and executes with verifiable evidence."
 ---
 
 # MO7I Universal Intelligence
@@ -17,6 +17,7 @@ When invoking the skill (via `$mo7i`, `/mo7i`, or `./bin/mo7i`), you can supply 
 
 ```text
 $mo7i [subcommand or task]
+  ├── setup [mode]           -> Autonomous project intelligence & skills setup (initial, audit, update, repair, report)
   ├── bench                  -> Benchmark execution overhead across 5 standard tasks with and without MO7I
   ├── audit                  -> Read-only project stack, skills, and configuration audit
   ├── status [--json]        -> System telemetry, project archetype, and installed skills inventory
@@ -69,7 +70,7 @@ For non-trivial tasks, MO7I executes the full autonomous pipeline:
 ```
 
 ### Key Phases:
-- **Phase 4 & 5 (Setup Status & Post-Install Setup)**: When skills with companion setups (e.g., `setup-matt-pocock-skills`) are installed, MO7I verifies their `setupStatus`. If interactive questions are required, a **Human Gate** is enforced. MO7I's own skills (`mo7i`, `mo7i-project-setup`) are strictly excluded from post-install setup detection.
+- **Phase 4 & 5 (Setup Status & Post-Install Setup)**: When skills with companion setups (e.g., `setup-matt-pocock-skills`) are installed, MO7I verifies their `setupStatus`. If interactive questions are required, a **Human Gate** is enforced. MO7I's own skill (`mo7i`) is strictly excluded from post-install setup detection.
 - **Phase 7 (Capability Gap Analysis)**: Reports "no gap" when existing tools suffice for the current task; reports capability gaps with targeted `discover` queries when specialized domains are uncovered.
 - **Phase 12 (Execution & Research Protocol)**: Enforces dynamic port probing for preview servers. For research tasks, executes at least 3 web searches and fetches 2 sources before citing figures, never citing URLs not returned by a tool.
 - **Phase 13 (Quality Validation)**: Compilers, typecheckers, and test suites run to produce real evidence ("Evidence over claims").

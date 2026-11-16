@@ -17,7 +17,7 @@
 
 ---
 
-A project onboarding and autonomous orchestration layer for AI agents: automatically detects the stack, provisions the right skills, tracks manual setup steps, selects the minimum skills per task, verifies with reproducible evidence, and logs every execution run. Consistent slash commands and unified state (`.mo7i/`) across projects and agent harnesses.
+A project onboarding and orchestration layer for AI agents: detects the stack, provisions the right skills, tracks manual setup steps, selects the minimum skills per task, verifies with evidence, and logs every run. Same commands and same state (.mo7i/) across projects and agents.
 
 ---
 
@@ -80,7 +80,7 @@ The 16-phase lifecycle ensures rigorous, automated execution from requirement de
 2. **PROJECT DETECTION**: Identify project root, git repository boundaries, and environment runtimes.
 3. **PROJECT PROFILE INSPECTION**: Audit `.mo7i/project-profile.json` and `.mo7i/skill-registry.json`.
 4. **SETUP STATUS CHECK**: Determine whether the project is uninitialized or missing foundational skills.
-5. **PROJECT SKILL SETUP (WHEN NEEDED)**: Invoke `mo7i-project-setup` to provision project-scoped skills into `./.agents/skills/`.
+5. **PROJECT SKILL SETUP (WHEN NEEDED)**: Invoke built-in project setup engine to provision project-scoped skills into `./.agents/skills/`.
 6. **TASK CLASSIFICATION**: Categorize immediate task into one of 13 functional domains.
 7. **CAPABILITY GAP ANALYSIS**: Determine whether project skills suffice or external specialists are required.
 8. **SKILL DISCOVERY**: Discover candidate skills via Vercel Labs `find-skills` (`npx skills find "<keywords>"`).
@@ -162,13 +162,13 @@ For human operators running interactive sessions with full UI access:
 
 Install using the Skills CLI (`npx skills`) or run directly via Node.js / npx. MO7I ships with a lean package footprint (~75 KB) containing only `SKILL.md` and `references/`:
 
-### Agent Skills & Project Scope (Recommended)
+### Agent Skills & Project Scope (Single-Command Install)
 ```bash
-# Add main MO7I orchestrator
-npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i -y
+# Add unified MO7I skill to project
+npx skills add Sayedmo7i/MO7I-Universal-Intelligence -y
 
-# Optional: Add project setup companion
-npx skills add Sayedmo7i/MO7I-Universal-Intelligence --skill mo7i-project-setup -y
+# Or install globally across all projects
+npx skills add Sayedmo7i/MO7I-Universal-Intelligence -g -y
 ```
 
 ### Direct Project Bootstrapping via `$mo7i`

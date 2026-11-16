@@ -5,8 +5,7 @@
   "main": "src/commands/command-router.js",
   "bin": {
     "mo7i": "./bin/mo7i",
-    "setup-project-skills": "./bin/setup-project-skills",
-    "mo7i-project-setup": "./bin/mo7i-project-setup"
+    "setup-project-skills": "./bin/setup-project-skills"
   },
   "scripts": {
     "test": "./tests/run_tests.sh",

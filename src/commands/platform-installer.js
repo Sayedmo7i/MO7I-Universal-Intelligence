@@ -77,7 +77,7 @@ function installSlashCommands(targetProjectDir = process.cwd()) {
     // 1. Standard Agent Skills Discovery (.agents/skills/) - VERIFIED
     const agentSkillsDir = path.join(resolvedDir, '.agents', 'skills');
     const skillsSrcDir = path.resolve(__dirname, '../../skills');
-    const skillsToLink = ['mo7i', 'mo7i-project-setup'];
+    const skillsToLink = ['mo7i'];
     for (const sName of skillsToLink) {
       const srcSkill = path.join(skillsSrcDir, sName, 'SKILL.md');
       if (fs.existsSync(srcSkill)) {
