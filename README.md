@@ -1,15 +1,23 @@
 # MO7I Universal Intelligence
 
-> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.4.0)**  
+> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.4.1)**  
 > *The user specifies WHAT needs to be accomplished. MO7I determines HOW to accomplish it.*
 
 A project onboarding and orchestration layer for AI agents: detects the stack, provisions the right skills, tracks manual setup steps, selects the minimum skills per task, verifies with evidence, and logs every run. Same commands and same state (.mo7i/) across projects and agents.
 
 ---
 
-## What's New in v2.4.0: Autonomous Self-Update & Rollback Safety
+## What's New in v2.4.1: Independent Verification Harness & Lean Packaging
 
-Version 2.4.0 introduces an autonomous self-updating mechanism for MO7I's core skills (`mo7i` and `mo7i-project-setup`):
+Version 2.4.1 introduces an independent verification harness addressing test bias and lean install footprint:
+
+1. **Independent Verification Harness (`/mo7i selftest`)**: Black-box verification suite running against the freshly INSTALLED skill (not repo source) in an isolated temporary project, producing structured JSON (`pass`/`fail` per check).
+2. **Self-Contained Lean Packaging**: Packages `setup-engine.js` directly within `skills/mo7i/scripts/` ensuring all inspection, doctor, status, and setup capabilities function out-of-the-box in lean single-skill installations.
+3. **Automated CI Workflow**: GitHub Actions workflow (`.github/workflows/selftest.yml`) installing the skill via `npx skills add` on a clean runner and executing the black-box selftest suite.
+
+---
+
+## What's New in v2.4.0: Autonomous Self-Update & Rollback Safety
 
 1. **Autonomous Self-Update (`/mo7i self-update`)**: Automatically detects installed version against remote releases via `git ls-remote` and GitHub API semver resolution.
 2. **Read-Only `--check` Mode**: Inspects installed versus latest remote versions and renders a formatted changelog summary without mutating files.
@@ -17,16 +25,6 @@ Version 2.4.0 introduces an autonomous self-updating mechanism for MO7I's core s
 4. **Scoped Backups & Safe Rollback**: Backs up existing MO7I skills to `.mo7i/backups/<timestamp>/` prior to installation, automatically restoring original files on failure while strictly leaving secrets and project files untouched.
 5. **Dry-Run Simulation (`--dry-run`)**: Simulates the complete backup and command invocation lifecycle with zero filesystem writes.
 6. **Post-Update Verification & Doctor Diagnostics**: Verifies newly installed skills on disk, executes doctor diagnostics, prints a neutral agent cache restart notice, and records execution audit telemetry in `.mo7i/runs/`.
-
----
-
-## What's New in v2.3.0: Post-Install Setups & Hardening
-
-1. **Post-Install Setup Engine**: Automatically detects companion setups (`setup-*`, `init-*`, `onboard*`) required by installed collections (e.g., Matt Pocock skills requiring `setup-matt-pocock-skills`).
-2. **Strict Human Gate for Interactive Setups**: Never fabricates or silently guesses answers for interactive setup skills; surfaces prominent notices when human input is needed.
-3. **Setup State Tracking & Verification**: Tracks setup lifecycle states (`not-required`, `pending`, `in-progress`, `completed`, `skipped`, `failed`) and verifies completion against real on-disk artifact evidence.
-4. **Orchestrator Hardening & Evidence**: Fast Path for trivial tasks with phase telemetry, dynamic TCP port probing for preview servers, capability-gap analysis reporting "no gap" when existing tools suffice, strict path traversal defense, and real per-run audit logging (`.mo7i/runs/<timestamp>.json`) recording phases executed, skills read/excluded, and tools called.
-5. **Research Evidence Protocol & Clean Setups**: Enforces at least 3 web searches and 2 source fetches before citing figures, prohibits non-tool URLs, and strictly excludes MO7I's own skills (`mo7i`, `mo7i-project-setup`) from post-install setup detection.
 
 ---
 
@@ -44,6 +42,7 @@ Version 2.4.0 introduces an autonomous self-updating mechanism for MO7I's core s
 | **`/mo7i doctor`** | `/mo7i doctor` | Validates Node.js runtimes, Skills CLI, command registrations, and script integrity. | Read-Only |
 | **`/mo7i update`** | `/mo7i update [--dry-run]` | Detects new dependencies and synchronizes project skills with `.bak` backups. | Human Gate Required |
 | **`/mo7i self-update`** | `/mo7i self-update [--check]` | Safely updates MO7I skills with semver comparison, backup, and rollback. | Human Gate Required |
+| **`/mo7i selftest`** | `/mo7i selftest` | Black-box independent verification of installed skill in a temp project. | Read-Only |
 
 ---
 

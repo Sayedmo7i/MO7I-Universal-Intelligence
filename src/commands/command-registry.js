@@ -167,6 +167,22 @@ const COMMANDS = [
     readOnly: false,
     requiresApproval: true,
     supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+  },
+  {
+    id: 'mo7i-selftest',
+    trigger: '/mo7i selftest',
+    alias: 'mo7i selftest',
+    summary: 'Black-box independent verification of installed MO7I skills',
+    description: 'Installs MO7I into an isolated temporary project, runs black-box acceptance tests against the installed skill footprint (not repo source), and outputs raw JSON with pass/fail per check.',
+    usage: '/mo7i selftest [--source <path|repo>] [--json]',
+    examples: [
+      '/mo7i selftest',
+      '/mo7i selftest --source /path/to/repo',
+      '/mo7i selftest --json'
+    ],
+    readOnly: true,
+    requiresApproval: false,
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   }
 ];
 

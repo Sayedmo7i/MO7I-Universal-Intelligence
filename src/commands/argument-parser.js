@@ -107,7 +107,7 @@ function parseCommand(input) {
     command = 'mo7i';
   } else {
     // If input was e.g. "/audit" or "/learn" or direct prompt without "mo7i" prefix
-    const knownSubcommands = ['help', 'audit', 'learn', 'discover', 'status', 'doctor', 'update', 'self-update', 'selfupdate'];
+    const knownSubcommands = ['help', 'audit', 'learn', 'discover', 'status', 'doctor', 'update', 'self-update', 'selfupdate', 'selftest'];
     if (knownSubcommands.includes(firstToken)) {
       command = 'mo7i';
       remainingTokens = tokens;
@@ -220,7 +220,7 @@ function parseCommand(input) {
       subcommand = 'help';
     } else {
       const candidate = positionalArgs[0].toLowerCase();
-      const validSubcommands = ['help', 'audit', 'learn', 'discover', 'status', 'doctor', 'update', 'self-update', 'selfupdate'];
+      const validSubcommands = ['help', 'audit', 'learn', 'discover', 'status', 'doctor', 'update', 'self-update', 'selfupdate', 'selftest'];
       if (validSubcommands.includes(candidate)) {
         subcommand = candidate;
         positionalArgs.shift(); // remove subcommand from args

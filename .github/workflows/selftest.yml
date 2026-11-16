@@ -1,0 +1,44 @@
+name: Independent Verification Harness (Selftest)
+
+on:
+  push:
+    branches:
+      - main
+      - feat/*
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  selftest:
+    name: Black-Box Installed Skill Selftest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate Skills CLI
+        run: |
+          npx skills --version
+
+      - name: Run Black-Box Selftest against Installed Skill
+        run: |
+          node -e '
+            const { runSelftest } = require("./src/commands/selftest-engine");
+            const res = runSelftest();
+            console.log(JSON.stringify(res, null, 2));
+            if (res.status !== "PASS") {
+              console.error("[Selftest Failed] One or more black-box checks failed.");
+              process.exit(1);
+            }
+          '
+
+      - name: Run Production Acceptance Test Suite
+        run: |
+          bash tests/run_tests.sh

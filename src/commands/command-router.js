@@ -16,13 +16,32 @@ const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
 
-const setupEngine = require('../../skills/mo7i-project-setup/scripts/setup-engine');
+function resolveSetupEngine(customPath) {
+  if (customPath && fs.existsSync(customPath)) {
+    return require(customPath);
+  }
+  const candidatePaths = [
+    path.resolve(__dirname, '../../skills/mo7i/scripts/setup-engine.js'),
+    path.resolve(__dirname, '../../skills/mo7i-project-setup/scripts/setup-engine.js'),
+    path.resolve(process.cwd(), '.agents/skills/mo7i/scripts/setup-engine.js'),
+    path.resolve(process.cwd(), '.agents/skills/mo7i-project-setup/scripts/setup-engine.js')
+  ];
+  for (const p of candidatePaths) {
+    if (fs.existsSync(p)) {
+      return require(p);
+    }
+  }
+  return require('../../skills/mo7i-project-setup/scripts/setup-engine');
+}
+
+const setupEngine = resolveSetupEngine();
 const { COMMANDS, getAllCommands } = require('./command-registry');
 const { parseCommand } = require('./argument-parser');
 const { PLATFORM_VERIFICATION } = require('./platform-installer');
 const selfUpdateEngine = require('./self-update-engine');
+const selftestEngine = require('./selftest-engine');
 
-const ROUTER_VERSION = '2.4.0';
+const ROUTER_VERSION = '2.4.1';
 
 /**
  * Determine if a task qualifies for the fast path.
@@ -308,6 +327,12 @@ function routeCommand(input, options = {}) {
         dryRun,
         ref: parsed.flags.ref || options.ref || null,
         source: parsed.flags.source || options.source || null,
+        ...options
+      });
+    case 'selftest':
+      return handleSelftestRoute(projectDir, {
+        ...parsed.flags,
+        source: parsed.flags.source || options.source || projectDir,
         ...options
       });
     default:
@@ -876,8 +901,16 @@ function handleDoctor(projectDir, flags = {}) {
   });
 
   // 5. Check Setup Engine Script
-  const enginePath = path.resolve(__dirname, '../../skills/mo7i-project-setup/scripts/setup-engine.js');
-  const engineExists = fs.existsSync(enginePath);
+  const engineCandidatePaths = [
+    path.resolve(projectDir, '.agents/skills/mo7i/scripts/setup-engine.js'),
+    path.resolve(projectDir, '.agents/skills/mo7i-project-setup/scripts/setup-engine.js'),
+    path.resolve(projectDir, 'skills/mo7i/scripts/setup-engine.js'),
+    path.resolve(projectDir, 'skills/mo7i-project-setup/scripts/setup-engine.js'),
+    path.resolve(__dirname, '../../skills/mo7i/scripts/setup-engine.js'),
+    path.resolve(__dirname, '../../skills/mo7i-project-setup/scripts/setup-engine.js')
+  ];
+  const enginePath = engineCandidatePaths.find(p => fs.existsSync(p)) || null;
+  const engineExists = Boolean(enginePath);
   diagnostics.push({
     check: 'Project Setup Engine',
     status: engineExists ? 'PASS' : 'FAIL',
@@ -1058,6 +1091,24 @@ function handleSelfUpdateRoute(projectDir, options = {}) {
   return result;
 }
 
+/**
+ * /mo7i selftest
+ */
+function handleSelftestRoute(projectDir, options = {}) {
+  const result = selftestEngine.runSelftest({
+    source: options.source || projectDir,
+    ...options
+  });
+
+  return {
+    status: result.status === 'PASS' ? 'SUCCESS' : 'ERROR',
+    command: 'selftest',
+    readOnly: true,
+    data: result,
+    output: JSON.stringify(result, null, 2)
+  };
+}
+
 module.exports = {
   ROUTER_VERSION,
   isTrivialTask,
@@ -1076,7 +1127,9 @@ module.exports = {
   handleDoctor,
   handleUpdate,
   handleSelfUpdate: handleSelfUpdateRoute,
-  handleSelfUpdateRoute
+  handleSelfUpdateRoute,
+  handleSelftest: handleSelftestRoute,
+  handleSelftestRoute
 };
 
 // CLI entrypoint
