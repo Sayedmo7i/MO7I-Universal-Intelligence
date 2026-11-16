@@ -663,7 +663,7 @@ function handleDoctor(projectDir, flags = {}) {
       diagnostics.push({
         check: 'Disk vs Registry Reconciliation',
         status: 'INFO',
-        detail: `Project not yet initialized; discovered skill(s) on disk: ${reconciliation.unregisteredOnDisk.join(', ')} (run /setup-project-skills initial to register)`
+        detail: `Project not yet initialized; discovered skill(s) on disk: ${reconciliation.unregisteredOnDisk.join(', ')} (run /mo7i setup initial to register)`
       });
     } else {
       diagnostics.push({
