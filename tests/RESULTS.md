@@ -1,6 +1,6 @@
 # MO7I Universal Intelligence - Production Acceptance Test Suite Results
 
-Date: 2026-11-15 23:22:56Z
+Date: 2026-11-15 23:59:32Z
 Host: Linux 7.0.0-34-generic (x86_64)
 Release Version: v2.3.0
 Suite: 70 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 15 Hardening & Post-Install)
@@ -1044,9 +1044,9 @@ rm -rf /tmp/test-project-scope && mkdir -p /tmp/test-project-scope && (cd /tmp/t
 [?25l│
 ◇  Source: https://github.com/mattpocock/skills.git
 [?25h[?25l│
-◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository….[1G[J◇  Repository cloned
+◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◇  Repository cloned
 [?25h[?25l│
-[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-b8BIwR/skills-Q1l9Yp/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
+[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-tCRbRM/skills-S95kv4/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
 
 description: Shared language for designing a software factory: the tasks it run…
              ^
@@ -1591,7 +1591,6 @@ Dispatch task through the Universal Intelligence Meta-Orchestrator and classify 
 
 [Notice: Pending Post-Install Setups Detected]
 • $mo7i-project-setup: Project Intelligence, Automated Specialist Skill Setup & Post-Install Configuration for MO7I Universal Intelligence (v2.3.0). Autonomously analyzes project technical stack, inspects frameworks, architectures, dependencies, and development tools, discovers suitable specialist skills via find-skills, integrates verified skills collections, provisions persistent project-scoped environments, and manages post-install setup lifecycles.
-• $setup-project-skills: Project Intelligence & Automated Skill Setup companion for MO7I Universal Intelligence (v2.3.0). Provisions, audits, repairs, and updates project-scoped specialist skills and manages post-install configuration lifecycles.
 
 ```
 
@@ -1797,7 +1796,7 @@ Generate comprehensive markdown report summarizing project intelligence profile.
 ```text
 # MO7I Project Intelligence & Skill Setup Report (v2.3.0)
 
-- **Timestamp**: `2026-11-15T23:23:04.476Z`
+- **Timestamp**: `2026-11-15T23:59:40.345Z`
 - **Execution Mode**: `REPORT`
 - **Project Workspace**: `/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/fixtures/projects/nextjs-app`
 - **Project Archetype**: **Fullstack Web Application (Next.js)**
@@ -1991,7 +1990,7 @@ Run system doctor diagnostics validating runtime environment, CLIs, and integrit
 | Slash Command Definitions | `PASS` | Command definitions detected |
 | Project Setup Engine | `PASS` | setup-engine.js present and executable |
 | Project Profile Registry | `INFO` | Uninitialized project workspace |
-| Disk vs Registry Reconciliation | `INFO` | Project not yet initialized; discovered skill(s) on disk: mo7i, mo7i-project-setup, setup-project-skills (run /setup-project-skills initial to register) |
+| Disk vs Registry Reconciliation | `INFO` | Project not yet initialized; discovered skill(s) on disk: mo7i, mo7i-project-setup (run /setup-project-skills initial to register) |
 
 ### Platform Compatibility Status
 
@@ -2197,30 +2196,30 @@ T3 Code skill entry point verified; directory name and frontmatter match mo7i fo
 
 ---
 
-### Test 57: T3 Code Companion Setup Discovery (.agents/skills/setup-project-skills/)
+### Test 57: T3 Code Companion Setup Discovery (.agents/skills/mo7i-project-setup/)
 
 **Status**: `PASS`
 
 **Expected Behavior**:
-Verify that .agents/skills/setup-project-skills/SKILL.md exists with name: setup-project-skills.
+Verify that .agents/skills/mo7i-project-setup/SKILL.md exists with name: mo7i-project-setup.
 
 **Command Executed**:
 ```bash
 node -e '
     const fs = require("fs");
-    const p = "/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/.agents/skills/setup-project-skills/SKILL.md";
-    if (!fs.existsSync(p)) throw new Error("Missing setup-project-skills");
-    console.log("setup-project-skills entry point verified at:", p);
+    const p = "/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/.agents/skills/mo7i-project-setup/SKILL.md";
+    if (!fs.existsSync(p)) throw new Error("Missing mo7i-project-setup");
+    console.log("mo7i-project-setup entry point verified at:", p);
   '
 ```
 
 **Actual Behavior & Output Evidence**:
 ```text
-setup-project-skills entry point verified at: /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/.agents/skills/setup-project-skills/SKILL.md
+mo7i-project-setup entry point verified at: /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/.agents/skills/mo7i-project-setup/SKILL.md
 ```
 
 **Verification Analysis**:
-Companion skill verified for direct T3 Code invocation via $setup-project-skills.
+Companion skill verified for direct T3 Code invocation via $mo7i-project-setup.
 
 ---
 
@@ -2243,11 +2242,7 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Detected setups: [
-  'mo7i-project-setup',
-  'setup-project-skills',
-  'setup-matt-pocock-skills'
-]
+Detected setups: [ 'mo7i-project-setup', 'setup-matt-pocock-skills' ]
 ```
 
 **Verification Analysis**:
@@ -2375,7 +2370,7 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Disk skills count: 3
+Disk skills count: 2
 Reconciled status: false
 ```
 
@@ -2498,7 +2493,7 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Probed available port: 3001
+Probed available port: 3000
 ```
 
 **Verification Analysis**:
@@ -2562,7 +2557,7 @@ node -e '
 **Actual Behavior & Output Evidence**:
 ```text
 Status JSON version: 2.3.0
-Status JSON post-install setups count: 2
+Status JSON post-install setups count: 1
 ```
 
 **Verification Analysis**:
@@ -2616,8 +2611,8 @@ node /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v230_hard
 === MO7I v2.3.0 Hardening, Entry Points & Post-Install Test Suite ===
 
 [PASS] Test 2.3.1: T3 Code entry point .agents/skills/mo7i/SKILL.md exists with name: mo7i
-[PASS] Test 2.3.2: T3 Code companion setup-project-skills exists with name: setup-project-skills
-[PASS] Test 2.3.3: Root SKILL.md has name: mo7i and version v2.3.0
+[PASS] Test 2.3.2: T3 Code companion mo7i-project-setup exists with name: mo7i-project-setup
+[PASS] Test 2.3.3: Specification file SKILL-SPEC.md exists with name: mo7i and version v2.3.0
 [PASS] Test 2.3.4: Reconciliation detects when a skill exists on disk but is missing from registry
 [PASS] Test 2.3.5: Dynamic post-install detection identifies setup-* skills and eliminates false positives
 [PASS] Test 2.3.6: Post-install setup lifecycle transitions: pending -> skipped

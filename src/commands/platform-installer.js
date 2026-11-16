@@ -44,7 +44,7 @@ function installSlashCommands(targetProjectDir = process.cwd()) {
     // 1. T3 Code & Agent Skills Discovery (.agents/skills/) - VERIFIED
     const agentSkillsDir = path.join(resolvedDir, '.agents', 'skills');
     const skillsSrcDir = path.resolve(__dirname, '../../skills');
-    const skillsToLink = ['mo7i', 'mo7i-project-setup', 'setup-project-skills'];
+    const skillsToLink = ['mo7i', 'mo7i-project-setup'];
     for (const sName of skillsToLink) {
       const srcSkill = path.join(skillsSrcDir, sName, 'SKILL.md');
       if (fs.existsSync(srcSkill)) {

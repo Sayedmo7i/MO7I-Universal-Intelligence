@@ -627,7 +627,7 @@ function handleDoctor(projectDir, flags = {}) {
     status: hasCommands ? 'PASS' : 'INFO',
     detail: hasCommands
       ? 'Command definitions detected'
-      : 'Optional: Markdown slash commands not linked in project. Run /setup-project-skills or use CLI/agents.'
+      : 'Optional: Markdown slash commands not linked in project. Run /mo7i setup or use CLI/agents.'
   });
 
   // 5. Check Setup Engine Script
