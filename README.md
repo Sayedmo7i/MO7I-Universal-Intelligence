@@ -1,13 +1,33 @@
-# MO7I Universal Intelligence
+<div align="center">
+  <img src="docs/assets/mo7i_hero_banner_en.jpg" alt="MO7I Universal Intelligence - Orchestrate Your AI With Confidence" width="100%" />
 
-> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.6.0)**  
-> *The user specifies WHAT needs to be accomplished. MO7I determines HOW to accomplish it.*
+  <br />
 
-A project onboarding and orchestration layer for AI agents: detects the stack, provisions the right skills, tracks manual setup steps, selects the minimum skills per task, verifies with evidence, and logs every run. Same commands and same state (.mo7i/) across projects and agents.
+  [![Version](https://img.shields.io/badge/version-v2.6.0-blue.svg?style=for-the-badge&logo=semver)](CHANGELOG.md)
+  [![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)](LICENSE)
+  [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-339933.svg?style=for-the-badge&logo=node.js)](package.json)
+  [![Verification](https://img.shields.io/badge/status-evidence--verified-brightgreen.svg?style=for-the-badge)](docs/CROSS_PLATFORM_VERIFICATION.md)
+  [![Arabic Docs](https://img.shields.io/badge/%D8%A7%D9%84%D9%88%D8%AB%D9%8A%D9%82%D8%A9-%D8%A8%D8%A7%D9%84%D9%84%D8%BA%D8%A9%20%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-orange.svg?style=for-the-badge)](README.ar.md)
+
+  <br />
+
+  <h3>Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System</h3>
+  <em>"The user specifies <strong>WHAT</strong> needs to be accomplished. MO7I determines <strong>HOW</strong> to accomplish it."</em>
+</div>
 
 ---
 
-## What's New in v2.6.0: Overhead Benchmarking, Platform Honesty & Publish Readiness
+A project onboarding and autonomous orchestration layer for AI agents: automatically detects the stack, provisions the right skills, tracks manual setup steps, selects the minimum skills per task, verifies with reproducible evidence, and logs every execution run. Consistent slash commands and unified state (`.mo7i/`) across projects and agent harnesses.
+
+---
+
+## ⚡ What's New in v2.6.0: Overhead Benchmarking, Platform Honesty & Publish Readiness
+
+<div align="center">
+  <img src="docs/assets/mo7i_benchmark_speed.jpg" alt="MO7I Benchmark & Fast-Path Performance" width="100%" />
+</div>
+
+<br />
 
 Version 2.6.0 introduces quantifiable performance benchmarking, honest cross-platform verification, and pre-publish security hardening:
 
@@ -15,11 +35,11 @@ Version 2.6.0 introduces quantifiable performance benchmarking, honest cross-pla
 2. **Fast-Path Bypass Analysis**: Documents an honest assessment of where orchestration adds unnecessary overhead (trivial single-variable edits and direct factual queries) and details the fast-path bypass mechanism that skips discovery/planning to reduce latency to near zero.
 3. **Cross-Platform Verification Honesty**: Replaces assumptions with evidence-backed status labels. Only Universal Shell CLI (`bin/mo7i`) and Standard Agent Skills (`.agents/skills/`) are marked `VERIFIED`. Claude Code CLI is marked `UNVERIFIED` due to interactive browser login requirements, and phantom platform definitions have been eliminated. Full evidence report in [docs/CROSS_PLATFORM_VERIFICATION.md](docs/CROSS_PLATFORM_VERIFICATION.md).
 4. **Platform Manual Verification Guides**: Includes step-by-step procedures (3 concise steps per platform) for developers wishing to manually verify slash command routing in Claude Code, Cursor, Codex, and Gemini CLI.
-5. **Publish Readiness Audit**: Complete git history secret scan (`git log -p`) confirming zero credentials or private tokens leaked, validated `LICENSE`, `SECURITY.md`, and `CONTRIBUTING.md`, and formalized pre-flight checklist in [docs/PUBLISH-CHECKLIST.md](docs/PUBLISH-CHECKLIST.md).
+5. **Publish Readiness Audit**: Complete git history secret scan (`git log -p`) confirming zero credentials or private tokens leaked, validated [LICENSE](LICENSE), [SECURITY.md](SECURITY.md), and [CONTRIBUTING.md](CONTRIBUTING.md), and formalized pre-flight checklist in [docs/PUBLISH-CHECKLIST.md](docs/PUBLISH-CHECKLIST.md).
 
 ---
 
-## What's New in v2.5.0: Non-Next.js & Non-Code Validation
+## 🔍 What's New in v2.5.0: Non-Next.js & Non-Code Validation
 
 1. **Stack-Accurate Archetype Detection**: Automatically classifies Python/FastAPI, Rust, Go, and document-only folders as `Non-Technical / General Workspace`.
 2. **Framework Leak Prevention**: Strictly prevents Next.js and frontend-only skills from leaking into backend or non-technical workspaces.
@@ -27,40 +47,34 @@ Version 2.6.0 introduces quantifiable performance benchmarking, honest cross-pla
 
 ---
 
-## The Official Command Set
+## 🛠️ The Official Command Set
 
 | Command | Usage | Description | Safety Profile |
 | :--- | :--- | :--- | :--- |
-| **`/mo7i`** | `/mo7i <task>` | Primary entry point to the 16-phase Universal Intelligence Meta-Orchestrator. | Standard Execution |
-| **`/mo7i help`** | `/mo7i help` | Displays the complete catalog of commands, syntax, and examples. | Read-Only |
-| **`/mo7i bench`** | `/mo7i bench [--json]` | Runs overhead benchmark suite across 5 standard tasks and updates documentation. | Read-Only |
-| **`/mo7i setup`** | `/mo7i setup [mode]` | Provisions project-scoped skills (`initial`, `audit`, `update`, `repair`, `report`). | Standard Execution |
-| **`/mo7i audit`** | `/mo7i audit` | Performs a read-only audit of project dependencies, installed skills, and drift. | Read-Only |
-| **`/mo7i learn`** | `/mo7i learn [skill]` | Executes the 4-phase learning loop and records operational capability contracts. | Standard Execution |
-| **`/mo7i discover`** | `/mo7i discover <query>` | Evaluates candidate specialists on skills.sh across 5 dimensions without auto-install. | Read-Only |
-| **`/mo7i status`** | `/mo7i status [--json]` | Displays system release, active workspace, stack profile, and registry telemetry. | Read-Only |
-| **`/mo7i doctor`** | `/mo7i doctor` | Validates Node.js runtimes, Skills CLI, command registrations, and script integrity. | Read-Only |
-| **`/mo7i update`** | `/mo7i update [--dry-run]` | Detects new dependencies and synchronizes project skills with `.bak` backups. | Human Gate Required |
-| **`/mo7i self-update`** | `/mo7i self-update [--check]` | Safely updates MO7I skills with semver comparison, backup, and rollback. | Human Gate Required |
-| **`/mo7i selftest`** | `/mo7i selftest` | Black-box independent verification of installed skill in a temp project. | Read-Only |
+| **`/mo7i`** | `/mo7i <task>` | Primary entry point to the 16-phase Universal Intelligence Meta-Orchestrator. | `Standard Execution` |
+| **`/mo7i help`** | `/mo7i help` | Displays the complete catalog of commands, syntax, and examples. | `Read-Only` |
+| **`/mo7i bench`** | `/mo7i bench [--json]` | Runs overhead benchmark suite across 5 standard tasks and updates documentation. | `Read-Only` |
+| **`/mo7i setup`** | `/mo7i setup [mode]` | Provisions project-scoped skills (`initial`, `audit`, `update`, `repair`, `report`). | `Standard Execution` |
+| **`/mo7i audit`** | `/mo7i audit` | Performs a read-only audit of project dependencies, installed skills, and drift. | `Read-Only` |
+| **`/mo7i learn`** | `/mo7i learn [skill]` | Executes the 4-phase learning loop and records operational capability contracts. | `Standard Execution` |
+| **`/mo7i discover`** | `/mo7i discover <query>` | Evaluates candidate specialists on skills.sh across 5 dimensions without auto-install. | `Read-Only` |
+| **`/mo7i status`** | `/mo7i status [--json]` | Displays system release, active workspace, stack profile, and registry telemetry. | `Read-Only` |
+| **`/mo7i doctor`** | `/mo7i doctor` | Validates Node.js runtimes, Skills CLI, command registrations, and script integrity. | `Read-Only` |
+| **`/mo7i update`** | `/mo7i update [--dry-run]` | Detects new dependencies and synchronizes project skills with `.bak` backups. | `Human Gate Required` |
+| **`/mo7i self-update`** | `/mo7i self-update [--check]` | Safely updates MO7I skills with semver comparison, backup, and rollback. | `Human Gate Required` |
+| **`/mo7i selftest`** | `/mo7i selftest` | Black-box independent verification of installed skill in a temp project. | `Read-Only` |
 
 ---
 
-## The Integrated Autonomous Execution Lifecycle
+## 🔄 The Integrated Autonomous Execution Lifecycle
 
-```
-[1. INTAKE] ──► [2. PROJECT DETECTION] ──► [3. PROJECT PROFILE INSPECTION]
-                                                      │
-[6. TASK CLASSIFICATION] ◄── [5. PROJECT SETUP (WHEN NEEDED)] ◄── [4. SETUP STATUS CHECK]
-         │
-         ▼
-[7. CAPABILITY GAP ANALYSIS] ──► [8. SKILL DISCOVERY] ──► [9. SKILL LEARNING]
-                                                              │
-[12. EXECUTION] ◄── [11. SKILL ORCHESTRATION] ◄── [10. COMPATIBILITY & PLANNING]
-         │
-         ▼
-[13. QUALITY VALIDATION] ──► [14. KNOWLEDGE & PROFILE UPDATE] ──► [15. SAFE CLEANUP] ──► [16. FINAL REPORT]
-```
+<div align="center">
+  <img src="docs/assets/mo7i_lifecycle_en.jpg" alt="MO7I 16-Phase Autonomous Execution Lifecycle" width="100%" />
+</div>
+
+<br />
+
+The 16-phase lifecycle ensures rigorous, automated execution from requirement deconstruction to verified output:
 
 1. **INTAKE**: Deconstruct user goals or slash command parameters.
 2. **PROJECT DETECTION**: Identify project root, git repository boundaries, and environment runtimes.
@@ -81,7 +95,29 @@ Version 2.6.0 introduces quantifiable performance benchmarking, honest cross-pla
 
 ---
 
-## Platform Compatibility & Discovery
+## 🧠 Skill Learning Engine (Dynamic Discovery & Validation)
+
+<div align="center">
+  <img src="docs/assets/mo7i_skill_learning.jpg" alt="MO7I Skill Learning Engine" width="100%" />
+</div>
+
+<br />
+
+MO7I uses a disciplined 4-phase learning loop before any external specialist skill is promoted into the active project registry:
+- **1. Inspect (`فحص`)**: Strict security scanning, dependency auditing, and scope verification.
+- **2. Understand (`فهم`)**: Contract extraction, trigger preconditions, and input/output parameter schemas.
+- **3. Integrate (`دمج`)**: Seamless registration within `./.agents/skills/` without framework pollution.
+- **4. Validate (`تحقق`)**: Isolated execution testing to verify the skill actually solves target problems before promotion.
+
+---
+
+## 🌐 One Unified Ecosystem For All Agents
+
+<div align="center">
+  <img src="docs/assets/mo7i_ecosystem_en.jpg" alt="MO7I One Unified Ecosystem For All Agents" width="100%" />
+</div>
+
+<br />
 
 MO7I strictly distinguishes between verified and unverified platforms based on reproducible automated command output:
 
@@ -96,7 +132,7 @@ MO7I strictly distinguishes between verified and unverified platforms based on r
 
 ---
 
-## How to Verify Platforms Manually (3 Steps Each)
+## 📋 How to Verify Platforms Manually (3 Steps Each)
 
 For human operators running interactive sessions with full UI access:
 
@@ -122,7 +158,7 @@ For human operators running interactive sessions with full UI access:
 
 ---
 
-## Installation & Usage
+## 🚀 Installation & Usage
 
 Install using the Skills CLI (`npx skills`) or run directly via Node.js / npx. MO7I ships with a lean package footprint (~75 KB) containing only `SKILL.md` and `references/`:
 
@@ -171,7 +207,7 @@ Once `$mo7i` is installed, you can trigger project-scoped skill initialization d
 
 ---
 
-## Reference Documentation Index
+## 📚 Reference Documentation Index
 
 - [Benchmark & Overhead Report](docs/BENCHMARK.md): 5-task benchmark results, fast-path analysis, and latency metrics.
 - [Cross-Platform Verification](docs/CROSS_PLATFORM_VERIFICATION.md): Audit results, raw evidence, and verification procedures.
@@ -187,10 +223,12 @@ Once `$mo7i` is installed, you can trigger project-scoped skill initialization d
 - [Model Selection](references/model-selection.md): Workload complexity matching, delegation rules.
 - [Security & Human Gates](references/security-policy.md): Threat vectors, human gates, zero-secret policy.
 - [Execution & Verification](references/execution-and-verification.md): Acceptance criteria, evidence standards.
+- [Domain Glossary](GLOSSARY.md): Formal terminology standards and avoidance rules.
+- [Agent Setup & Operations](AGENTS.md): Task tracking, triage labels, and domain doc guidelines.
 
 ---
 
-## Contributing & License
+## 🤝 Contributing & License
 
 Contributions are welcome! Please review [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) before submitting pull requests.
 
