@@ -6,7 +6,8 @@ The following versions of `mo7i-universal-intelligence` are currently receiving 
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
+| 2.x.x   | :white_check_mark: |
+| 1.x.x   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 

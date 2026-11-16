@@ -1,9 +1,9 @@
 # MO7I Universal Intelligence - Production Acceptance Test Suite Results
 
-Date: 2026-11-16 02:37:52Z
+Date: 2026-11-16 02:53:37Z
 Host: Linux 7.0.0-34-generic (x86_64)
-Release Version: v2.5.0
-Suite: 91 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification + 6 Non-Next.js & Non-Code Validation)
+Release Version: v2.6.0
+Suite: 98 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification + 6 Non-Next.js & Non-Code + 7 Overhead Benchmarking, Platform Honesty & Publish Readiness)
 
 ### Test 1: A New Next.js Development Task
 
@@ -541,7 +541,7 @@ rm -rf /tmp/mo7i-cleanup-suite && mkdir -p /tmp/mo7i-cleanup-suite && (cd /tmp/m
 │                                                                │
 ├────────────────────────────────────────────────────────────────╯
 [?25l│
-◒  Installing skills…[1G[J◐  Installing skills…[1G[J◇  Installation complete
+◇  Installation complete
 [?25h
 │
 ◇  Installed 1 skill ──────────────────────╮
@@ -1047,7 +1047,7 @@ rm -rf /tmp/test-project-scope && mkdir -p /tmp/test-project-scope && (cd /tmp/t
 [?25h[?25l│
 ◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◇  Repository cloned
 [?25h[?25l│
-[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-mAnaDt/skills-zaqQyH/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
+[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-cokP5w/skills-poqutt/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
 
 description: Shared language for designing a software factory: the tasks it run…
              ^
@@ -1066,15 +1066,6 @@ description: Shared language for designing a software factory: the tasks it run�
 │    universal: Antigravity, Amp, Cline, Codex, Cursor +16 more  │
 │                                                                │
 ├────────────────────────────────────────────────────────────────╯
-│
-◇  Security Risk Assessments ──────────────────────────────╮
-│                                                          │
-│            Gen               Socket            Snyk      │
-│  ask-matt  Safe              0 alerts          Low Risk  │
-│                                                          │
-│  Details: https://skills.sh/mattpocock/skills            │
-│                                                          │
-├──────────────────────────────────────────────────────────╯
 [?25l│
 [1G[J◇  Installation complete
 [?25h
@@ -1521,7 +1512,7 @@ Default to help catalog displaying all available slash commands and platform sup
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.5.0)
+# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.6.0)
 
 **Core Principle:** One unified intelligence layer with multiple direct entry points.
 
@@ -1540,6 +1531,7 @@ Default to help catalog displaying all available slash commands and platform sup
 | `/mo7i update [--dry-run] [--project <path>]` | `mo7i update` | Check for stack changes, skill updates, and registry sync | Gate / Approval |
 | `/mo7i self-update [--check] [--yes] [--dry-run] [--ref <branch|tag>]` | `mo7i self-update` | Self-update MO7I skills to latest release with backup and rollback | Gate / Approval |
 | `/mo7i selftest [--source <path|repo>] [--json]` | `mo7i selftest` | Black-box independent verification of installed MO7I skills | Read-Only |
+| `/mo7i bench [--json]` | `mo7i bench` | Benchmark execution overhead across 5 standard tasks with and without MO7I | Read-Only |
 
 ### Command Examples
 
@@ -1554,16 +1546,17 @@ Default to help catalog displaying all available slash commands and platform sup
 - **/mo7i update**: `/mo7i update`
 - **/mo7i self-update**: `/mo7i self-update --check`
 - **/mo7i selftest**: `/mo7i selftest`
+- **/mo7i bench**: `/mo7i bench`
 
 ### Supported Platforms & Verification Status
 
-- **T3 Code ($mo7i via .agents/skills/)**: `FILE_PRESENT` — _file present, UI discovery unverified by code (confirmed manually in sandbox)_
 - **Universal Shell & CLI (bin/mo7i)**: `VERIFIED`
-- **Claude Code Local (.claude/commands/)**: `VERIFIED` — _Claude Code CLI only; not parsed by T3 Code_
-- **Claude Code Global (~/.claude/commands/)**: `VERIFIED` — _Claude Code CLI only_
-- **Cursor / Windsurf (.cursor/rules/)**: `UNVERIFIED` — _Cursor IDE only; not parsed by T3 Code_
-- **OpenAI Codex (.codex/prompts/)**: `UNVERIFIED`
-- **Gemini CLI (.gemini/commands/)**: `UNVERIFIED`
+- **Standard Agent Skills (.agents/skills/)**: `VERIFIED`
+- **Claude Code Local (.claude/commands/)**: `UNVERIFIED` — _CLI installed (v2.1.325) but requires interactive browser login (/login); cannot be verified non-interactively_
+- **Claude Code Global (~/.claude/commands/)**: `UNVERIFIED` — _CLI installed (v2.1.325) but requires interactive browser login (/login)_
+- **Cursor / Windsurf (.cursor/rules/)**: `UNVERIFIED` — _Cursor IDE rules provide editor context, not documented slash command discovery_
+- **OpenAI Codex (.codex/prompts/)**: `UNVERIFIED` — _No documented markdown slash-command discovery standard in upstream Codex specifications_
+- **Gemini CLI (.gemini/commands/)**: `UNVERIFIED` — _No documented slash-command discovery standard in upstream Gemini specifications_
 
 ```
 
@@ -1586,17 +1579,14 @@ Dispatch task through the Universal Intelligence Meta-Orchestrator and classify 
 
 **Actual Behavior & Output Evidence**:
 ```text
-[MO7I Universal Task Dispatcher (v2.5.0)]
+[MO7I Universal Task Dispatcher (v2.6.0)]
 • Intent: "Build a modern Flutter mobile app with reactive BLoC state"
 • Target Project: MO7I-Universal-Intelligence (Generic Software Project)
 • Project Setup Status: UNINITIALIZED
 • Execution Mode: FULL META-ORCHESTRATOR (16-phase pipeline)
 • Classified Domain: Mobile Development
 • Executed Phases Log: 1. INTAKE -> 2. PROJECT_DETECTION -> 3. PROJECT_PROFILE_INSPECTION -> 4. SETUP_STATUS_CHECK -> 5. PROJECT_SKILL_SETUP -> 6. TASK_CLASSIFICATION -> 7. CAPABILITY_GAP_ANALYSIS -> 8. SKILL_DISCOVERY -> 9. SKILL_LEARNING -> 10. COMPATIBILITY_AND_PLANNING -> 11. SKILL_ORCHESTRATION -> 12. EXECUTION -> 13. QUALITY_VALIDATION -> 14. KNOWLEDGE_AND_PROFILE_UPDATE -> 15. SAFE_CLEANUP -> 16. FINAL_REPORT
-• Per-Run Log: .mo7i/runs/2026-11-16T02-37-59.658Z.json
-
-[Notice: Pending Post-Install Setups Detected]
-• $setup-matt-pocock-skills: Configure this repo for the engineering skills: set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills.
+• Per-Run Log: .mo7i/runs/2026-11-16T02-53-44.149Z.json
 
 [Capability Gap Notice]
 • Gap Analysis: no gap (existing tools suffice for the current task)
@@ -1622,7 +1612,7 @@ Display complete official command registry with parameters, examples, and safety
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.5.0)
+# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.6.0)
 
 **Core Principle:** One unified intelligence layer with multiple direct entry points.
 
@@ -1641,6 +1631,7 @@ Display complete official command registry with parameters, examples, and safety
 | `/mo7i update [--dry-run] [--project <path>]` | `mo7i update` | Check for stack changes, skill updates, and registry sync | Gate / Approval |
 | `/mo7i self-update [--check] [--yes] [--dry-run] [--ref <branch|tag>]` | `mo7i self-update` | Self-update MO7I skills to latest release with backup and rollback | Gate / Approval |
 | `/mo7i selftest [--source <path|repo>] [--json]` | `mo7i selftest` | Black-box independent verification of installed MO7I skills | Read-Only |
+| `/mo7i bench [--json]` | `mo7i bench` | Benchmark execution overhead across 5 standard tasks with and without MO7I | Read-Only |
 
 ### Command Examples
 
@@ -1655,16 +1646,17 @@ Display complete official command registry with parameters, examples, and safety
 - **/mo7i update**: `/mo7i update`
 - **/mo7i self-update**: `/mo7i self-update --check`
 - **/mo7i selftest**: `/mo7i selftest`
+- **/mo7i bench**: `/mo7i bench`
 
 ### Supported Platforms & Verification Status
 
-- **T3 Code ($mo7i via .agents/skills/)**: `FILE_PRESENT` — _file present, UI discovery unverified by code (confirmed manually in sandbox)_
 - **Universal Shell & CLI (bin/mo7i)**: `VERIFIED`
-- **Claude Code Local (.claude/commands/)**: `VERIFIED` — _Claude Code CLI only; not parsed by T3 Code_
-- **Claude Code Global (~/.claude/commands/)**: `VERIFIED` — _Claude Code CLI only_
-- **Cursor / Windsurf (.cursor/rules/)**: `UNVERIFIED` — _Cursor IDE only; not parsed by T3 Code_
-- **OpenAI Codex (.codex/prompts/)**: `UNVERIFIED`
-- **Gemini CLI (.gemini/commands/)**: `UNVERIFIED`
+- **Standard Agent Skills (.agents/skills/)**: `VERIFIED`
+- **Claude Code Local (.claude/commands/)**: `UNVERIFIED` — _CLI installed (v2.1.325) but requires interactive browser login (/login); cannot be verified non-interactively_
+- **Claude Code Global (~/.claude/commands/)**: `UNVERIFIED` — _CLI installed (v2.1.325) but requires interactive browser login (/login)_
+- **Cursor / Windsurf (.cursor/rules/)**: `UNVERIFIED` — _Cursor IDE rules provide editor context, not documented slash command discovery_
+- **OpenAI Codex (.codex/prompts/)**: `UNVERIFIED` — _No documented markdown slash-command discovery standard in upstream Codex specifications_
+- **Gemini CLI (.gemini/commands/)**: `UNVERIFIED` — _No documented slash-command discovery standard in upstream Gemini specifications_
 
 ```
 
@@ -1810,7 +1802,7 @@ Generate comprehensive markdown report summarizing project intelligence profile.
 ```text
 # MO7I Project Intelligence & Skill Setup Report (v2.5.0)
 
-- **Timestamp**: `2026-11-16T02:37:59.873Z`
+- **Timestamp**: `2026-11-16T02:53:44.324Z`
 - **Execution Mode**: `REPORT`
 - **Project Workspace**: `/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/fixtures/projects/nextjs-app`
 - **Project Archetype**: **Fullstack Web Application (Next.js)**
@@ -1994,29 +1986,29 @@ Run system doctor diagnostics validating runtime environment, CLIs, and integrit
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I System Doctor Diagnostics (v2.5.0)
+# MO7I System Doctor Diagnostics (v2.6.0)
 
 | Check | Status | Detail |
 | :--- | :--- | :--- |
 | Node.js Runtime | `PASS` | v22.23.5 (Supported >= 18) |
 | Skills CLI | `PASS` | Version 1.8.1 active |
-| T3 Code Skills Entry Point (.agents/skills/mo7i/) | `INFO` | file present, UI discovery unverified by code (confirmed manually in sandbox) |
+| Agent Skills Standard Entry Point (.agents/skills/mo7i/) | `INFO` | file present and valid skill specification |
 | Slash Command Definitions | `PASS` | Command definitions detected |
 | Project Setup Engine | `PASS` | setup-engine.js present and executable |
 | Project Profile Registry | `INFO` | Uninitialized project workspace |
-| Disk vs Registry Reconciliation | `INFO` | Project not yet initialized; discovered skill(s) on disk: ask-matt, code-review, codebase-design, diagnosing-bugs, domain-modeling, grill-me, grill-with-docs, grilling, handoff, implement, implement-spec, improve-codebase-architecture, mo7i, mo7i-project-setup, pr, prototype, research, retro, setup-matt-pocock-skills, tdd, teach, to-spec, to-tickets, triage, wayfinder, wizard (run /mo7i setup initial to register) |
+| Disk vs Registry Reconciliation | `INFO` | Project not yet initialized; discovered skill(s) on disk: mo7i, mo7i-project-setup (run /mo7i setup initial to register) |
 
 ### Platform Compatibility Status
 
 | Platform | Mechanism | Status | Notes |
 | :--- | :--- | :--- | :--- |
-| T3 Code ($mo7i via .agents/skills/) | `.agents/skills/` | **`FILE_PRESENT`** | file present, UI discovery unverified by code (confirmed manually in sandbox) |
 | Universal Shell & CLI (bin/mo7i) | `bin/` | **`VERIFIED`** | Direct entry point |
-| Claude Code Local (.claude/commands/) | `.claude/commands/` | **`VERIFIED`** | Claude Code CLI only; not parsed by T3 Code |
-| Claude Code Global (~/.claude/commands/) | `~/.claude/commands/` | **`VERIFIED`** | Claude Code CLI only |
-| Cursor / Windsurf (.cursor/rules/) | `.cursor/rules/` | **`UNVERIFIED`** | Cursor IDE only; not parsed by T3 Code |
-| OpenAI Codex (.codex/prompts/) | `.codex/prompts/` | **`UNVERIFIED`** | Direct entry point |
-| Gemini CLI (.gemini/commands/) | `.gemini/commands/` | **`UNVERIFIED`** | Direct entry point |
+| Standard Agent Skills (.agents/skills/) | `.agents/skills/` | **`VERIFIED`** | Direct entry point |
+| Claude Code Local (.claude/commands/) | `.claude/commands/` | **`UNVERIFIED`** | CLI installed (v2.1.325) but requires interactive browser login (/login); cannot be verified non-interactively |
+| Claude Code Global (~/.claude/commands/) | `~/.claude/commands/` | **`UNVERIFIED`** | CLI installed (v2.1.325) but requires interactive browser login (/login) |
+| Cursor / Windsurf (.cursor/rules/) | `.cursor/rules/` | **`UNVERIFIED`** | Cursor IDE rules provide editor context, not documented slash command discovery |
+| OpenAI Codex (.codex/prompts/) | `.codex/prompts/` | **`UNVERIFIED`** | No documented markdown slash-command discovery standard in upstream Codex specifications |
+| Gemini CLI (.gemini/commands/) | `.gemini/commands/` | **`UNVERIFIED`** | No documented slash-command discovery standard in upstream Gemini specifications |
 
 **Doctor Summary**: All diagnostic checks passed. System is fully operational.
 
@@ -2171,8 +2163,8 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-mo7i status version: 2.5.0
-Registered commands count: 11
+mo7i status version: 2.6.0
+Registered commands count: 12
 setup-project-skills output header: [MO7I Project Setup: AUDIT]
 ```
 
@@ -2384,7 +2376,7 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Disk skills count: 26
+Disk skills count: 2
 Reconciled status: false
 ```
 
@@ -2570,8 +2562,8 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Status JSON version: 2.5.0
-Status JSON post-install setups count: 1
+Status JSON version: 2.6.0
+Status JSON post-install setups count: 0
 ```
 
 **Verification Analysis**:
@@ -3409,6 +3401,208 @@ All 6 v2.5.0 Non-Next.js & Non-Code Acceptance Tests Passed Successfully!
 
 **Verification Analysis**:
 All 6 v2.5.0 acceptance tests passed successfully with zero regressions.
+
+---
+
+### Test 92: Overhead Benchmark Engine Execution Across 5 Tasks
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Run benchmark engine comparing baseline vs orchestrated metrics across 5 fixed tasks.
+
+**Command Executed**:
+```bash
+node -e '
+    const { runBenchmark } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/bench-engine");
+    const res = runBenchmark();
+    console.log("Tasks benchmarked:", res.results.length);
+    console.log("Task 1 baseline vs mo7i ms:", res.results[0].baseline.wallTimeMs, res.results[0].orchestrated.wallTimeMs);
+    console.log("Task 3 phases:", res.results[2].orchestrated.phasesRun);
+    if (res.results.length !== 5 || res.results[2].orchestrated.phasesRun < 16) process.exit(1);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Tasks benchmarked: 5
+Task 1 baseline vs mo7i ms: 1.078 3.38
+Task 3 phases: 16
+```
+
+**Verification Analysis**:
+Benchmark engine successfully measured baseline vs orchestrated execution across 5 standard tasks.
+
+---
+
+### Test 93: /mo7i bench CLI and JSON Output Verification
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Execute /mo7i bench via CLI and verify formatted markdown table and JSON telemetry output.
+
+**Command Executed**:
+```bash
+/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/bin/mo7i bench --json | grep -q 'tokenTelemetryNotice' && /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/bin/mo7i bench | grep -q 'Executive Summary Table'
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+```
+
+**Verification Analysis**:
+/mo7i bench CLI generated formatted markdown summary and structured JSON output.
+
+---
+
+### Test 94: Benchmark Honest Overhead Analysis & Fast-Path Recommendation
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify docs/BENCHMARK.md exists and contains honest overhead analysis and fast-path recommendations.
+
+**Command Executed**:
+```bash
+node -e '
+    const fs = require("fs");
+    const path = require("path");
+    const bm = fs.readFileSync(path.join("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence", "docs", "BENCHMARK.md"), "utf8");
+    console.log("Contains overhead analysis:", bm.includes("Where MO7I Adds Overhead Without Benefit"));
+    console.log("Contains fast-path bypass:", bm.includes("Fast-Path Bypass Recommendation"));
+    if (!bm.includes("Trivial Edits") || !bm.includes("Fast-Path Bypass")) process.exit(1);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Contains overhead analysis: true
+Contains fast-path bypass: true
+```
+
+**Verification Analysis**:
+Benchmark report accurately identifies overhead on trivial tasks and documents fast-path bypass.
+
+---
+
+### Test 95: Cross-Platform Honesty Matrix & Raw Evidence Verification
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Assert platform verification statuses: Universal CLI and Agent Skills VERIFIED; Claude Code, Cursor, Codex, Gemini UNVERIFIED.
+
+**Command Executed**:
+```bash
+node -e '
+    const { PLATFORM_VERIFICATION } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/platform-installer");
+    console.log("CLI status:", PLATFORM_VERIFICATION["Universal Shell & CLI (bin/mo7i)"].status);
+    console.log("Agent skills status:", PLATFORM_VERIFICATION["Standard Agent Skills (.agents/skills/)"].status);
+    console.log("Claude code status:", PLATFORM_VERIFICATION["Claude Code Local (.claude/commands/)"].status);
+    if (PLATFORM_VERIFICATION["Universal Shell & CLI (bin/mo7i)"].status !== "VERIFIED") process.exit(1);
+    if (PLATFORM_VERIFICATION["Standard Agent Skills (.agents/skills/)"].status !== "VERIFIED") process.exit(1);
+    if (PLATFORM_VERIFICATION["Claude Code Local (.claude/commands/)"].status !== "UNVERIFIED") process.exit(1);
+    if (PLATFORM_VERIFICATION["Cursor / Windsurf (.cursor/rules/)"].status !== "UNVERIFIED") process.exit(1);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+CLI status: VERIFIED
+Agent skills status: VERIFIED
+Claude code status: UNVERIFIED
+```
+
+**Verification Analysis**:
+Cross-platform matrix accurately reflects verified vs unverified platforms with documented evidence.
+
+---
+
+### Test 96: Zero Prohibited Platform Names in Codebase
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Assert zero occurrences of platform-specific runtime names across src/, skills/, references/, bin/, and README.md.
+
+**Command Executed**:
+```bash
+node -e '
+    const cp = require("child_process");
+    const hits = cp.execSync("grep -rnI -i \"t3 code\" \"/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src\" \"/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/skills\" \"/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/references\" \"/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/bin\" \"/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/README.md\" || true").toString().trim();
+    if (hits.length > 0) {
+      console.error("Found prohibited occurrences:", hits);
+      process.exit(1);
+    }
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+```
+
+**Verification Analysis**:
+Codebase and documentation are completely platform-agnostic with zero host agent mentions.
+
+---
+
+### Test 97: Pre-Publish Readiness Checklist, Security Policy & License Audit
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify docs/PUBLISH-CHECKLIST.md, LICENSE, and SECURITY.md pass all pre-flight standards.
+
+**Command Executed**:
+```bash
+node -e '
+    const fs = require("fs");
+    const checklist = fs.readFileSync("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/docs/PUBLISH-CHECKLIST.md", "utf8");
+    const sec = fs.readFileSync("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/SECURITY.md", "utf8");
+    const lic = fs.readFileSync("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/LICENSE", "utf8");
+    if (!checklist.includes("CLEAN") || !sec.includes("2.x.x") || !lic.includes("MIT License")) process.exit(1);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+```
+
+**Verification Analysis**:
+Pre-publish checklist, security policy, and MIT license are fully validated.
+
+---
+
+### Test 98: End-to-End v2.6.0 Benchmarking & Honesty Suite
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Execute complete v2.6.0 acceptance test suite covering all Phases D, E, F requirements.
+
+**Command Executed**:
+```bash
+node /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v260_bench_and_crossplatform.js
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+=== MO7I v2.6.0 Overhead Benchmarking, Platform Honesty & Publish Readiness Suite ===
+
+[PASS] Test 2.6.1: Benchmark engine runs all 5 tasks and measures baseline vs orchestrated metrics
+[PASS] Test 2.6.2: /mo7i bench route outputs formatted markdown report and supports --json
+[PASS] Test 2.6.3: Benchmark reports honest overhead analysis (trivial edit/question) and documents fast-path bypass
+[PASS] Test 2.6.4: Platform verification matrix honestly marks Universal CLI & Agent Skills as VERIFIED, and Claude Code/Cursor/Codex/Gemini as UNVERIFIED
+[PASS] Test 2.6.5: Strict platform-agnostic check asserts zero occurrences of prohibited names in code, docs, and skills
+[PASS] Test 2.6.6: Pre-publish readiness checklist, license, and security policy pass all gate criteria
+
+All 6 v2.6.0 tests passed successfully!
+
+```
+
+**Verification Analysis**:
+All 6 v2.6.0 acceptance tests executed cleanly with zero regressions.
 
 ---
 

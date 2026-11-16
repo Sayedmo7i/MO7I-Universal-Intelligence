@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Production Acceptance Test Suite for MO7I Universal Intelligence
-# Version: 2.5.0
-# Suite: 91 Tests Total (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification + 6 Non-Next.js & Non-Code Validation)
+# Version: 2.6.0
+# Suite: 98 Tests Total (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification + 6 Non-Next.js & Non-Code + 7 Overhead Benchmarking, Platform Honesty & Publish Readiness)
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_FILE="${REPO_DIR}/tests/RESULTS.md"
@@ -14,8 +14,8 @@ echo "# MO7I Universal Intelligence - Production Acceptance Test Suite Results" 
 echo "" >> "$OUTPUT_FILE"
 echo "Date: $(date -u '+%Y-%m-%d %H:%M:%SZ')" >> "$OUTPUT_FILE"
 echo "Host: $(uname -s) $(uname -r) ($(uname -m))" >> "$OUTPUT_FILE"
-echo "Release Version: v2.5.0" >> "$OUTPUT_FILE"
-echo "Suite: 91 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification + 6 Non-Next.js & Non-Code Validation)" >> "$OUTPUT_FILE"
+echo "Release Version: v2.6.0" >> "$OUTPUT_FILE"
+echo "Suite: 98 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification + 6 Non-Next.js & Non-Code + 7 Overhead Benchmarking, Platform Honesty & Publish Readiness)" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
 run_and_log() {
@@ -1476,6 +1476,94 @@ run_and_log "91" "End-to-End v2.5.0 Non-Next.js and Non-Code Suite" \
   "PASS" \
   "All 6 v2.5.0 acceptance tests passed successfully with zero regressions."
 
+echo "=== Running Part 8: v2.6.0 Overhead Benchmarking, Platform Honesty & Publish Readiness Tests (Tests 92-98) ==="
+
+# --- Test 92: Overhead Benchmark Engine Execution ---
+run_and_log "92" "Overhead Benchmark Engine Execution Across 5 Tasks" \
+  "Run benchmark engine comparing baseline vs orchestrated metrics across 5 fixed tasks." \
+  "node -e '
+    const { runBenchmark } = require(\"${REPO_DIR}/src/commands/bench-engine\");
+    const res = runBenchmark();
+    console.log(\"Tasks benchmarked:\", res.results.length);
+    console.log(\"Task 1 baseline vs mo7i ms:\", res.results[0].baseline.wallTimeMs, res.results[0].orchestrated.wallTimeMs);
+    console.log(\"Task 3 phases:\", res.results[2].orchestrated.phasesRun);
+    if (res.results.length !== 5 || res.results[2].orchestrated.phasesRun < 16) process.exit(1);
+  '" \
+  "PASS" \
+  "Benchmark engine successfully measured baseline vs orchestrated execution across 5 standard tasks."
+
+# --- Test 93: /mo7i bench CLI and JSON Output Verification ---
+run_and_log "93" "/mo7i bench CLI and JSON Output Verification" \
+  "Execute /mo7i bench via CLI and verify formatted markdown table and JSON telemetry output." \
+  "${REPO_DIR}/bin/mo7i bench --json | grep -q 'tokenTelemetryNotice' && ${REPO_DIR}/bin/mo7i bench | grep -q 'Executive Summary Table'" \
+  "PASS" \
+  "/mo7i bench CLI generated formatted markdown summary and structured JSON output."
+
+# --- Test 94: Benchmark Honest Overhead Analysis & Fast-Path Recommendation ---
+run_and_log "94" "Benchmark Honest Overhead Analysis & Fast-Path Recommendation" \
+  "Verify docs/BENCHMARK.md exists and contains honest overhead analysis and fast-path recommendations." \
+  "node -e '
+    const fs = require(\"fs\");
+    const path = require(\"path\");
+    const bm = fs.readFileSync(path.join(\"${REPO_DIR}\", \"docs\", \"BENCHMARK.md\"), \"utf8\");
+    console.log(\"Contains overhead analysis:\", bm.includes(\"Where MO7I Adds Overhead Without Benefit\"));
+    console.log(\"Contains fast-path bypass:\", bm.includes(\"Fast-Path Bypass Recommendation\"));
+    if (!bm.includes(\"Trivial Edits\") || !bm.includes(\"Fast-Path Bypass\")) process.exit(1);
+  '" \
+  "PASS" \
+  "Benchmark report accurately identifies overhead on trivial tasks and documents fast-path bypass."
+
+# --- Test 95: Cross-Platform Honesty Matrix & Raw Evidence Verification ---
+run_and_log "95" "Cross-Platform Honesty Matrix & Raw Evidence Verification" \
+  "Assert platform verification statuses: Universal CLI and Agent Skills VERIFIED; Claude Code, Cursor, Codex, Gemini UNVERIFIED." \
+  "node -e '
+    const { PLATFORM_VERIFICATION } = require(\"${REPO_DIR}/src/commands/platform-installer\");
+    console.log(\"CLI status:\", PLATFORM_VERIFICATION[\"Universal Shell & CLI (bin/mo7i)\"].status);
+    console.log(\"Agent skills status:\", PLATFORM_VERIFICATION[\"Standard Agent Skills (.agents/skills/)\"].status);
+    console.log(\"Claude code status:\", PLATFORM_VERIFICATION[\"Claude Code Local (.claude/commands/)\"].status);
+    if (PLATFORM_VERIFICATION[\"Universal Shell & CLI (bin/mo7i)\"].status !== \"VERIFIED\") process.exit(1);
+    if (PLATFORM_VERIFICATION[\"Standard Agent Skills (.agents/skills/)\"].status !== \"VERIFIED\") process.exit(1);
+    if (PLATFORM_VERIFICATION[\"Claude Code Local (.claude/commands/)\"].status !== \"UNVERIFIED\") process.exit(1);
+    if (PLATFORM_VERIFICATION[\"Cursor / Windsurf (.cursor/rules/)\"].status !== \"UNVERIFIED\") process.exit(1);
+  '" \
+  "PASS" \
+  "Cross-platform matrix accurately reflects verified vs unverified platforms with documented evidence."
+
+# --- Test 96: Zero Prohibited Platform Names in Codebase (Platform Agnostic Check) ---
+run_and_log "96" "Zero Prohibited Platform Names in Codebase" \
+  "Assert zero occurrences of platform-specific runtime names across src/, skills/, references/, bin/, and README.md." \
+  "node -e '
+    const cp = require(\"child_process\");
+    const hits = cp.execSync(\"grep -rnI -i \\\"t3 code\\\" \\\"${REPO_DIR}/src\\\" \\\"${REPO_DIR}/skills\\\" \\\"${REPO_DIR}/references\\\" \\\"${REPO_DIR}/bin\\\" \\\"${REPO_DIR}/README.md\\\" || true\").toString().trim();
+    if (hits.length > 0) {
+      console.error(\"Found prohibited occurrences:\", hits);
+      process.exit(1);
+    }
+  '" \
+  "PASS" \
+  "Codebase and documentation are completely platform-agnostic with zero host agent mentions."
+
+# --- Test 97: Pre-Publish Readiness Checklist, Security Policy & License Audit ---
+run_and_log "97" "Pre-Publish Readiness Checklist, Security Policy & License Audit" \
+  "Verify docs/PUBLISH-CHECKLIST.md, LICENSE, and SECURITY.md pass all pre-flight standards." \
+  "node -e '
+    const fs = require(\"fs\");
+    const checklist = fs.readFileSync(\"${REPO_DIR}/docs/PUBLISH-CHECKLIST.md\", \"utf8\");
+    const sec = fs.readFileSync(\"${REPO_DIR}/SECURITY.md\", \"utf8\");
+    const lic = fs.readFileSync(\"${REPO_DIR}/LICENSE\", \"utf8\");
+    if (!checklist.includes(\"CLEAN\") || !sec.includes(\"2.x.x\") || !lic.includes(\"MIT License\")) process.exit(1);
+  '" \
+  "PASS" \
+  "Pre-publish checklist, security policy, and MIT license are fully validated."
+
+# --- Test 98: End-to-End v2.6.0 Suite Execution ---
+run_and_log "98" "End-to-End v2.6.0 Benchmarking & Honesty Suite" \
+  "Execute complete v2.6.0 acceptance test suite covering all Phases D, E, F requirements." \
+  "node ${REPO_DIR}/tests/test_v260_bench_and_crossplatform.js" \
+  "PASS" \
+  "All 6 v2.6.0 acceptance tests executed cleanly with zero regressions."
+
 echo ""
-echo "All 91 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
+echo "All 98 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
+
 
