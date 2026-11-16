@@ -1,11 +1,11 @@
 ---
 name: mo7i
-description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Multi-Platform Entry Point (v2.3.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands (audit, learn, discover, status, doctor, update, help, or a free-form task). Autonomously analyzes project stacks, provisions project-scoped skills, manages post-install setup lifecycles, and executes with verifiable evidence."
+description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Multi-Platform Entry Point (v2.4.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands (audit, learn, discover, status, doctor, update, self-update, help, or a free-form task). Autonomously analyzes project stacks, provisions project-scoped skills, manages post-install setup lifecycles, and executes with verifiable evidence."
 ---
 
 # MO7I Universal Intelligence
 
-Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, and Multi-Platform Entry Point (v2.3.0).
+Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, and Multi-Platform Entry Point (v2.4.0).
 
 MO7I serves as the single autonomous entry point across all repositories and engineering tasks. It operates on a core principle: **The user specifies WHAT needs to be accomplished; MO7I determines HOW to accomplish it.**
 
@@ -13,7 +13,7 @@ MO7I serves as the single autonomous entry point across all repositories and eng
 
 ## 1. Subcommands & Invocations
 
-When invoking `$mo7i` in T3 Code (or `/mo7i` or `./bin/mo7i` in CLI), you can supply either a natural-language task or an official subcommand:
+When invoking the skill (via `$mo7i`, `/mo7i`, or `./bin/mo7i`), you can supply either a natural-language task or an official subcommand:
 
 ```text
 $mo7i [subcommand or task]
@@ -23,6 +23,7 @@ $mo7i [subcommand or task]
   ├── discover <query>       -> Dynamic skill discovery on skills.sh with 5-dimension scoring
   ├── learn [skill]          -> 4-phase Skill Learning Engine (Inspect -> Understand -> Integrate -> Validate)
   ├── update [--dry-run]     -> Dependency drift detection and safe registry synchronization
+  ├── self-update [--check]  -> Autonomous self-updater with backup, rollback, and semver detection
   ├── help                   -> Command catalog, usage syntax, and platform guides
   └── <natural-language task> -> Autonomous Universal Intelligence Meta-Orchestrator (16-phase lifecycle)
 ```

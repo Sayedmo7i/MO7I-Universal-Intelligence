@@ -20,8 +20,9 @@ const setupEngine = require('../../skills/mo7i-project-setup/scripts/setup-engin
 const { COMMANDS, getAllCommands } = require('./command-registry');
 const { parseCommand } = require('./argument-parser');
 const { PLATFORM_VERIFICATION } = require('./platform-installer');
+const selfUpdateEngine = require('./self-update-engine');
 
-const ROUTER_VERSION = '2.3.0';
+const ROUTER_VERSION = '2.4.0';
 
 /**
  * Determine if a task qualifies for the fast path.
@@ -234,6 +235,7 @@ function writeRunLog(projectDir, runData = {}, options = {}) {
     toolsCalled,
     capabilityGaps: runData.capabilityGaps || [],
     gapReport: runData.gapReport || (runData.capabilityGaps && runData.capabilityGaps.length === 0 ? 'no gap' : 'gap detected'),
+    metadata: runData.metadata || {},
     ...(runData.metadata || {})
   };
 
@@ -298,6 +300,16 @@ function routeCommand(input, options = {}) {
       });
     case 'update':
       return handleUpdate(projectDir, { dryRun });
+    case 'self-update':
+    case 'selfupdate':
+      return handleSelfUpdateRoute(projectDir, {
+        check: Boolean(parsed.flags.check || options.check),
+        yes: Boolean(parsed.flags.yes || options.yes),
+        dryRun,
+        ref: parsed.flags.ref || options.ref || null,
+        source: parsed.flags.source || options.source || null,
+        ...options
+      });
     default:
       if (parsed.task) {
         return handleUniversalTask(parsed.task, projectDir, { ...options, dryRun });
@@ -1009,6 +1021,43 @@ function handleUpdate(projectDir, options = {}) {
   };
 }
 
+/**
+ * /mo7i self-update
+ */
+function handleSelfUpdateRoute(projectDir, options = {}) {
+  const result = selfUpdateEngine.handleSelfUpdate(projectDir, {
+    ...options,
+    doctorRunner: (dir) => handleDoctor(dir)
+  });
+
+  // Record audit run log for non-check executions
+  if (!options.check) {
+    const timestampStr = options.timestamp || new Date().toISOString().replace(/[:.]/g, '-');
+    const meta = {
+      command: 'self-update',
+      installedVersion: result.previousVersion || result.installedVersion,
+      newVersion: result.newVersion || result.latestVersion,
+      backupDir: result.backupDir,
+      scope: result.scope,
+      rolledBack: Boolean(result.rolledBack)
+    };
+    writeRunLog(projectDir, {
+      task: '/mo7i self-update',
+      domain: 'System Orchestration',
+      status: result.status === 'ERROR' ? 'FAIL' : 'PASS',
+      executionMode: options.dryRun ? 'DRY_RUN' : 'SELF_UPDATE',
+      phasesExecuted: ['1. INTAKE', '2. VERSION_INSPECTION', '3. BACKUP_SAFETY', '4. SKILL_UPDATE', '5. DOCTOR_VERIFICATION', '16. FINAL_REPORT'],
+      skillsRead: ['mo7i', 'mo7i-project-setup'],
+      skillsExcluded: [],
+      toolsCalled: ['run_command', 'view_file'],
+      metadata: meta,
+      ...meta
+    }, { timestamp: timestampStr });
+  }
+
+  return result;
+}
+
 module.exports = {
   ROUTER_VERSION,
   isTrivialTask,
@@ -1025,7 +1074,9 @@ module.exports = {
   handleDiscover,
   handleStatus,
   handleDoctor,
-  handleUpdate
+  handleUpdate,
+  handleSelfUpdate: handleSelfUpdateRoute,
+  handleSelfUpdateRoute
 };
 
 // CLI entrypoint

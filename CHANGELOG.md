@@ -5,6 +5,23 @@ All notable changes to the `mo7i-universal-intelligence` skill will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-11-16
+
+### Added
+- **Autonomous Self-Update (`/mo7i self-update`)**:
+  - Implemented `/mo7i self-update` command supporting `--check`, `--yes`, `--dry-run`, and `--ref <branch|tag>`.
+  - Added installed version detection inspecting `skills/mo7i/VERSION` or `SKILL.md` frontmatter.
+  - Added remote version discovery using `git ls-remote` or GitHub API with exact error reporting on network or authentication failure.
+  - Implemented semver comparison logic (`parseSemver`, `compareSemver`).
+- **Safety, Backups & Automated Rollback**:
+  - Added pre-update atomic backup to `.mo7i/backups/<timestamp>/` strictly scoped to MO7I's skills (`mo7i`, `mo7i-project-setup`), leaving other skills, project files, and secrets untouched.
+  - Automated rollback restoring original skill state if `npx skills add` or disk verification fails.
+  - Human Gate requirement: non-interactive invocations without `--yes` halt and request explicit user confirmation.
+  - Added dry-run simulation mode (`--dry-run`) executing without filesystem mutation.
+- **Post-Update Verification & Telemetry**:
+  - Verifies new version on disk, runs doctor diagnostics, and displays neutral agent cache restart notice: `"Some agents cache their skill list; if the new version does not appear, restart your agent."`
+  - Records full structured audit log in `.mo7i/runs/<timestamp>.json`.
+
 ## [2.3.1] - 2026-11-16
 
 ### Added

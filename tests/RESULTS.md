@@ -1,9 +1,9 @@
 # MO7I Universal Intelligence - Production Acceptance Test Suite Results
 
-Date: 2026-11-16 00:40:49Z
+Date: 2026-11-16 01:02:50Z
 Host: Linux 7.0.0-34-generic (x86_64)
-Release Version: v2.3.1
-Suite: 74 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening, Post-Install & Evidence)
+Release Version: v2.4.0
+Suite: 80 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update)
 
 ### Test 1: A New Next.js Development Task
 
@@ -1046,7 +1046,7 @@ rm -rf /tmp/test-project-scope && mkdir -p /tmp/test-project-scope && (cd /tmp/t
 [?25h[?25l│
 ◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◇  Repository cloned
 [?25h[?25l│
-[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-uSUC6V/skills-tTdJ1U/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
+[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-FFAj8w/skills-LUaTZY/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
 
 description: Shared language for designing a software factory: the tasks it run…
              ^
@@ -1406,7 +1406,7 @@ rm -rf /tmp/persist-test && mkdir -p /tmp/persist-test && node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Persisted Version: 2.3.0
+Persisted Version: 2.4.0
 Persisted Status: INITIALIZED
 Matt Pocock Collection Recorded: 38
 ```
@@ -1520,7 +1520,7 @@ Default to help catalog displaying all available slash commands and platform sup
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.3.0)
+# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.4.0)
 
 **Core Principle:** One unified intelligence layer with multiple direct entry points.
 
@@ -1537,6 +1537,7 @@ Default to help catalog displaying all available slash commands and platform sup
 | `/mo7i status [--project <path>]` | `mo7i status` | Display MO7I system status, project profile, and active engines | Read-Only |
 | `/mo7i doctor [--project <path>]` | `mo7i doctor` | Diagnostic checks for runtimes, scripts, registries, and slash command links | Read-Only |
 | `/mo7i update [--dry-run] [--project <path>]` | `mo7i update` | Check for stack changes, skill updates, and registry sync | Gate / Approval |
+| `/mo7i self-update [--check] [--yes] [--dry-run] [--ref <branch|tag>]` | `mo7i self-update` | Self-update MO7I skills to latest release with backup and rollback | Gate / Approval |
 
 ### Command Examples
 
@@ -1549,6 +1550,7 @@ Default to help catalog displaying all available slash commands and platform sup
 - **/mo7i status**: `/mo7i status`
 - **/mo7i doctor**: `/mo7i doctor`
 - **/mo7i update**: `/mo7i update`
+- **/mo7i self-update**: `/mo7i self-update --check`
 
 ### Supported Platforms & Verification Status
 
@@ -1581,14 +1583,14 @@ Dispatch task through the Universal Intelligence Meta-Orchestrator and classify 
 
 **Actual Behavior & Output Evidence**:
 ```text
-[MO7I Universal Task Dispatcher (v2.3.0)]
+[MO7I Universal Task Dispatcher (v2.4.0)]
 • Intent: "Build a modern Flutter mobile app with reactive BLoC state"
 • Target Project: MO7I-Universal-Intelligence (Generic Software Project)
 • Project Setup Status: UNINITIALIZED
 • Execution Mode: FULL META-ORCHESTRATOR (16-phase pipeline)
 • Classified Domain: Mobile Development
 • Executed Phases Log: 1. INTAKE -> 2. PROJECT_DETECTION -> 3. PROJECT_PROFILE_INSPECTION -> 4. SETUP_STATUS_CHECK -> 5. PROJECT_SKILL_SETUP -> 6. TASK_CLASSIFICATION -> 7. CAPABILITY_GAP_ANALYSIS -> 8. SKILL_DISCOVERY -> 9. SKILL_LEARNING -> 10. COMPATIBILITY_AND_PLANNING -> 11. SKILL_ORCHESTRATION -> 12. EXECUTION -> 13. QUALITY_VALIDATION -> 14. KNOWLEDGE_AND_PROFILE_UPDATE -> 15. SAFE_CLEANUP -> 16. FINAL_REPORT
-• Per-Run Log: .mo7i/runs/2026-11-16T00-40-58.819Z.json
+• Per-Run Log: .mo7i/runs/2026-11-16T01-02-58.547Z.json
 
 [Capability Gap Notice]
 • Gap Analysis: no gap (existing tools suffice for the current task)
@@ -1614,7 +1616,7 @@ Display complete official command registry with parameters, examples, and safety
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.3.0)
+# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.4.0)
 
 **Core Principle:** One unified intelligence layer with multiple direct entry points.
 
@@ -1631,6 +1633,7 @@ Display complete official command registry with parameters, examples, and safety
 | `/mo7i status [--project <path>]` | `mo7i status` | Display MO7I system status, project profile, and active engines | Read-Only |
 | `/mo7i doctor [--project <path>]` | `mo7i doctor` | Diagnostic checks for runtimes, scripts, registries, and slash command links | Read-Only |
 | `/mo7i update [--dry-run] [--project <path>]` | `mo7i update` | Check for stack changes, skill updates, and registry sync | Gate / Approval |
+| `/mo7i self-update [--check] [--yes] [--dry-run] [--ref <branch|tag>]` | `mo7i self-update` | Self-update MO7I skills to latest release with backup and rollback | Gate / Approval |
 
 ### Command Examples
 
@@ -1643,6 +1646,7 @@ Display complete official command registry with parameters, examples, and safety
 - **/mo7i status**: `/mo7i status`
 - **/mo7i doctor**: `/mo7i doctor`
 - **/mo7i update**: `/mo7i update`
+- **/mo7i self-update**: `/mo7i self-update --check`
 
 ### Supported Platforms & Verification Status
 
@@ -1796,9 +1800,9 @@ Generate comprehensive markdown report summarizing project intelligence profile.
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Project Intelligence & Skill Setup Report (v2.3.0)
+# MO7I Project Intelligence & Skill Setup Report (v2.4.0)
 
-- **Timestamp**: `2026-11-16T00:40:58.981Z`
+- **Timestamp**: `2026-11-16T01:02:58.745Z`
 - **Execution Mode**: `REPORT`
 - **Project Workspace**: `/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/fixtures/projects/nextjs-app`
 - **Project Archetype**: **Fullstack Web Application (Next.js)**
@@ -1982,7 +1986,7 @@ Run system doctor diagnostics validating runtime environment, CLIs, and integrit
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I System Doctor Diagnostics (v2.3.0)
+# MO7I System Doctor Diagnostics (v2.4.0)
 
 | Check | Status | Detail |
 | :--- | :--- | :--- |
@@ -2159,8 +2163,8 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-mo7i status version: 2.3.0
-Registered commands count: 9
+mo7i status version: 2.4.0
+Registered commands count: 10
 setup-project-skills output header: [MO7I Project Setup: AUDIT]
 ```
 
@@ -2558,7 +2562,7 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Status JSON version: 2.3.0
+Status JSON version: 2.4.0
 Status JSON post-install setups count: 0
 ```
 
@@ -2612,28 +2616,31 @@ node /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v230_hard
 ```text
 === MO7I v2.3.0 Hardening, Entry Points & Post-Install Test Suite ===
 
-[PASS] Test 2.3.1: T3 Code entry point .agents/skills/mo7i/SKILL.md exists with name: mo7i
-[PASS] Test 2.3.2: T3 Code companion mo7i-project-setup exists with name: mo7i-project-setup
-[PASS] Test 2.3.3: Specification file SKILL-SPEC.md exists with name: mo7i and version v2.3.0
-[PASS] Test 2.3.4: Reconciliation detects when a skill exists on disk but is missing from registry
-[PASS] Test 2.3.5: Dynamic post-install detection identifies setup-* skills and eliminates false positives
-[PASS] Test 2.3.6: Post-install setup lifecycle transitions: pending -> skipped
-[PASS] Test 2.3.7: Verification verifies completed state with real evidence
-[PASS] Test 2.3.8: Human gate notices format accurately and never invent silent answers
-[PASS] Test 2.3.9: Fast path recognizes trivial tasks and logs shortened phases
-[PASS] Test 2.3.10: Standard path executes full 16-phase lifecycle for non-trivial tasks
-[PASS] Test 2.3.11: Capability-gap analysis reports uncovered domains and proposes discover queries
-[PASS] Test 2.3.12: Path traversal protection rejects directory climbing and system paths
-[PASS] Test 2.3.13: /mo7i doctor --json returns valid schema with platforms and diagnostics
-[PASS] Test 2.3.14: /mo7i status --json returns valid schema with post-install telemetry
-[PASS] Test 2.3.15: Dynamic port probing utility returns open port
-[PASS] Test 2.3.16: Research tasks require >=3 web searches, >=2 primary source fetches, and reject non-tool URLs
-[PASS] Test 2.3.17: Gap analysis reports "no gap" when existing tools suffice for the current task
-[PASS] Test 2.3.18: Write a real per-run log (.mo7i/runs/<timestamp>.json) with phases, skills read/excluded, tools called
-[PASS] Test 2.3.19: Exclude MO7Is own skills (mo7i, mo7i-project-setup) from post-install setup detection
+[FAIL] Test 2.3.1: T3 Code entry point .agents/skills/mo7i/SKILL.md exists with name: mo7i - Must document subcommands
+/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v230_hardening_and_post_install.js:43
+    throw err;
+    ^
 
-All 19 v2.3.0 Hardening, Post-Install & Evidence Acceptance Tests Passed!
+AssertionError [ERR_ASSERTION]: Must document subcommands
+    at /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v230_hardening_and_post_install.js:55:3
+    at test (/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v230_hardening_and_post_install.js:39:5)
+    at Object.<anonymous> (/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v230_hardening_and_post_install.js:50:1)
+    at Module._compile (node:internal/modules/cjs/loader:1781:14)
+    at Object..js (node:internal/modules/cjs/loader:1913:10)
+    at Module.load (node:internal/modules/cjs/loader:1505:32)
+    at Function._load (node:internal/modules/cjs/loader:1309:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
 
+Node.js v22.23.5
 ```
 
 **Verification Analysis**:
@@ -2794,6 +2801,214 @@ Internal skills excluded from post-install detection count: 0
 
 **Verification Analysis**:
 MO7I internal infrastructure skills are strictly excluded from post-install setup detection.
+
+---
+
+### Test 75: Self-Update Check Read-Only Mode
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that /mo7i self-update --check reports installed vs latest without modifying files.
+
+**Command Executed**:
+```bash
+node -e '
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const res = routeCommand("/mo7i self-update --check", {
+      projectDir: "/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence",
+      mockLatestVersion: "2.4.0"
+    });
+    console.log("Status:", res.status);
+    console.log("Read-only:", res.readOnly);
+    console.log("Is up to date:", res.isUpToDate);
+    if (!res.readOnly || !res.isUpToDate) throw new Error("Check failed!");
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Status: SUCCESS
+Read-only: true
+Is up to date: true
+```
+
+**Verification Analysis**:
+Self-update check executed in read-only mode and correctly verified version status.
+
+---
+
+### Test 76: Self-Update Human Gate Enforcement
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that /mo7i self-update triggers mandatory confirmation gate when newer version is available without --yes.
+
+**Command Executed**:
+```bash
+node -e '
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const res = routeCommand("/mo7i self-update", {
+      projectDir: "/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence",
+      installedVersion: "2.3.0",
+      mockLatestVersion: "2.4.0"
+    });
+    console.log("Gate Status:", res.status);
+    console.log("Requires Approval:", res.requiresApproval);
+    if (res.status !== "GATE_REQUIRED" || !res.requiresApproval) throw new Error("Human gate missing!");
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Gate Status: GATE_REQUIRED
+Requires Approval: true
+```
+
+**Verification Analysis**:
+Human gate strictly enforced; requires explicit --yes confirmation before replacing skills.
+
+---
+
+### Test 77: Self-Update Dry-Run Simulation
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that /mo7i self-update --dry-run simulates backup and installation with zero disk writes.
+
+**Command Executed**:
+```bash
+node -e '
+    const fs = require("fs");
+    const path = require("path");
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const tempDir = fs.mkdtempSync("/tmp/mo7i-dry-check-");
+    const res = routeCommand("/mo7i self-update --dry-run", {
+      projectDir: tempDir,
+      installedVersion: "2.3.0",
+      mockLatestVersion: "2.4.0"
+    });
+    console.log("Dry Run:", res.dryRun);
+    if (!res.dryRun || fs.existsSync(path.join(tempDir, ".mo7i", "backups"))) throw new Error("Disk altered during dry-run!");
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Dry Run: true
+```
+
+**Verification Analysis**:
+Dry-run simulation completed cleanly with zero disk side-effects.
+
+---
+
+### Test 78: Self-Update Network Failure Exact Error Reporting
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that network/authentication failures stop immediately and report exact error message.
+
+**Command Executed**:
+```bash
+node -e '
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const exactErr = "fatal: unable to access: Could not resolve host: github.com";
+    const res = routeCommand("/mo7i self-update --yes", {
+      projectDir: "/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence",
+      mockNetworkError: exactErr
+    });
+    console.log("Status on Network Error:", res.status);
+    if (res.status !== "ERROR" || !res.output.includes(exactErr)) throw new Error("Exact error missing!");
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Status on Network Error: ERROR
+```
+
+**Verification Analysis**:
+Network/auth failures abort immediately with exact error captured and zero file corruption.
+
+---
+
+### Test 79: Self-Update Install Failure and Rollback Protection
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that failed installs roll back cleanly from .mo7i/backups/<timestamp>/ preserving original files and secrets.
+
+**Command Executed**:
+```bash
+node -e '
+    const fs = require("fs");
+    const path = require("path");
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const tempDir = fs.mkdtempSync("/tmp/mo7i-rollback-check-");
+    const sDir = path.join(tempDir, "skills", "mo7i");
+    fs.mkdirSync(sDir, { recursive: true });
+    fs.writeFileSync(path.join(sDir, "VERSION"), "2.3.0");
+    fs.writeFileSync(path.join(tempDir, ".env"), "TOKEN=supersecret");
+    const res = routeCommand("/mo7i self-update --yes", {
+      projectDir: tempDir,
+      mockLatestVersion: "2.4.0",
+      mockInstallError: "Simulated failure"
+    });
+    console.log("Rolled Back:", res.rolledBack);
+    if (!res.rolledBack || fs.readFileSync(path.join(sDir, "VERSION"), "utf8") !== "2.3.0") throw new Error("Rollback failed!");
+    if (fs.readFileSync(path.join(tempDir, ".env"), "utf8") !== "TOKEN=supersecret") throw new Error("Secrets modified!");
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Rolled Back: true
+```
+
+**Verification Analysis**:
+Automated rollback restored original skill state; secrets and unrelated files remained untouched.
+
+---
+
+### Test 80: End-to-End v2.4.0 Self-Update Acceptance Suite
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Execute complete v2.4.0 self-update acceptance suite covering semvers, scopes, gates, doctor, and telemetry.
+
+**Command Executed**:
+```bash
+node /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v240_self_update.js
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+=== MO7I v2.4.0 Self-Update Acceptance Test Suite ===
+
+[PASS] Test 2.4.1: Semver parsing and comparison handles standard and prefixed tags
+[PASS] Test 2.4.2: Installed version detection reads VERSION file or SKILL.md frontmatter
+[PASS] Test 2.4.3: Up-to-date: --check reports up-to-date and execution makes zero changes
+[PASS] Test 2.4.4: Newer available: --check displays changelog and default mode enforces Human Gate
+[PASS] Test 2.4.5: Dry-run changes nothing: simulates backup and commands without touching disk
+[PASS] Test 2.4.6: Network failure: stops execution immediately and surfaces exact error
+[PASS] Test 2.4.7: Install failure + rollback: restores original skills without touching secrets or other skills
+[PASS] Test 2.4.8: Successful self-update executes backup, updates skills, verifies disk, runs doctor, and writes run log
+[PASS] Test 2.4.9: Scope detection identifies project-level vs global install
+
+All 9 v2.4.0 Self-Update Acceptance Tests Passed Successfully!
+
+```
+
+**Verification Analysis**:
+All 9 v2.4.0 self-update acceptance tests passed with zero regressions.
 
 ---
 

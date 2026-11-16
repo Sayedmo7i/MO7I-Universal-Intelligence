@@ -149,6 +149,24 @@ const COMMANDS = [
     readOnly: false,
     requiresApproval: true, // Gate before updating packages
     supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
+  },
+  {
+    id: 'mo7i-self-update',
+    trigger: '/mo7i self-update',
+    alias: 'mo7i self-update',
+    summary: 'Self-update MO7I skills to latest release with backup and rollback',
+    description: 'Checks installed version vs latest remote release, backs up MO7I skills to .mo7i/backups/, safely updates mo7i and mo7i-project-setup via skills CLI, runs doctor verification, and logs telemetry.',
+    usage: '/mo7i self-update [--check] [--yes] [--dry-run] [--ref <branch|tag>]',
+    examples: [
+      '/mo7i self-update --check',
+      '/mo7i self-update',
+      '/mo7i self-update --yes',
+      '/mo7i self-update --dry-run',
+      '/mo7i self-update --ref main'
+    ],
+    readOnly: false,
+    requiresApproval: true,
+    supportedPlatforms: ['t3-code', 'claude-code', 'cursor', 'codex', 'gemini-cli', 'universal-cli']
   }
 ];
 

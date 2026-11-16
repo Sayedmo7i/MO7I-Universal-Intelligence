@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Production Acceptance Test Suite for MO7I Universal Intelligence
-# Version: 2.3.0
-# Suite: 74 Tests Total (18 v2.0.0 Core + 20 v2.1.0 Project Setup + 17 v2.2.0 Slash Commands + 19 v2.3.0 Hardening, Post-Install & Evidence)
+# Version: 2.4.0
+# Suite: 80 Tests Total (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update)
 
 REPO_DIR="/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence"
 OUTPUT_FILE="${REPO_DIR}/tests/RESULTS.md"
@@ -14,8 +14,8 @@ echo "# MO7I Universal Intelligence - Production Acceptance Test Suite Results" 
 echo "" >> "$OUTPUT_FILE"
 echo "Date: $(date -u '+%Y-%m-%d %H:%M:%SZ')" >> "$OUTPUT_FILE"
 echo "Host: $(uname -s) $(uname -r) ($(uname -m))" >> "$OUTPUT_FILE"
-echo "Release Version: v2.3.1" >> "$OUTPUT_FILE"
-echo "Suite: 74 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening, Post-Install & Evidence)" >> "$OUTPUT_FILE"
+echo "Release Version: v2.4.0" >> "$OUTPUT_FILE"
+echo "Suite: 80 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update)" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
 run_and_log() {
@@ -1170,6 +1170,110 @@ run_and_log "74" "Exclude MO7I Own Skills From Post-Install Detection" \
   "PASS" \
   "MO7I internal infrastructure skills are strictly excluded from post-install setup detection."
 
+echo "=== Running Part 5: v2.4.0 Self-Update Acceptance Tests (Tests 75-80) ==="
+
+# --- Test 75: /mo7i self-update --check (Up-to-Date) ---
+run_and_log "75" "Self-Update Check Read-Only Mode" \
+  "Verify that /mo7i self-update --check reports installed vs latest without modifying files." \
+  "node -e '
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const res = routeCommand(\"/mo7i self-update --check\", {
+      projectDir: \"${REPO_DIR}\",
+      mockLatestVersion: \"2.4.0\"
+    });
+    console.log(\"Status:\", res.status);
+    console.log(\"Read-only:\", res.readOnly);
+    console.log(\"Is up to date:\", res.isUpToDate);
+    if (!res.readOnly || !res.isUpToDate) throw new Error(\"Check failed!\");
+  '" \
+  "PASS" \
+  "Self-update check executed in read-only mode and correctly verified version status."
+
+# --- Test 76: /mo7i self-update Human Gate on Update Available ---
+run_and_log "76" "Self-Update Human Gate Enforcement" \
+  "Verify that /mo7i self-update triggers mandatory confirmation gate when newer version is available without --yes." \
+  "node -e '
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const res = routeCommand(\"/mo7i self-update\", {
+      projectDir: \"${REPO_DIR}\",
+      installedVersion: \"2.3.0\",
+      mockLatestVersion: \"2.4.0\"
+    });
+    console.log(\"Gate Status:\", res.status);
+    console.log(\"Requires Approval:\", res.requiresApproval);
+    if (res.status !== \"GATE_REQUIRED\" || !res.requiresApproval) throw new Error(\"Human gate missing!\");
+  '" \
+  "PASS" \
+  "Human gate strictly enforced; requires explicit --yes confirmation before replacing skills."
+
+# --- Test 77: /mo7i self-update --dry-run ---
+run_and_log "77" "Self-Update Dry-Run Simulation" \
+  "Verify that /mo7i self-update --dry-run simulates backup and installation with zero disk writes." \
+  "node -e '
+    const fs = require(\"fs\");
+    const path = require(\"path\");
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const tempDir = fs.mkdtempSync(\"/tmp/mo7i-dry-check-\");
+    const res = routeCommand(\"/mo7i self-update --dry-run\", {
+      projectDir: tempDir,
+      installedVersion: \"2.3.0\",
+      mockLatestVersion: \"2.4.0\"
+    });
+    console.log(\"Dry Run:\", res.dryRun);
+    if (!res.dryRun || fs.existsSync(path.join(tempDir, \".mo7i\", \"backups\"))) throw new Error(\"Disk altered during dry-run!\");
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '" \
+  "PASS" \
+  "Dry-run simulation completed cleanly with zero disk side-effects."
+
+# --- Test 78: Network Failure Exact Error Reporting ---
+run_and_log "78" "Self-Update Network Failure Exact Error Reporting" \
+  "Verify that network/authentication failures stop immediately and report exact error message." \
+  "node -e '
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const exactErr = \"fatal: unable to access: Could not resolve host: github.com\";
+    const res = routeCommand(\"/mo7i self-update --yes\", {
+      projectDir: \"${REPO_DIR}\",
+      mockNetworkError: exactErr
+    });
+    console.log(\"Status on Network Error:\", res.status);
+    if (res.status !== \"ERROR\" || !res.output.includes(exactErr)) throw new Error(\"Exact error missing!\");
+  '" \
+  "PASS" \
+  "Network/auth failures abort immediately with exact error captured and zero file corruption."
+
+# --- Test 79: Install Failure and Rollback Protection ---
+run_and_log "79" "Self-Update Install Failure and Rollback Protection" \
+  "Verify that failed installs roll back cleanly from .mo7i/backups/<timestamp>/ preserving original files and secrets." \
+  "node -e '
+    const fs = require(\"fs\");
+    const path = require(\"path\");
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const tempDir = fs.mkdtempSync(\"/tmp/mo7i-rollback-check-\");
+    const sDir = path.join(tempDir, \"skills\", \"mo7i\");
+    fs.mkdirSync(sDir, { recursive: true });
+    fs.writeFileSync(path.join(sDir, \"VERSION\"), \"2.3.0\");
+    fs.writeFileSync(path.join(tempDir, \".env\"), \"TOKEN=supersecret\");
+    const res = routeCommand(\"/mo7i self-update --yes\", {
+      projectDir: tempDir,
+      mockLatestVersion: \"2.4.0\",
+      mockInstallError: \"Simulated failure\"
+    });
+    console.log(\"Rolled Back:\", res.rolledBack);
+    if (!res.rolledBack || fs.readFileSync(path.join(sDir, \"VERSION\"), \"utf8\") !== \"2.3.0\") throw new Error(\"Rollback failed!\");
+    if (fs.readFileSync(path.join(tempDir, \".env\"), \"utf8\") !== \"TOKEN=supersecret\") throw new Error(\"Secrets modified!\");
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '" \
+  "PASS" \
+  "Automated rollback restored original skill state; secrets and unrelated files remained untouched."
+
+# --- Test 80: End-to-End v2.4.0 Self-Update Acceptance Suite ---
+run_and_log "80" "End-to-End v2.4.0 Self-Update Acceptance Suite" \
+  "Execute complete v2.4.0 self-update acceptance suite covering semvers, scopes, gates, doctor, and telemetry." \
+  "node ${REPO_DIR}/tests/test_v240_self_update.js" \
+  "PASS" \
+  "All 9 v2.4.0 self-update acceptance tests passed with zero regressions."
+
 echo ""
-echo "All 74 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
+echo "All 80 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
 

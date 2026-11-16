@@ -15,7 +15,7 @@ const path = require('path');
 const cp = require('child_process');
 const net = require('net');
 
-const ENGINE_VERSION = '2.3.0';
+const ENGINE_VERSION = '2.4.0';
 
 // Official verified Matt Pocock skills collection (from https://skills.sh/mattpocock/skills)
 const MATT_POCOCK_OFFICIAL_SOURCE = {
