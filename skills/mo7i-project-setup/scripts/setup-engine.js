@@ -15,7 +15,7 @@ const path = require('path');
 const cp = require('child_process');
 const net = require('net');
 
-const ENGINE_VERSION = '2.4.0';
+const ENGINE_VERSION = '2.5.0';
 
 // Official verified Matt Pocock skills collection (from https://skills.sh/mattpocock/skills)
 const MATT_POCOCK_OFFICIAL_SOURCE = {
@@ -448,6 +448,22 @@ function analyzeProject(projectDir = process.cwd()) {
     if (/mypy/i.test(pyCombined)) profile.codeQualityConventions.push('Mypy');
   }
 
+  // Inspect Rust ecosystem
+  if (fileExists('Cargo.toml')) {
+    if (!profile.languages.includes('Rust')) profile.languages.push('Rust');
+    profile.type = 'Systems / Application Service (Rust)';
+    profile.architecture = 'Rust Modular Crate Architecture';
+    profile.inspectedFiles.push('Cargo.toml');
+  }
+
+  // Inspect Go ecosystem
+  if (fileExists('go.mod')) {
+    if (!profile.languages.includes('Go')) profile.languages.push('Go');
+    profile.type = 'Backend Service (Go)';
+    profile.architecture = 'Go Standard Package Architecture';
+    profile.inspectedFiles.push('go.mod');
+  }
+
   // Inspect Docker & DevOps
   if (fileExists('Dockerfile') || fileExists('docker-compose.yml') || fileExists('docker-compose.yaml')) {
     profile.existingTools.push('Docker Containerization');
@@ -465,6 +481,27 @@ function analyzeProject(projectDir = process.cwd()) {
       }
     } catch {
       // ignore
+    }
+  }
+
+  // Non-Technical / General Workspace detection
+  if (profile.languages.length === 0 && profile.frameworks.length === 0) {
+    let hasCodeFiles = false;
+    try {
+      const files = fs.readdirSync(resolvedDir);
+      for (const f of files) {
+        if (/\.(js|ts|jsx|tsx|py|go|rs|rb|php|java|c|cpp|cs|swift|kt|dart)$/i.test(f)) {
+          hasCodeFiles = true;
+          break;
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    if (!hasCodeFiles) {
+      profile.type = 'Non-Technical / General Workspace';
+      profile.architecture = 'Document & Research Workspace';
     }
   }
 
@@ -496,7 +533,11 @@ function recommendProjectSkills(profile) {
     OPTIONAL_SKILLS: []
   };
 
-  // Matt Pocock collection integration
+  const isNonTechnical = profile.type && (profile.type.includes('Non-Technical') || (profile.languages.length === 0 && profile.frameworks.length === 0));
+  const isTypeScript = profile.languages && profile.languages.includes('TypeScript');
+  const isPython = profile.languages && (profile.languages.includes('Python') || profile.type.includes('FastAPI') || profile.type.includes('Django') || profile.type.includes('Flask'));
+
+  // Matt Pocock collection integration with archetype filtering
   for (const skill of MATT_POCOCK_OFFICIAL_SOURCE.skills) {
     const item = {
       id: skill.id,
@@ -506,6 +547,40 @@ function recommendProjectSkills(profile) {
       description: skill.description,
       installed: profile.existingSkills.includes(skill.id)
     };
+
+    if (isNonTechnical) {
+      // In non-technical projects, only include documentation, research, and non-coding collaboration skills
+      const nonTechnicalAllowed = [
+        'research',
+        'writing-for-agents',
+        'writing-shape',
+        'writing-beats',
+        'writing-fragments',
+        'to-questionnaire',
+        'teach',
+        'handoff',
+        'grill-me',
+        'ask-matt',
+        'wait-what'
+      ];
+      if (nonTechnicalAllowed.includes(skill.id)) {
+        categories.MATT_POCOCK_COLLECTION.push(item);
+        if (skill.category === 'DEVELOPMENT') {
+          categories.DEVELOPMENT_SKILLS.push(item);
+        } else if (skill.category === 'OPTIONAL') {
+          categories.OPTIONAL_SKILLS.push(item);
+        }
+      }
+      continue;
+    }
+
+    // For technical projects: exclude TypeScript-specific specialists unless TypeScript is in languages
+    if (skill.category === 'PROJECT_SPECIFIC') {
+      if ((skill.id === 'setup-ts-deep-modules' || skill.id === 'migrate-to-shoehorn') && !isTypeScript) {
+        continue;
+      }
+    }
+
     categories.MATT_POCOCK_COLLECTION.push(item);
 
     if (skill.category === 'DEVELOPMENT') {
@@ -518,7 +593,22 @@ function recommendProjectSkills(profile) {
   }
 
   // Core & Project-Specific skills based on stack
-  if (profile.type.includes('Next.js')) {
+  if (isNonTechnical) {
+    categories.CORE_PROJECT_SKILLS.push({
+      id: 'research',
+      package: 'mattpocock/skills@research',
+      source: 'mattpocock/skills',
+      description: 'Investigate questions against high-trust primary sources with grounded evidence.',
+      installed: profile.existingSkills.includes('research')
+    });
+    categories.CORE_PROJECT_SKILLS.push({
+      id: 'writing-for-agents',
+      package: 'mattpocock/skills@writing-for-agents',
+      source: 'mattpocock/skills',
+      description: 'Format documentation and knowledge artifacts specifically for AI agents.',
+      installed: profile.existingSkills.includes('writing-for-agents')
+    });
+  } else if (profile.type.includes('Next.js')) {
     categories.CORE_PROJECT_SKILLS.push({
       id: 'nextjs-best-practices',
       package: 'sickn33/agentic-awesome-skills@nextjs-best-practices',
@@ -533,13 +623,15 @@ function recommendProjectSkills(profile) {
       description: 'High-contrast accessible component design and responsive layout systems.',
       installed: profile.existingSkills.includes('frontend-design')
     });
-    categories.PROJECT_SPECIFIC_SPECIALISTS.push({
-      id: 'setup-ts-deep-modules',
-      package: 'mattpocock/skills@setup-ts-deep-modules',
-      source: 'mattpocock/skills',
-      description: 'Enforce TypeScript deep module architectural boundaries via dependency-cruiser.',
-      installed: profile.existingSkills.includes('setup-ts-deep-modules')
-    });
+    if (isTypeScript) {
+      categories.PROJECT_SPECIFIC_SPECIALISTS.push({
+        id: 'setup-ts-deep-modules',
+        package: 'mattpocock/skills@setup-ts-deep-modules',
+        source: 'mattpocock/skills',
+        description: 'Enforce TypeScript deep module architectural boundaries via dependency-cruiser.',
+        installed: profile.existingSkills.includes('setup-ts-deep-modules')
+      });
+    }
   } else if (profile.type.includes('Flutter')) {
     categories.CORE_PROJECT_SKILLS.push({
       id: 'flutter-specialist',
@@ -570,6 +662,14 @@ function recommendProjectSkills(profile) {
       description: 'Pest PHP elegant testing, dataset mutations, and architectural assertions.',
       installed: profile.existingSkills.includes('pest-testing')
     });
+  } else if (isPython) {
+    categories.CORE_PROJECT_SKILLS.push({
+      id: 'codebase-design',
+      package: 'mattpocock/skills@codebase-design',
+      source: 'mattpocock/skills',
+      description: 'Design deep modules with small interfaces and rich implementations.',
+      installed: profile.existingSkills.includes('codebase-design')
+    });
   } else {
     // Default software engineering core
     categories.CORE_PROJECT_SKILLS.push({
@@ -582,7 +682,7 @@ function recommendProjectSkills(profile) {
   }
 
   // Cross-cutting QA
-  if (profile.languages.includes('TypeScript')) {
+  if (isTypeScript) {
     categories.PROJECT_SPECIFIC_SPECIALISTS.push({
       id: 'migrate-to-shoehorn',
       package: 'mattpocock/skills@migrate-to-shoehorn',
@@ -1372,10 +1472,18 @@ function runEngine(mode = 'initial', projectDir = process.cwd(), options = {}) {
   }
 
   // Default: mode === 'initial'
-  const skillsToInstall = [
+  const rawSkillsToInstall = [
     ...recommendations.CORE_PROJECT_SKILLS,
     ...recommendations.MATT_POCOCK_COLLECTION
   ];
+  const seenSkillIds = new Set();
+  const skillsToInstall = [];
+  for (const s of rawSkillsToInstall) {
+    if (!seenSkillIds.has(s.id)) {
+      seenSkillIds.add(s.id);
+      skillsToInstall.push(s);
+    }
+  }
 
   const installResults = installProjectSkills(resolvedDir, skillsToInstall, options);
   const registryInfo = saveProjectRegistry(resolvedDir, profile, recommendations, installResults, 'initial');

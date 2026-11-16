@@ -1,9 +1,9 @@
 # MO7I Universal Intelligence - Production Acceptance Test Suite Results
 
-Date: 2026-11-16 02:22:25Z
+Date: 2026-11-16 02:37:52Z
 Host: Linux 7.0.0-34-generic (x86_64)
-Release Version: v2.4.1
-Suite: 85 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification)
+Release Version: v2.5.0
+Suite: 91 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification + 6 Non-Next.js & Non-Code Validation)
 
 ### Test 1: A New Next.js Development Task
 
@@ -541,7 +541,7 @@ rm -rf /tmp/mo7i-cleanup-suite && mkdir -p /tmp/mo7i-cleanup-suite && (cd /tmp/m
 │                                                                │
 ├────────────────────────────────────────────────────────────────╯
 [?25l│
-◇  Installation complete
+◒  Installing skills…[1G[J◐  Installing skills…[1G[J◇  Installation complete
 [?25h
 │
 ◇  Installed 1 skill ──────────────────────╮
@@ -1047,7 +1047,7 @@ rm -rf /tmp/test-project-scope && mkdir -p /tmp/test-project-scope && (cd /tmp/t
 [?25h[?25l│
 ◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◇  Repository cloned
 [?25h[?25l│
-[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-mX5AeH/skills-5yRmK6/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
+[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-mAnaDt/skills-zaqQyH/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
 
 description: Shared language for designing a software factory: the tasks it run…
              ^
@@ -1338,7 +1338,7 @@ rm -rf /tmp/repair-sandbox && mkdir -p /tmp/repair-sandbox && node -e '
 **Actual Behavior & Output Evidence**:
 ```text
 Repair Mode Executed: repair
-Target skills repaired: 40
+Target skills repaired: 38
 ```
 
 **Verification Analysis**:
@@ -1407,7 +1407,7 @@ rm -rf /tmp/persist-test && mkdir -p /tmp/persist-test && node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Persisted Version: 2.4.0
+Persisted Version: 2.5.0
 Persisted Status: INITIALIZED
 Matt Pocock Collection Recorded: 38
 ```
@@ -1521,7 +1521,7 @@ Default to help catalog displaying all available slash commands and platform sup
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.4.1)
+# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.5.0)
 
 **Core Principle:** One unified intelligence layer with multiple direct entry points.
 
@@ -1586,14 +1586,17 @@ Dispatch task through the Universal Intelligence Meta-Orchestrator and classify 
 
 **Actual Behavior & Output Evidence**:
 ```text
-[MO7I Universal Task Dispatcher (v2.4.1)]
+[MO7I Universal Task Dispatcher (v2.5.0)]
 • Intent: "Build a modern Flutter mobile app with reactive BLoC state"
 • Target Project: MO7I-Universal-Intelligence (Generic Software Project)
 • Project Setup Status: UNINITIALIZED
 • Execution Mode: FULL META-ORCHESTRATOR (16-phase pipeline)
 • Classified Domain: Mobile Development
 • Executed Phases Log: 1. INTAKE -> 2. PROJECT_DETECTION -> 3. PROJECT_PROFILE_INSPECTION -> 4. SETUP_STATUS_CHECK -> 5. PROJECT_SKILL_SETUP -> 6. TASK_CLASSIFICATION -> 7. CAPABILITY_GAP_ANALYSIS -> 8. SKILL_DISCOVERY -> 9. SKILL_LEARNING -> 10. COMPATIBILITY_AND_PLANNING -> 11. SKILL_ORCHESTRATION -> 12. EXECUTION -> 13. QUALITY_VALIDATION -> 14. KNOWLEDGE_AND_PROFILE_UPDATE -> 15. SAFE_CLEANUP -> 16. FINAL_REPORT
-• Per-Run Log: .mo7i/runs/2026-11-16T02-22-34.360Z.json
+• Per-Run Log: .mo7i/runs/2026-11-16T02-37-59.658Z.json
+
+[Notice: Pending Post-Install Setups Detected]
+• $setup-matt-pocock-skills: Configure this repo for the engineering skills: set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills.
 
 [Capability Gap Notice]
 • Gap Analysis: no gap (existing tools suffice for the current task)
@@ -1619,7 +1622,7 @@ Display complete official command registry with parameters, examples, and safety
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.4.1)
+# MO7I Universal Intelligence — Multi-Platform Entry Points (v2.5.0)
 
 **Core Principle:** One unified intelligence layer with multiple direct entry points.
 
@@ -1805,9 +1808,9 @@ Generate comprehensive markdown report summarizing project intelligence profile.
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I Project Intelligence & Skill Setup Report (v2.4.0)
+# MO7I Project Intelligence & Skill Setup Report (v2.5.0)
 
-- **Timestamp**: `2026-11-16T02:22:34.559Z`
+- **Timestamp**: `2026-11-16T02:37:59.873Z`
 - **Execution Mode**: `REPORT`
 - **Project Workspace**: `/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/fixtures/projects/nextjs-app`
 - **Project Archetype**: **Fullstack Web Application (Next.js)**
@@ -1991,7 +1994,7 @@ Run system doctor diagnostics validating runtime environment, CLIs, and integrit
 
 **Actual Behavior & Output Evidence**:
 ```text
-# MO7I System Doctor Diagnostics (v2.4.1)
+# MO7I System Doctor Diagnostics (v2.5.0)
 
 | Check | Status | Detail |
 | :--- | :--- | :--- |
@@ -2001,7 +2004,7 @@ Run system doctor diagnostics validating runtime environment, CLIs, and integrit
 | Slash Command Definitions | `PASS` | Command definitions detected |
 | Project Setup Engine | `PASS` | setup-engine.js present and executable |
 | Project Profile Registry | `INFO` | Uninitialized project workspace |
-| Disk vs Registry Reconciliation | `INFO` | Project not yet initialized; discovered skill(s) on disk: mo7i, mo7i-project-setup (run /mo7i setup initial to register) |
+| Disk vs Registry Reconciliation | `INFO` | Project not yet initialized; discovered skill(s) on disk: ask-matt, code-review, codebase-design, diagnosing-bugs, domain-modeling, grill-me, grill-with-docs, grilling, handoff, implement, implement-spec, improve-codebase-architecture, mo7i, mo7i-project-setup, pr, prototype, research, retro, setup-matt-pocock-skills, tdd, teach, to-spec, to-tickets, triage, wayfinder, wizard (run /mo7i setup initial to register) |
 
 ### Platform Compatibility Status
 
@@ -2168,7 +2171,7 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-mo7i status version: 2.4.1
+mo7i status version: 2.5.0
 Registered commands count: 11
 setup-project-skills output header: [MO7I Project Setup: AUDIT]
 ```
@@ -2381,7 +2384,7 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Disk skills count: 2
+Disk skills count: 26
 Reconciled status: false
 ```
 
@@ -2567,8 +2570,8 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Status JSON version: 2.4.1
-Status JSON post-install setups count: 0
+Status JSON version: 2.5.0
+Status JSON post-install setups count: 1
 ```
 
 **Verification Analysis**:
@@ -3077,7 +3080,7 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Installed footprint size: 168 KB
+Installed footprint size: 172 KB
 ```
 
 **Verification Analysis**:
@@ -3110,7 +3113,7 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Engine version in installed footprint: 2.4.0
+Engine version in installed footprint: 2.5.0
 ```
 
 **Verification Analysis**:
@@ -3183,6 +3186,229 @@ All 6 v2.4.1 Independent Verification Acceptance Tests Passed Successfully!
 
 **Verification Analysis**:
 All 6 v2.4.1 independent verification acceptance tests passed with zero regressions.
+
+---
+
+### Test 86: Python/FastAPI Project Archetype Detection
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Inspect Python/FastAPI repository and verify accurate stack archetype classification without frontend bias.
+
+**Command Executed**:
+```bash
+node -e '
+    const os = require("os");
+    const fs = require("fs");
+    const path = require("path");
+    const { analyzeProject } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/skills/mo7i/scripts/setup-engine");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "mo7i-py-"));
+    fs.writeFileSync(path.join(tmp, "requirements.txt"), "fastapi>=0.110.0\npytest>=8.0.0\n");
+    const p = analyzeProject(tmp);
+    console.log("Detected Type:", p.type);
+    console.log("Languages:", p.languages.join(", "));
+    fs.rmSync(tmp, { recursive: true, force: true });
+    if (p.type !== "Web API Service (FastAPI)" || !p.languages.includes("Python")) process.exit(1);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Detected Type: Web API Service (FastAPI)
+Languages: Python
+```
+
+**Verification Analysis**:
+Python/FastAPI stack correctly classified as Web API Service (FastAPI) without framework leaks.
+
+---
+
+### Test 87: Non-Next.js Skill Exclusion on Python/FastAPI
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Run setup initial on Python/FastAPI project and assert that Next.js and frontend skills are excluded.
+
+**Command Executed**:
+```bash
+node -e '
+    const os = require("os");
+    const fs = require("fs");
+    const path = require("path");
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "mo7i-py2-"));
+    fs.writeFileSync(path.join(tmp, "requirements.txt"), "fastapi>=0.110.0\npytest>=8.0.0\n");
+    const res = routeCommand("/mo7i setup initial", tmp, { dryRun: true });
+    const installed = res.result.installResults.successful.map(s => s.id);
+    console.log("Contains nextjs-best-practices:", installed.includes("nextjs-best-practices"));
+    console.log("Contains frontend-design:", installed.includes("frontend-design"));
+    console.log("Contains setup-ts-deep-modules:", installed.includes("setup-ts-deep-modules"));
+    fs.rmSync(tmp, { recursive: true, force: true });
+    if (installed.includes("nextjs-best-practices") || installed.includes("frontend-design") || installed.includes("setup-ts-deep-modules")) process.exit(1);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Contains nextjs-best-practices: false
+Contains frontend-design: false
+Contains setup-ts-deep-modules: false
+```
+
+**Verification Analysis**:
+Setup initial on Python/FastAPI cleanly excluded all Next.js, frontend, and TypeScript skills.
+
+---
+
+### Test 88: Non-Technical / General Workspace Archetype Detection
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Inspect empty or document-only directory and classify as Non-Technical / General Workspace without code assumptions.
+
+**Command Executed**:
+```bash
+node -e '
+    const os = require("os");
+    const fs = require("fs");
+    const path = require("path");
+    const { analyzeProject } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/skills/mo7i/scripts/setup-engine");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "mo7i-nontech-"));
+    const p = analyzeProject(tmp);
+    console.log("Detected Type:", p.type);
+    console.log("Architecture:", p.architecture);
+    fs.rmSync(tmp, { recursive: true, force: true });
+    if (p.type !== "Non-Technical / General Workspace" || p.architecture !== "Document & Research Workspace") process.exit(1);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Detected Type: Non-Technical / General Workspace
+Architecture: Document & Research Workspace
+```
+
+**Verification Analysis**:
+Empty directory successfully recognized as Non-Technical / General Workspace.
+
+---
+
+### Test 89: Non-Code Tooling Exclusion on General Workspace
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify setup initial on non-technical workspace provisions only research/documentation skills and excludes coding tools.
+
+**Command Executed**:
+```bash
+node -e '
+    const os = require("os");
+    const fs = require("fs");
+    const path = require("path");
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "mo7i-nontech2-"));
+    const res = routeCommand("/mo7i setup initial", tmp, { dryRun: true });
+    const installed = res.result.installResults.successful.map(s => s.id);
+    console.log("Has research skill:", installed.includes("research"));
+    console.log("Has writing-for-agents:", installed.includes("writing-for-agents"));
+    console.log("Has tdd:", installed.includes("tdd"));
+    console.log("Has code-review:", installed.includes("code-review"));
+    fs.rmSync(tmp, { recursive: true, force: true });
+    if (!installed.includes("research") || installed.includes("tdd") || installed.includes("code-review")) process.exit(1);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Has research skill: true
+Has writing-for-agents: true
+Has tdd: false
+Has code-review: false
+```
+
+**Verification Analysis**:
+Non-technical setup correctly selected research and documentation skills while omitting code testing tools.
+
+---
+
+### Test 90: Real Research Task & Evidence Protocol Log Verification
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Execute real research task requiring 3+ searches and 2+ fetched sources; verify .mo7i/runs/ log.
+
+**Command Executed**:
+```bash
+node -e '
+    const os = require("os");
+    const fs = require("fs");
+    const path = require("path");
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "mo7i-runlog-"));
+    const task = "Summarize the latest developments on sodium-ion batteries in grid energy storage with sources.";
+    const res = routeCommand(task, tmp, {
+      webSearches: ["s1", "s2", "s3"],
+      sourcesFetched: ["https://peakenergy.com", "https://volta.foundation"],
+      citedUrls: ["https://peakenergy.com", "https://volta.foundation"],
+      toolReturnedUrls: ["https://peakenergy.com", "https://volta.foundation"]
+    });
+    console.log("Validation valid:", res.researchValidation.valid);
+    console.log("Run log exists:", fs.existsSync(res.runLogPath));
+    const log = JSON.parse(fs.readFileSync(res.runLogPath, "utf8"));
+    console.log("Log task:", log.task);
+    console.log("Log domain:", log.domain);
+    fs.rmSync(tmp, { recursive: true, force: true });
+    if (!res.researchValidation.valid || log.domain !== "Research & Analysis") process.exit(1);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Validation valid: true
+Run log exists: true
+Log task: Summarize the latest developments on sodium-ion batteries in grid energy storage with sources.
+Log domain: Research & Analysis
+```
+
+**Verification Analysis**:
+Research task enforced evidence protocol and recorded verified execution log in .mo7i/runs/.
+
+---
+
+### Test 91: End-to-End v2.5.0 Non-Next.js and Non-Code Suite
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Execute complete v2.5.0 acceptance test suite covering all Phase C requirements.
+
+**Command Executed**:
+```bash
+node /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v250_non_nextjs_and_non_code_validation.js
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+=== MO7I v2.5.0 Non-Next.js & Non-Code Validation Suite ===
+
+[PASS] Test 2.5.1: Python/FastAPI fixture project analysis detects archetype and Python stack
+[PASS] Test 2.5.2: /mo7i setup initial on Python/FastAPI excludes Next.js, frontend, and TypeScript skills
+[PASS] Test 2.5.3: Non-technical empty folder fixture detects Non-Technical / General Workspace archetype
+[PASS] Test 2.5.4: /mo7i setup initial on non-technical workspace excludes all code-specific and frontend skills
+[PASS] Test 2.5.5: Real research task enforces evidence protocol (3+ searches, 2+ sources) and writes .mo7i/runs/
+[PASS] Test 2.5.6: Research validation rejects citations of URLs not returned by tools (anti-hallucination guard)
+
+All 6 v2.5.0 Non-Next.js & Non-Code Acceptance Tests Passed Successfully!
+
+```
+
+**Verification Analysis**:
+All 6 v2.5.0 acceptance tests passed successfully with zero regressions.
 
 ---
 

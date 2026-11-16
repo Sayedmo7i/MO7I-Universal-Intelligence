@@ -41,7 +41,7 @@ const { PLATFORM_VERIFICATION } = require('./platform-installer');
 const selfUpdateEngine = require('./self-update-engine');
 const selftestEngine = require('./selftest-engine');
 
-const ROUTER_VERSION = '2.4.1';
+const ROUTER_VERSION = '2.5.0';
 
 /**
  * Determine if a task qualifies for the fast path.
@@ -270,7 +270,10 @@ function writeRunLog(projectDir, runData = {}, options = {}) {
 /**
  * Route and execute a command given raw input string or parsed command object.
  */
-function routeCommand(input, options = {}) {
+function routeCommand(input, optionsOrProjectDir = {}, maybeOptions = {}) {
+  const options = typeof optionsOrProjectDir === 'string'
+    ? { projectDir: optionsOrProjectDir, ...maybeOptions }
+    : (optionsOrProjectDir || {});
   const parsed = typeof input === 'string' ? parseCommand(input) : input;
 
   if (!parsed.valid) {
@@ -409,7 +412,7 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
     domain = 'UI/UX & Visual Design';
   } else if (lower.includes('docker') || lower.includes('devops') || lower.includes('ci/cd') || lower.includes('container') || lower.includes('kubernetes')) {
     domain = 'DevOps & Infrastructure';
-  } else if (lower.includes('research') || lower.includes('benchmark') || lower.includes('paper') || lower.includes('compare')) {
+  } else if (lower.includes('research') || lower.includes('benchmark') || lower.includes('paper') || lower.includes('compare') || lower.includes('summarize') || lower.includes('sources')) {
     domain = 'Research & Analysis';
   } else if (lower.includes('security') || lower.includes('vulnerability') || lower.includes('fuzz') || lower.includes('appsec')) {
     domain = 'Security & AppSec';
@@ -450,7 +453,7 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
     ];
   }
 
-  const isResearchTask = domain === 'Research & Analysis' || lower.includes('research');
+  const isResearchTask = domain === 'Research & Analysis' || lower.includes('research') || lower.includes('summarize');
   const researchEvidencePolicy = {
     minWebSearches: 3,
     minSourcesFetched: 2,
@@ -485,6 +488,8 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
       toolsCalled = ['search_web', 'search_web', 'search_web', 'read_url_content', 'read_url_content'];
     } else if (fastPath) {
       toolsCalled = ['view_file'];
+    } else if (profile.type && profile.type.includes('Non-Technical')) {
+      toolsCalled = ['view_file', 'write_to_file'];
     } else {
       toolsCalled = ['run_command', 'view_file', 'replace_file_content'];
     }

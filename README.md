@@ -1,9 +1,21 @@
 # MO7I Universal Intelligence
 
-> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.4.1)**  
+> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.5.0)**  
 > *The user specifies WHAT needs to be accomplished. MO7I determines HOW to accomplish it.*
 
 A project onboarding and orchestration layer for AI agents: detects the stack, provisions the right skills, tracks manual setup steps, selects the minimum skills per task, verifies with evidence, and logs every run. Same commands and same state (.mo7i/) across projects and agents.
+
+---
+
+## What's New in v2.5.0: Non-Next.js & Non-Code Validation
+
+Version 2.5.0 eliminates framework-specific assumptions and extends intelligent onboarding to non-Next.js and non-technical projects:
+
+1. **Stack-Accurate Archetype Detection**: Automatically classifies Python/FastAPI (`Web API Service (FastAPI)`), Rust (`Systems / Application Service (Rust)`), Go (`Backend Service (Go)`), and document-only/empty folders as `Non-Technical / General Workspace`.
+2. **Framework Leak Prevention**: Strictly prevents Next.js (`nextjs-best-practices`), frontend design (`frontend-design`), and TypeScript-only specialists (`setup-ts-deep-modules`, `migrate-to-shoehorn`) from leaking into Python or non-technical workspaces.
+3. **Non-Technical Workspace Onboarding**: Non-technical projects receive research, writing, and structured collaboration skills (`research`, `writing-for-agents`, `writing-shape`, `to-questionnaire`, `teach`) while omitting software test runners (`tdd`, `code-review`, `diagnosing-bugs`).
+4. **Research Evidence Protocol & Verification**: Full enforcement of research evidence policy (minimum 3 searches, 2 fetched sources) and anti-hallucination validation ensuring all cited URLs were returned by tool executions.
+5. **Flexible Command Routing**: Supports `/mo7i setup initial` as a first-class subcommand and flexible routing signatures across projects.
 
 ---
 

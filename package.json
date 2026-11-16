@@ -1,6 +1,6 @@
 {
   "name": "mo7i-universal-intelligence",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System",
   "main": "src/commands/command-router.js",
   "bin": {

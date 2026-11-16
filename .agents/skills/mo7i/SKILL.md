@@ -1,11 +1,11 @@
 ---
 name: mo7i
-description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Multi-Platform Entry Point (v2.4.1). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands (audit, learn, discover, status, doctor, update, self-update, selftest, help, or a free-form task). Autonomously analyzes project stacks, provisions project-scoped skills, manages post-install setup lifecycles, and executes with verifiable evidence."
+description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Multi-Platform Entry Point (v2.5.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands (audit, learn, discover, status, doctor, update, self-update, selftest, help, or a free-form task). Autonomously analyzes project stacks, provisions project-scoped skills, manages post-install setup lifecycles, and executes with verifiable evidence."
 ---
 
 # MO7I Universal Intelligence
 
-Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, and Multi-Platform Entry Point (v2.4.1).
+Universal Intelligence Layer, Autonomous Task Meta-Orchestrator, and Multi-Platform Entry Point (v2.5.0).
 
 MO7I serves as the single autonomous entry point across all repositories and engineering tasks. It operates on a core principle: **The user specifies WHAT needs to be accomplished; MO7I determines HOW to accomplish it.**
 
