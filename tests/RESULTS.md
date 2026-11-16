@@ -1,6 +1,6 @@
 # MO7I Universal Intelligence - Production Acceptance Test Suite Results
 
-Date: 2026-11-16 02:19:47Z
+Date: 2026-11-16 02:22:25Z
 Host: Linux 7.0.0-34-generic (x86_64)
 Release Version: v2.4.1
 Suite: 85 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification)
@@ -485,7 +485,8 @@ Verify independent projects can access the global skill store without creating d
 ```bash
 rm -rf /tmp/proj-alpha /tmp/proj-beta && mkdir -p /tmp/proj-alpha /tmp/proj-beta && node -e '
     const fs = require("fs");
-    const globalPath = "/root/.agents/skills/find-skills/SKILL.md";
+    const path = require("path");
+    const globalPath = path.join(process.env.HOME || "/root", ".agents/skills/find-skills/SKILL.md");
     console.log("Project Alpha reading global skill:", fs.existsSync(globalPath));
     console.log("Project Beta reading global skill:", fs.existsSync(globalPath));
     console.log("Shared access verified across independent projects without file duplication.");
@@ -1046,7 +1047,7 @@ rm -rf /tmp/test-project-scope && mkdir -p /tmp/test-project-scope && (cd /tmp/t
 [?25h[?25l│
 ◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◇  Repository cloned
 [?25h[?25l│
-[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-mX5AeH/skills-6Sv5Sy/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
+[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-mX5AeH/skills-5yRmK6/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
 
 description: Shared language for designing a software factory: the tasks it run…
              ^
@@ -1592,7 +1593,7 @@ Dispatch task through the Universal Intelligence Meta-Orchestrator and classify 
 • Execution Mode: FULL META-ORCHESTRATOR (16-phase pipeline)
 • Classified Domain: Mobile Development
 • Executed Phases Log: 1. INTAKE -> 2. PROJECT_DETECTION -> 3. PROJECT_PROFILE_INSPECTION -> 4. SETUP_STATUS_CHECK -> 5. PROJECT_SKILL_SETUP -> 6. TASK_CLASSIFICATION -> 7. CAPABILITY_GAP_ANALYSIS -> 8. SKILL_DISCOVERY -> 9. SKILL_LEARNING -> 10. COMPATIBILITY_AND_PLANNING -> 11. SKILL_ORCHESTRATION -> 12. EXECUTION -> 13. QUALITY_VALIDATION -> 14. KNOWLEDGE_AND_PROFILE_UPDATE -> 15. SAFE_CLEANUP -> 16. FINAL_REPORT
-• Per-Run Log: .mo7i/runs/2026-11-16T02-19-56.352Z.json
+• Per-Run Log: .mo7i/runs/2026-11-16T02-22-34.360Z.json
 
 [Capability Gap Notice]
 • Gap Analysis: no gap (existing tools suffice for the current task)
@@ -1806,7 +1807,7 @@ Generate comprehensive markdown report summarizing project intelligence profile.
 ```text
 # MO7I Project Intelligence & Skill Setup Report (v2.4.0)
 
-- **Timestamp**: `2026-11-16T02:19:56.537Z`
+- **Timestamp**: `2026-11-16T02:22:34.559Z`
 - **Execution Mode**: `REPORT`
 - **Project Workspace**: `/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/fixtures/projects/nextjs-app`
 - **Project Archetype**: **Fullstack Web Application (Next.js)**

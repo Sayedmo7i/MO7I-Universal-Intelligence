@@ -5,9 +5,9 @@ set -euo pipefail
 # Version: 2.4.1
 # Suite: 85 Tests Total (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification)
 
-REPO_DIR="/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_FILE="${REPO_DIR}/tests/RESULTS.md"
-CONFIG_DIR="/root/.config/mo7i/universal-intelligence"
+CONFIG_DIR="${HOME:-/root}/.config/mo7i/universal-intelligence"
 mkdir -p "${CONFIG_DIR}"
 
 echo "# MO7I Universal Intelligence - Production Acceptance Test Suite Results" > "$OUTPUT_FILE"
@@ -258,7 +258,8 @@ run_and_log "13" "Cross-Project Knowledge Reuse" \
   "Verify independent projects can access the global skill store without creating duplicate copies in each repository." \
   "rm -rf /tmp/proj-alpha /tmp/proj-beta && mkdir -p /tmp/proj-alpha /tmp/proj-beta && node -e '
     const fs = require(\"fs\");
-    const globalPath = \"/root/.agents/skills/find-skills/SKILL.md\";
+    const path = require(\"path\");
+    const globalPath = path.join(process.env.HOME || \"/root\", \".agents/skills/find-skills/SKILL.md\");
     console.log(\"Project Alpha reading global skill:\", fs.existsSync(globalPath));
     console.log(\"Project Beta reading global skill:\", fs.existsSync(globalPath));
     console.log(\"Shared access verified across independent projects without file duplication.\");
