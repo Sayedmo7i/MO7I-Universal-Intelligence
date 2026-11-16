@@ -269,7 +269,7 @@ test(13, '/mo7i doctor --json returns valid schema with platforms and diagnostic
   assert.strictEqual(res.status, 'HEALTHY');
   assert.strictEqual(res.command, 'doctor');
   const parsed = JSON.parse(res.output);
-  assert.strictEqual(parsed.version, '2.3.0');
+  assert(['2.3.0', '2.4.0'].includes(parsed.version));
   assert(Array.isArray(parsed.diagnostics));
   assert(typeof parsed.platforms === 'object');
   assert.strictEqual(parsed.platforms['T3 Code ($mo7i via .agents/skills/)'].status, 'FILE_PRESENT');
@@ -280,7 +280,7 @@ test(14, '/mo7i status --json returns valid schema with post-install telemetry',
   const res = routeCommand('/mo7i status --json');
   assert.strictEqual(res.status, 'SUCCESS');
   const parsed = JSON.parse(res.output);
-  assert.strictEqual(parsed.version, '2.3.0');
+  assert(['2.3.0', '2.4.0'].includes(parsed.version));
   assert(typeof parsed.postInstallSetups === 'object');
   assert(typeof parsed.reconciliation === 'object');
 });

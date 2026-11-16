@@ -107,7 +107,7 @@ function parseCommand(input) {
     command = 'mo7i';
   } else {
     // If input was e.g. "/audit" or "/learn" or direct prompt without "mo7i" prefix
-    const knownSubcommands = ['help', 'audit', 'learn', 'discover', 'status', 'doctor', 'update'];
+    const knownSubcommands = ['help', 'audit', 'learn', 'discover', 'status', 'doctor', 'update', 'self-update', 'selfupdate'];
     if (knownSubcommands.includes(firstToken)) {
       command = 'mo7i';
       remainingTokens = tokens;
@@ -123,7 +123,11 @@ function parseCommand(input) {
     dryRun: false,
     project: null,
     json: false,
-    all: false
+    all: false,
+    check: false,
+    yes: false,
+    ref: null,
+    source: null
   };
 
   const positionalArgs = [];
@@ -136,6 +140,22 @@ function parseCommand(input) {
       flags.json = true;
     } else if (token === '--all') {
       flags.all = true;
+    } else if (token === '--check') {
+      flags.check = true;
+    } else if (token === '--yes' || token === '-y') {
+      flags.yes = true;
+    } else if (token === '--ref') {
+      if (i + 1 < remainingTokens.length) {
+        flags.ref = remainingTokens[++i];
+      }
+    } else if (token.startsWith('--ref=')) {
+      flags.ref = token.split('=')[1];
+    } else if (token === '--source') {
+      if (i + 1 < remainingTokens.length) {
+        flags.source = remainingTokens[++i];
+      }
+    } else if (token.startsWith('--source=')) {
+      flags.source = token.split('=')[1];
     } else if (token === '--project' || token === '-p') {
       if (i + 1 < remainingTokens.length) {
         flags.project = remainingTokens[++i];
@@ -200,7 +220,7 @@ function parseCommand(input) {
       subcommand = 'help';
     } else {
       const candidate = positionalArgs[0].toLowerCase();
-      const validSubcommands = ['help', 'audit', 'learn', 'discover', 'status', 'doctor', 'update'];
+      const validSubcommands = ['help', 'audit', 'learn', 'discover', 'status', 'doctor', 'update', 'self-update', 'selfupdate'];
       if (validSubcommands.includes(candidate)) {
         subcommand = candidate;
         positionalArgs.shift(); // remove subcommand from args

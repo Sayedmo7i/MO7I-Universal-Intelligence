@@ -1,25 +1,32 @@
 # MO7I Universal Intelligence
 
-> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.3.0)**  
+> **Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Official Slash Commands System (v2.4.0)**  
 > *The user specifies WHAT needs to be accomplished. MO7I determines HOW to accomplish it.*
 
-MO7I Universal Intelligence is an autonomous intelligence layer, task meta-orchestrator, project intelligence engine, and native slash command system built on the open [Agent Skills](https://skills.sh) standard. It operates as the single autonomous entry point across all engineering repositories and domains.
-
-Rather than expecting users to manually configure tools or remember complex prompts, MO7I provides direct native slash command entry points (`/mo7i`, `/setup-project-skills`, `/mo7i audit`, etc.) and native T3 Code autocomplete chips (`$mo7i`, `$setup-project-skills`), automatically inspects projects, detects frameworks and architectures, provisions project-scoped specialist skills (including the verified Matt Pocock collection), handles post-install setup companions with Human Gate guards, learns operational contracts, coordinates multi-skill pipelines, enforces zero-trust safety boundaries, and verifies outcomes with real execution evidence.
+A project onboarding and orchestration layer for AI agents: detects the stack, provisions the right skills, tracks manual setup steps, selects the minimum skills per task, verifies with evidence, and logs every run. Same commands and same state (.mo7i/) across projects and agents.
 
 ---
 
-## What's New in v2.3.0: T3 Code Entry Points, Post-Install Setups & Hardening
+## What's New in v2.4.0: Autonomous Self-Update & Rollback Safety
 
-Version 2.3.0 resolves T3 Code skill discovery, introduces automated post-install setup handling, and hardens the orchestrator core:
+Version 2.4.0 introduces an autonomous self-updating mechanism for MO7I's core skills (`mo7i` and `mo7i-project-setup`):
 
-1. **Native T3 Code Entry Points**: Directly invokable via `$mo7i` (and companion `$mo7i-project-setup`) chips in T3 Code through compliant `.agents/skills/` manifests.
-2. **Post-Install Setup Engine**: Automatically detects companion setups (`setup-*`, `init-*`, `onboard*`) required by installed collections (e.g., Matt Pocock skills requiring `setup-matt-pocock-skills`).
-3. **Strict Human Gate for Interactive Setups**: Never fabricates or silently guesses answers for interactive setup skills; surfaces prominent notices when human input is needed.
-4. **Setup State Tracking & Verification**: Tracks setup lifecycle states (`not-required`, `pending`, `in-progress`, `completed`, `skipped`, `failed`) and verifies completion against real on-disk artifact evidence.
-5. **Platform Truth & Verification**: Explicitly marks verified runtimes (`t3-code`, universal CLI, Claude Code CLI outside T3 Code) versus unverified runtimes (`cursor`, `codex`, `gemini-cli`).
-6. **Orchestrator Hardening & Evidence**: Fast Path for trivial tasks with phase telemetry, dynamic TCP port probing for preview servers, capability-gap analysis reporting "no gap" when existing tools suffice, strict path traversal defense, and real per-run audit logging (`.mo7i/runs/<timestamp>.json`) recording phases executed, skills read/excluded, and tools called.
-7. **Research Evidence Protocol & Clean Setups**: Enforces at least 3 web searches and 2 source fetches before citing figures, prohibits non-tool URLs, and strictly excludes MO7I's own skills (`mo7i`, `mo7i-project-setup`) from post-install setup detection.
+1. **Autonomous Self-Update (`/mo7i self-update`)**: Automatically detects installed version against remote releases via `git ls-remote` and GitHub API semver resolution.
+2. **Read-Only `--check` Mode**: Inspects installed versus latest remote versions and renders a formatted changelog summary without mutating files.
+3. **Strict Human Gate**: Non-interactive runs require `--yes` confirmation before replacing skills, ensuring full operator consent.
+4. **Scoped Backups & Safe Rollback**: Backs up existing MO7I skills to `.mo7i/backups/<timestamp>/` prior to installation, automatically restoring original files on failure while strictly leaving secrets and project files untouched.
+5. **Dry-Run Simulation (`--dry-run`)**: Simulates the complete backup and command invocation lifecycle with zero filesystem writes.
+6. **Post-Update Verification & Doctor Diagnostics**: Verifies newly installed skills on disk, executes doctor diagnostics, prints a neutral agent cache restart notice, and records execution audit telemetry in `.mo7i/runs/`.
+
+---
+
+## What's New in v2.3.0: Post-Install Setups & Hardening
+
+1. **Post-Install Setup Engine**: Automatically detects companion setups (`setup-*`, `init-*`, `onboard*`) required by installed collections (e.g., Matt Pocock skills requiring `setup-matt-pocock-skills`).
+2. **Strict Human Gate for Interactive Setups**: Never fabricates or silently guesses answers for interactive setup skills; surfaces prominent notices when human input is needed.
+3. **Setup State Tracking & Verification**: Tracks setup lifecycle states (`not-required`, `pending`, `in-progress`, `completed`, `skipped`, `failed`) and verifies completion against real on-disk artifact evidence.
+4. **Orchestrator Hardening & Evidence**: Fast Path for trivial tasks with phase telemetry, dynamic TCP port probing for preview servers, capability-gap analysis reporting "no gap" when existing tools suffice, strict path traversal defense, and real per-run audit logging (`.mo7i/runs/<timestamp>.json`) recording phases executed, skills read/excluded, and tools called.
+5. **Research Evidence Protocol & Clean Setups**: Enforces at least 3 web searches and 2 source fetches before citing figures, prohibits non-tool URLs, and strictly excludes MO7I's own skills (`mo7i`, `mo7i-project-setup`) from post-install setup detection.
 
 ---
 
@@ -36,6 +43,7 @@ Version 2.3.0 resolves T3 Code skill discovery, introduces automated post-instal
 | **`/mo7i status`** | `/mo7i status [--json]` | Displays system release, active workspace, stack profile, and registry telemetry. | Read-Only |
 | **`/mo7i doctor`** | `/mo7i doctor` | Validates Node.js runtimes, Skills CLI, command registrations, and script integrity. | Read-Only |
 | **`/mo7i update`** | `/mo7i update [--dry-run]` | Detects new dependencies and synchronizes project skills with `.bak` backups. | Human Gate Required |
+| **`/mo7i self-update`** | `/mo7i self-update [--check]` | Safely updates MO7I skills with semver comparison, backup, and rollback. | Human Gate Required |
 
 ---
 
