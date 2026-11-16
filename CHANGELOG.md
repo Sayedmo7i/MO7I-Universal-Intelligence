@@ -5,6 +5,18 @@ All notable changes to the `mo7i-universal-intelligence` skill will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1] - 2026-11-16
+
+### Added
+- **Independent Verification Harness (`/mo7i selftest`)**:
+  - Implemented `/mo7i selftest` command running black-box verification against the freshly installed skill footprint in an isolated temporary directory.
+  - Outputs pure machine-readable JSON (`pass`/`fail` per check without narrative).
+  - Verifies clean temp project initialization, lean installation via `npx skills add`, installed footprint size (<= 350 KB), manifest and VERSION file integrity, setup engine execution, doctor and status diagnostics, and autonomous project profile initialization.
+- **Self-Contained Lean Packaging**:
+  - Packaged `setup-engine.js` into `skills/mo7i/scripts/setup-engine.js` ensuring single-skill lean installs have full independent access to stack analysis, doctor diagnostics, and skill recommendations without requiring `mo7i-project-setup`.
+- **Automated GitHub Actions CI Workflow**:
+  - Created `.github/workflows/selftest.yml` to run automated independent verification on GitHub runners for all PRs and pushes to `main`.
+
 ## [2.4.0] - 2026-11-16
 
 ### Added

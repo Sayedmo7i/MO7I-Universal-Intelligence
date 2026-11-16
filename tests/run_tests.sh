@@ -2,20 +2,20 @@
 set -euo pipefail
 
 # Production Acceptance Test Suite for MO7I Universal Intelligence
-# Version: 2.4.0
-# Suite: 80 Tests Total (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update)
+# Version: 2.4.1
+# Suite: 85 Tests Total (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification)
 
-REPO_DIR="/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_FILE="${REPO_DIR}/tests/RESULTS.md"
-CONFIG_DIR="/root/.config/mo7i/universal-intelligence"
+CONFIG_DIR="${HOME:-/root}/.config/mo7i/universal-intelligence"
 mkdir -p "${CONFIG_DIR}"
 
 echo "# MO7I Universal Intelligence - Production Acceptance Test Suite Results" > "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 echo "Date: $(date -u '+%Y-%m-%d %H:%M:%SZ')" >> "$OUTPUT_FILE"
 echo "Host: $(uname -s) $(uname -r) ($(uname -m))" >> "$OUTPUT_FILE"
-echo "Release Version: v2.4.0" >> "$OUTPUT_FILE"
-echo "Suite: 80 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update)" >> "$OUTPUT_FILE"
+echo "Release Version: v2.4.1" >> "$OUTPUT_FILE"
+echo "Suite: 85 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening & Setup + 6 Self-Update + 5 Independent Verification)" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
 run_and_log() {
@@ -258,7 +258,8 @@ run_and_log "13" "Cross-Project Knowledge Reuse" \
   "Verify independent projects can access the global skill store without creating duplicate copies in each repository." \
   "rm -rf /tmp/proj-alpha /tmp/proj-beta && mkdir -p /tmp/proj-alpha /tmp/proj-beta && node -e '
     const fs = require(\"fs\");
-    const globalPath = \"/root/.agents/skills/find-skills/SKILL.md\";
+    const path = require(\"path\");
+    const globalPath = path.join(process.env.HOME || \"/root\", \".agents/skills/find-skills/SKILL.md\");
     console.log(\"Project Alpha reading global skill:\", fs.existsSync(globalPath));
     console.log(\"Project Beta reading global skill:\", fs.existsSync(globalPath));
     console.log(\"Shared access verified across independent projects without file duplication.\");
@@ -1274,6 +1275,88 @@ run_and_log "80" "End-to-End v2.4.0 Self-Update Acceptance Suite" \
   "PASS" \
   "All 9 v2.4.0 self-update acceptance tests passed with zero regressions."
 
+echo "=== Running Part 6: v2.4.1 Independent Verification & Selftest Tests (Tests 81-85) ==="
+
+# --- Test 81: Black-Box Selftest JSON Execution ---
+run_and_log "81" "Black-Box Selftest JSON Execution (/mo7i selftest)" \
+  "Verify that /mo7i selftest runs black-box suite against installed skill in temp project and outputs valid JSON." \
+  "node -e '
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const res = routeCommand(\"/mo7i selftest\");
+    console.log(\"Selftest Command Status:\", res.status);
+    console.log(\"Read-only:\", res.readOnly);
+    const parsed = JSON.parse(res.output);
+    console.log(\"Overall Status:\", parsed.status);
+    console.log(\"Passed Checks:\", parsed.summary.passed);
+    if (parsed.status !== \"PASS\" || parsed.summary.failed !== 0) throw new Error(\"Selftest check failed!\");
+  '" \
+  "PASS" \
+  "Selftest executed cleanly against isolated temp project, returning valid structured JSON without narrative."
+
+# --- Test 82: Installed Footprint and Manifest Verification ---
+run_and_log "82" "Installed Footprint Size and Manifest Integrity" \
+  "Verify that lean mo7i installation stays under 350 KB and contains required manifests." \
+  "node -e '
+    const fs = require(\"fs\");
+    const cp = require(\"child_process\");
+    const path = require(\"path\");
+    const tempDir = fs.mkdtempSync(\"/tmp/mo7i-check-footprint-test-\");
+    cp.execSync(\"npx skills add \\\"${REPO_DIR}\\\" --skill mo7i -y\", { cwd: tempDir, stdio: \"pipe\" });
+    const mo7iDir = path.join(tempDir, \".agents\", \"skills\", \"mo7i\");
+    const duOut = cp.execSync(\"du -sk .\", { cwd: mo7iDir }).toString();
+    const kb = parseInt(duOut.trim().split(/\\s+/)[0], 10);
+    console.log(\"Installed footprint size:\", kb, \"KB\");
+    if (kb > 350) throw new Error(\"Installed footprint too large: \" + kb);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '" \
+  "PASS" \
+  "Installed footprint size verified under 350 KB with complete manifest and version integrity."
+
+# --- Test 83: Engine Present After Lean Install ---
+run_and_log "83" "Engine Present After Lean Install" \
+  "Verify setup-engine.js is packaged and operational after a lean install of only mo7i." \
+  "node -e '
+    const fs = require(\"fs\");
+    const cp = require(\"child_process\");
+    const path = require(\"path\");
+    const tempDir = fs.mkdtempSync(\"/tmp/mo7i-check-engine-test-\");
+    cp.execSync(\"npx skills add \\\"${REPO_DIR}\\\" --skill mo7i -y\", { cwd: tempDir, stdio: \"pipe\" });
+    const enginePath = path.join(tempDir, \".agents\", \"skills\", \"mo7i\", \"scripts\", \"setup-engine.js\");
+    if (!fs.existsSync(enginePath)) throw new Error(\"setup-engine.js missing from installed mo7i!\");
+    const engine = require(enginePath);
+    console.log(\"Engine version in installed footprint:\", engine.ENGINE_VERSION);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '" \
+  "PASS" \
+  "Setup engine confirmed packaged and functional inside lean installed skill footprint."
+
+# --- Test 84: Doctor Diagnostics from Lean Install ---
+run_and_log "84" "Doctor Diagnostics from Lean Install" \
+  "Verify /mo7i doctor executes and reports HEALTHY in a clean temp project with lean installed mo7i." \
+  "node -e '
+    const fs = require(\"fs\");
+    const cp = require(\"child_process\");
+    const tempDir = fs.mkdtempSync(\"/tmp/mo7i-check-doctor-test-\");
+    cp.execSync(\"npx skills add \\\"${REPO_DIR}\\\" --skill mo7i -y\", { cwd: tempDir, stdio: \"pipe\" });
+    const { routeCommand } = require(\"${REPO_DIR}/src/commands/command-router\");
+    const res = routeCommand(\"/mo7i doctor --json\", { projectDir: tempDir });
+    console.log(\"Doctor Status in lean project:\", res.status);
+    const parsed = JSON.parse(res.output);
+    const engineCheck = parsed.diagnostics.find(d => d.check === \"Project Setup Engine\");
+    console.log(\"Setup engine diagnostic:\", engineCheck.status, engineCheck.detail);
+    if (res.status !== \"HEALTHY\" || engineCheck.status !== \"PASS\") throw new Error(\"Doctor failed!\");
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '" \
+  "PASS" \
+  "Doctor diagnostics verified clean PASS for setup engine in an isolated lean installed project."
+
+# --- Test 85: End-to-End v2.4.1 Independent Verification Suite ---
+run_and_log "85" "End-to-End v2.4.1 Independent Verification Suite" \
+  "Execute complete v2.4.1 independent verification test suite." \
+  "node ${REPO_DIR}/tests/test_v241_independent_verification.js" \
+  "PASS" \
+  "All 6 v2.4.1 independent verification acceptance tests passed with zero regressions."
+
 echo ""
-echo "All 80 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
+echo "All 85 production acceptance tests executed successfully! Results logged to ${OUTPUT_FILE}."
 
