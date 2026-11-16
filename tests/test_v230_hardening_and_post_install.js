@@ -20,7 +20,14 @@ const path = require('path');
 const cp = require('child_process');
 
 const setupEngine = require('../skills/mo7i-project-setup/scripts/setup-engine');
-const { routeCommand, isTrivialTask, analyzeCapabilityGaps } = require('../src/commands/command-router');
+const {
+  routeCommand,
+  isTrivialTask,
+  analyzeCapabilityGaps,
+  reportCapabilityGaps,
+  validateResearchEvidence,
+  writeRunLog
+} = require('../src/commands/command-router');
 const { checkPathTraversal, parseCommand } = require('../src/commands/argument-parser');
 const { PLATFORM_VERIFICATION } = require('../src/commands/platform-installer');
 
@@ -285,4 +292,149 @@ test(15, 'Dynamic port probing utility returns open port', () => {
   assert(port >= 9870);
 });
 
-console.log('\nAll 15 v2.3.0 Hardening and Post-Install Acceptance Tests Passed!\n');
+// 10. Research Tasks Evidence Protocol
+test(16, 'Research tasks require >=3 web searches, >=2 primary source fetches, and reject non-tool URLs', () => {
+  // Case A: insufficient searches (<3)
+  const res1 = validateResearchEvidence({
+    webSearches: ['search 1', 'search 2'],
+    sourcesFetched: ['https://example.com/doc1', 'https://example.com/doc2'],
+    citedUrls: ['https://example.com/doc1'],
+    toolReturnedUrls: ['https://example.com/doc1', 'https://example.com/doc2']
+  });
+  assert.strictEqual(res1.valid, false);
+  assert(res1.error.includes('at least 3 web searches'));
+
+  // Case B: insufficient sources fetched (<2)
+  const res2 = validateResearchEvidence({
+    webSearches: ['search 1', 'search 2', 'search 3'],
+    sourcesFetched: ['https://example.com/doc1'],
+    citedUrls: ['https://example.com/doc1'],
+    toolReturnedUrls: ['https://example.com/doc1']
+  });
+  assert.strictEqual(res2.valid, false);
+  assert(res2.error.includes('at least 2 primary sources'));
+
+  // Case C: cited URL not returned by tool (anti-hallucination violation)
+  const res3 = validateResearchEvidence({
+    webSearches: ['search 1', 'search 2', 'search 3'],
+    sourcesFetched: ['https://example.com/doc1', 'https://example.com/doc2'],
+    citedUrls: ['https://hallucinated-source.org/paper.pdf'],
+    toolReturnedUrls: ['https://example.com/doc1', 'https://example.com/doc2']
+  });
+  assert.strictEqual(res3.valid, false);
+  assert(res3.error.includes('Anti-hallucination violation'));
+
+  // Case D: valid evidence with tool-returned URLs
+  const res4 = validateResearchEvidence({
+    webSearches: ['query 1', 'query 2', 'query 3'],
+    sourcesFetched: ['https://source1.com/benchmark', 'https://source2.com/paper'],
+    citedUrls: ['https://source1.com/benchmark'],
+    toolReturnedUrls: ['https://source1.com/benchmark', 'https://source2.com/paper']
+  });
+  assert.strictEqual(res4.valid, true);
+  assert.strictEqual(res4.webSearchesCount, 3);
+  assert.strictEqual(res4.sourcesFetchedCount, 2);
+});
+
+// 11. Capability Gap Reporting
+test(17, 'Gap analysis reports "no gap" when existing tools suffice for the current task', () => {
+  // Software Engineering domain with standard development skills
+  const gapsNoGap = analyzeCapabilityGaps('Software Engineering', ['codebase-design', 'tdd']);
+  assert.strictEqual(gapsNoGap.length, 0);
+  assert.strictEqual(gapsNoGap.report, 'no gap');
+  assert.strictEqual(gapsNoGap.status, 'NO_GAP');
+  assert.strictEqual(reportCapabilityGaps('Software Engineering', ['codebase-design']), 'no gap');
+
+  // Security domain with semgrep covered
+  const securityCovered = analyzeCapabilityGaps('Security & AppSec', ['semgrep-rules', 'appsec-scanner']);
+  assert.strictEqual(securityCovered.length, 0);
+  assert.strictEqual(securityCovered.report, 'no gap');
+  assert.strictEqual(reportCapabilityGaps('Security & AppSec', ['semgrep-rules']), 'no gap');
+
+  // Dispatched universal task with covered skills
+  const taskRes = routeCommand('/mo7i Refactor the authentication service helper', {
+    projectDir: REPO_DIR
+  });
+  assert.strictEqual(taskRes.gapReport, 'no gap');
+  assert.strictEqual(taskRes.gapAnalysis.status, 'NO_GAP');
+  assert(taskRes.output.includes('• Gap Analysis: no gap (existing tools suffice for the current task)'));
+});
+
+// 12. Real Per-Run Logging (.mo7i/runs/<timestamp>.json)
+test(18, 'Write a real per-run log (.mo7i/runs/<timestamp>.json) with phases, skills read/excluded, tools called', () => {
+  const tempProject = path.join('/tmp', 'mo7i-test-runlog-' + Date.now());
+  fs.mkdirSync(tempProject, { recursive: true });
+
+  const testTs = '2026-11-16T00-30-00-000Z';
+  const runRes = routeCommand('/mo7i Run benchmark tests and inspect memory consumption', {
+    projectDir: tempProject,
+    timestamp: testTs,
+    toolsCalled: ['search_web', 'read_url_content', 'run_command'],
+    skillsRead: ['research', 'codebase-design'],
+    skillsExcluded: ['mo7i', 'mo7i-project-setup', 'email-sender']
+  });
+
+  const runsDir = path.join(tempProject, '.mo7i', 'runs');
+  assert(fs.existsSync(runsDir), '.mo7i/runs directory must be created');
+
+  const files = fs.readdirSync(runsDir);
+  assert(files.length >= 1, 'At least one run log must be generated');
+  assert(files.includes(`${testTs}.json`), `Run file ${testTs}.json must exist`);
+
+  const runLogContent = JSON.parse(fs.readFileSync(path.join(runsDir, `${testTs}.json`), 'utf8'));
+  assert(Array.isArray(runLogContent.phasesExecuted), 'phasesExecuted must be an array');
+  assert(runLogContent.phasesExecuted.length > 0, 'phasesExecuted must not be empty');
+  assert(Array.isArray(runLogContent.skillsRead), 'skillsRead must be an array');
+  assert(runLogContent.skillsRead.includes('research'), 'skillsRead must include research');
+  assert(Array.isArray(runLogContent.skillsExcluded), 'skillsExcluded must be an array');
+  assert(runLogContent.skillsExcluded.includes('mo7i'), 'skillsExcluded must include mo7i');
+  assert(runLogContent.skillsExcluded.includes('mo7i-project-setup'), 'skillsExcluded must include mo7i-project-setup');
+  assert(Array.isArray(runLogContent.toolsCalled), 'toolsCalled must be an array');
+  assert(runLogContent.toolsCalled.includes('search_web'), 'toolsCalled must include search_web');
+  assert.strictEqual(runLogContent.status, 'PASS');
+
+  // Clean up
+  fs.rmSync(tempProject, { recursive: true, force: true });
+});
+
+// 13. Exclusion of MO7I's Own Skills from Post-Install Setup Detection
+test(19, 'Exclude MO7Is own skills (mo7i, mo7i-project-setup) from post-install setup detection', () => {
+  const tempProject = path.join('/tmp', 'mo7i-test-internal-exclusion-' + Date.now());
+  const agentSkills = path.join(tempProject, '.agents', 'skills');
+  fs.mkdirSync(agentSkills, { recursive: true });
+
+  // Create mo7i and mo7i-project-setup on disk
+  const internalSkills = ['mo7i', 'mo7i-project-setup'];
+  for (const sId of internalSkills) {
+    const sDir = path.join(agentSkills, sId);
+    fs.mkdirSync(sDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(sDir, 'SKILL.md'),
+      `---\nname: ${sId}\ndescription: "Setup and orchestrate repository workflows. Run once before first use."\n---\n# ${sId}\nInternal skill.`
+    );
+  }
+
+  // Also include a genuine setup skill to ensure detection still works for real setup skills
+  const genuineSkillDir = path.join(agentSkills, 'setup-matt-pocock-skills');
+  fs.mkdirSync(genuineSkillDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(genuineSkillDir, 'SKILL.md'),
+    `---\nname: setup-matt-pocock-skills\ndescription: "Configure this repo for engineering skills. Run once before first use."\n---\n# Setup\nAsk questions.`
+  );
+
+  const detected = setupEngine.detectPostInstallSetups(tempProject, ['mo7i', 'mo7i-project-setup', 'setup-matt-pocock-skills']);
+  const detectedIds = detected.map(d => d.setupSkill);
+
+  // mo7i and mo7i-project-setup MUST NOT be in detected post-install setup skills
+  assert.strictEqual(detectedIds.includes('mo7i'), false, 'mo7i must NEVER be detected as a post-install setup skill');
+  assert.strictEqual(detectedIds.includes('mo7i-project-setup'), false, 'mo7i-project-setup must NEVER be detected as a post-install setup skill');
+
+  // Genuine setup skill MUST still be detected
+  assert.strictEqual(detectedIds.includes('setup-matt-pocock-skills'), true, 'Genuine setup skill must still be detected');
+  assert.strictEqual(detected.length, 1, 'Only genuine setup skill should be detected');
+
+  // Clean up
+  fs.rmSync(tempProject, { recursive: true, force: true });
+});
+
+console.log('\nAll 19 v2.3.0 Hardening, Post-Install & Evidence Acceptance Tests Passed!\n');

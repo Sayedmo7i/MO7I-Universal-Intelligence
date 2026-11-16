@@ -1,9 +1,9 @@
 # MO7I Universal Intelligence - Production Acceptance Test Suite Results
 
-Date: 2026-11-15 23:59:32Z
+Date: 2026-11-16 00:40:49Z
 Host: Linux 7.0.0-34-generic (x86_64)
-Release Version: v2.3.0
-Suite: 70 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 15 Hardening & Post-Install)
+Release Version: v2.3.1
+Suite: 74 Production Acceptance Tests (18 Core Meta-Orchestrator + 20 Project Intelligence + 17 Slash Commands + 19 Hardening, Post-Install & Evidence)
 
 ### Test 1: A New Next.js Development Task
 
@@ -1046,7 +1046,7 @@ rm -rf /tmp/test-project-scope && mkdir -p /tmp/test-project-scope && (cd /tmp/t
 [?25h[?25l│
 ◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◑  Cloning repository…[1G[J◒  Cloning repository…[1G[J◐  Cloning repository…[1G[J◓  Cloning repository…[1G[J◇  Repository cloned
 [?25h[?25l│
-[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-tCRbRM/skills-S95kv4/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
+[SKILLS_SKILL_SKIPPED] ⚠ Skipped /root/.t3/userdata/antigravity-tmp/ac0a3dfd6ddd/run-uSUC6V/skills-tTdJ1U/skills/in-progress/software-factory/SKILL.md — YAML parse error: Nested mappings are not allowed in compact mappings at line 2, column 14:
 
 description: Shared language for designing a software factory: the tasks it run…
              ^
@@ -1588,9 +1588,10 @@ Dispatch task through the Universal Intelligence Meta-Orchestrator and classify 
 • Execution Mode: FULL META-ORCHESTRATOR (16-phase pipeline)
 • Classified Domain: Mobile Development
 • Executed Phases Log: 1. INTAKE -> 2. PROJECT_DETECTION -> 3. PROJECT_PROFILE_INSPECTION -> 4. SETUP_STATUS_CHECK -> 5. PROJECT_SKILL_SETUP -> 6. TASK_CLASSIFICATION -> 7. CAPABILITY_GAP_ANALYSIS -> 8. SKILL_DISCOVERY -> 9. SKILL_LEARNING -> 10. COMPATIBILITY_AND_PLANNING -> 11. SKILL_ORCHESTRATION -> 12. EXECUTION -> 13. QUALITY_VALIDATION -> 14. KNOWLEDGE_AND_PROFILE_UPDATE -> 15. SAFE_CLEANUP -> 16. FINAL_REPORT
+• Per-Run Log: .mo7i/runs/2026-11-16T00-40-58.819Z.json
 
-[Notice: Pending Post-Install Setups Detected]
-• $mo7i-project-setup: Project Intelligence, Automated Specialist Skill Setup & Post-Install Configuration for MO7I Universal Intelligence (v2.3.0). Autonomously analyzes project technical stack, inspects frameworks, architectures, dependencies, and development tools, discovers suitable specialist skills via find-skills, integrates verified skills collections, provisions persistent project-scoped environments, and manages post-install setup lifecycles.
+[Capability Gap Notice]
+• Gap Analysis: no gap (existing tools suffice for the current task)
 
 ```
 
@@ -1710,6 +1711,7 @@ Execute non-destructive project audit, reporting missing skills without disk mod
 • Languages: TypeScript, JavaScript
 • Installed Skills in Project Scope: 0
 • Missing Recommended Skills: 37
+• Gap Analysis: 37 gap(s) detected
 • Post-Install Setups Total: 0
 • Pending Setups (Require Configuration): 0
 
@@ -1796,7 +1798,7 @@ Generate comprehensive markdown report summarizing project intelligence profile.
 ```text
 # MO7I Project Intelligence & Skill Setup Report (v2.3.0)
 
-- **Timestamp**: `2026-11-15T23:59:40.345Z`
+- **Timestamp**: `2026-11-16T00:40:58.981Z`
 - **Execution Mode**: `REPORT`
 - **Project Workspace**: `/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/fixtures/projects/nextjs-app`
 - **Project Archetype**: **Fullstack Web Application (Next.js)**
@@ -1990,7 +1992,7 @@ Run system doctor diagnostics validating runtime environment, CLIs, and integrit
 | Slash Command Definitions | `PASS` | Command definitions detected |
 | Project Setup Engine | `PASS` | setup-engine.js present and executable |
 | Project Profile Registry | `INFO` | Uninitialized project workspace |
-| Disk vs Registry Reconciliation | `INFO` | Project not yet initialized; discovered skill(s) on disk: mo7i, mo7i-project-setup (run /setup-project-skills initial to register) |
+| Disk vs Registry Reconciliation | `INFO` | Project not yet initialized; discovered skill(s) on disk: mo7i, mo7i-project-setup (run /mo7i setup initial to register) |
 
 ### Platform Compatibility Status
 
@@ -2242,7 +2244,7 @@ node -e '
 
 **Actual Behavior & Output Evidence**:
 ```text
-Detected setups: [ 'mo7i-project-setup', 'setup-matt-pocock-skills' ]
+Detected setups: [ 'setup-matt-pocock-skills' ]
 ```
 
 **Verification Analysis**:
@@ -2557,7 +2559,7 @@ node -e '
 **Actual Behavior & Output Evidence**:
 ```text
 Status JSON version: 2.3.0
-Status JSON post-install setups count: 1
+Status JSON post-install setups count: 0
 ```
 
 **Verification Analysis**:
@@ -2599,7 +2601,7 @@ Path traversal protection actively enforced across all router entry points.
 **Status**: `PASS`
 
 **Expected Behavior**:
-Execute full tests/test_v230_hardening_and_post_install.js suite and verify 15/15 tests pass.
+Execute full tests/test_v230_hardening_and_post_install.js suite and verify 19/19 tests pass.
 
 **Command Executed**:
 ```bash
@@ -2625,13 +2627,173 @@ node /root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/tests/test_v230_hard
 [PASS] Test 2.3.13: /mo7i doctor --json returns valid schema with platforms and diagnostics
 [PASS] Test 2.3.14: /mo7i status --json returns valid schema with post-install telemetry
 [PASS] Test 2.3.15: Dynamic port probing utility returns open port
+[PASS] Test 2.3.16: Research tasks require >=3 web searches, >=2 primary source fetches, and reject non-tool URLs
+[PASS] Test 2.3.17: Gap analysis reports "no gap" when existing tools suffice for the current task
+[PASS] Test 2.3.18: Write a real per-run log (.mo7i/runs/<timestamp>.json) with phases, skills read/excluded, tools called
+[PASS] Test 2.3.19: Exclude MO7Is own skills (mo7i, mo7i-project-setup) from post-install setup detection
 
-All 15 v2.3.0 Hardening and Post-Install Acceptance Tests Passed!
+All 19 v2.3.0 Hardening, Post-Install & Evidence Acceptance Tests Passed!
 
 ```
 
 **Verification Analysis**:
-All 15 v2.3.0 hardening and post-install tests passed with zero regressions.
+All 19 v2.3.0 hardening, post-install, and evidence tests passed with zero regressions.
+
+---
+
+### Test 71: Research Tasks Evidence Protocol
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that research tasks require >=3 web searches, >=2 sources fetched before citing figures, and reject non-tool URLs.
+
+**Command Executed**:
+```bash
+node -e '
+    const { validateResearchEvidence } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const valid = validateResearchEvidence({
+      webSearches: ["q1", "q2", "q3"],
+      sourcesFetched: ["https://source1.com", "https://source2.com"],
+      citedUrls: ["https://source1.com"],
+      toolReturnedUrls: ["https://source1.com", "https://source2.com"]
+    });
+    if (!valid.valid) throw new Error("Expected valid evidence to pass");
+    const invalid = validateResearchEvidence({
+      webSearches: ["q1", "q2", "q3"],
+      sourcesFetched: ["https://source1.com", "https://source2.com"],
+      citedUrls: ["https://hallucinated.com"],
+      toolReturnedUrls: ["https://source1.com", "https://source2.com"]
+    });
+    if (invalid.valid || !invalid.error.includes("Anti-hallucination violation")) throw new Error("Expected non-tool URL to be rejected");
+    console.log("Research evidence protocol validated:", valid.valid);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Research evidence protocol validated: true
+```
+
+**Verification Analysis**:
+Research evidence validation strictly enforces 3 searches, 2 fetched sources, and rejects non-tool URLs.
+
+---
+
+### Test 72: Gap Analysis Reports 'no gap' When Tools Suffice
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that capability gap analysis explicitly reports 'no gap' when existing tools and installed skills suffice.
+
+**Command Executed**:
+```bash
+node -e '
+    const { analyzeCapabilityGaps, reportCapabilityGaps, routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const gaps = analyzeCapabilityGaps("Software Engineering", ["codebase-design", "tdd"]);
+    if (gaps.length !== 0 || gaps.report !== "no gap" || gaps.status !== "NO_GAP") {
+      throw new Error("Expected no gap reporting");
+    }
+    const summary = reportCapabilityGaps("Software Engineering", ["codebase-design"]);
+    if (summary !== "no gap") throw new Error("Expected reportCapabilityGaps to return no gap");
+    const task = routeCommand("/mo7i Refactor auth middleware", { projectDir: "/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence" });
+    if (task.gapReport !== "no gap" || !task.output.includes("Gap Analysis: no gap")) {
+      throw new Error("Expected universal task to report no gap");
+    }
+    console.log("Gap Analysis Report:", gaps.report);
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Gap Analysis Report: no gap
+```
+
+**Verification Analysis**:
+Gap analysis explicitly returns 'no gap' when existing tools suffice for the task.
+
+---
+
+### Test 73: Real Per-Run Logging (.mo7i/runs/<timestamp>.json)
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that task execution writes a real per-run log file to .mo7i/runs/<timestamp>.json with phases, skills read/excluded, and tools called.
+
+**Command Executed**:
+```bash
+node -e '
+    const fs = require("fs");
+    const path = require("path");
+    const { routeCommand } = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/src/commands/command-router");
+    const tempDir = fs.mkdtempSync("/tmp/mo7i-run-test-");
+    const ts = "2026-11-16T00-30-00-000Z";
+    const res = routeCommand("/mo7i Analyze memory leak and run diagnostic profiling", {
+      projectDir: tempDir,
+      timestamp: ts,
+      toolsCalled: ["view_file", "run_command"],
+      skillsRead: ["diagnosing-bugs"],
+      skillsExcluded: ["mo7i", "mo7i-project-setup"]
+    });
+    const logFile = path.join(tempDir, ".mo7i", "runs", ts + ".json");
+    if (!fs.existsSync(logFile)) throw new Error("Run log file not found at " + logFile);
+    const log = JSON.parse(fs.readFileSync(logFile, "utf8"));
+    if (!Array.isArray(log.phasesExecuted) || log.phasesExecuted.length === 0) throw new Error("Invalid phasesExecuted");
+    if (!Array.isArray(log.skillsRead) || !log.skillsRead.includes("diagnosing-bugs")) throw new Error("Invalid skillsRead");
+    if (!Array.isArray(log.skillsExcluded) || !log.skillsExcluded.includes("mo7i") || !log.skillsExcluded.includes("mo7i-project-setup")) throw new Error("Invalid skillsExcluded");
+    if (!Array.isArray(log.toolsCalled) || !log.toolsCalled.includes("run_command")) throw new Error("Invalid toolsCalled");
+    console.log("Per-run log verified:", path.basename(logFile), "phases count:", log.phasesExecuted.length);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Per-run log verified: 2026-11-16T00-30-00-000Z.json phases count: 16
+```
+
+**Verification Analysis**:
+Real per-run log written to disk (.mo7i/runs/<timestamp>.json) with phases, skills read/excluded, and tools called.
+
+---
+
+### Test 74: Exclude MO7I Own Skills From Post-Install Detection
+
+**Status**: `PASS`
+
+**Expected Behavior**:
+Verify that detectPostInstallSetups strictly excludes mo7i and mo7i-project-setup from companion post-install detection.
+
+**Command Executed**:
+```bash
+node -e '
+    const fs = require("fs");
+    const path = require("path");
+    const setupEngine = require("/root/github.com/Sayedmo7i/MO7I-Universal-Intelligence/skills/mo7i-project-setup/scripts/setup-engine");
+    const tempDir = fs.mkdtempSync("/tmp/mo7i-exclude-test-");
+    const skillsDir = path.join(tempDir, ".agents", "skills");
+    fs.mkdirSync(skillsDir, { recursive: true });
+    for (const s of ["mo7i", "mo7i-project-setup"]) {
+      const sDir = path.join(skillsDir, s);
+      fs.mkdirSync(sDir, { recursive: true });
+      fs.writeFileSync(path.join(sDir, "SKILL.md"), "---\nname: " + s + "\ndescription: \"Configure this repo. Run once before first use.\"\n---\n# Test");
+    }
+    const detected = setupEngine.detectPostInstallSetups(tempDir, ["mo7i", "mo7i-project-setup"]);
+    if (detected.length !== 0) throw new Error("Expected zero setup skills detected, but got: " + detected.map(d => d.setupSkill).join(", "));
+    console.log("Internal skills excluded from post-install detection count:", detected.length);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  '
+```
+
+**Actual Behavior & Output Evidence**:
+```text
+Internal skills excluded from post-install detection count: 0
+```
+
+**Verification Analysis**:
+MO7I internal infrastructure skills are strictly excluded from post-install setup detection.
 
 ---
 

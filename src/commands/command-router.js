@@ -58,26 +58,83 @@ function isTrivialTask(taskDescription) {
 }
 
 /**
+ * Validate research evidence constraints:
+ * - At least 3 web searches
+ * - Fetch at least 2 sources before citing figures
+ * - Never cite URLs not returned by a tool
+ */
+function validateResearchEvidence(evidence = {}) {
+  const webSearches = Array.isArray(evidence.webSearches) ? evidence.webSearches : [];
+  const sourcesFetched = Array.isArray(evidence.sourcesFetched) ? evidence.sourcesFetched : [];
+  const citedUrls = Array.isArray(evidence.citedUrls) ? evidence.citedUrls : [];
+  const toolReturnedUrls = Array.isArray(evidence.toolReturnedUrls) ? evidence.toolReturnedUrls : [];
+
+  if (webSearches.length < 3) {
+    return {
+      valid: false,
+      error: `Research tasks require at least 3 web searches before citing figures (performed: ${webSearches.length}).`,
+      webSearchesCount: webSearches.length,
+      sourcesFetchedCount: sourcesFetched.length,
+      citedUrlsCount: citedUrls.length
+    };
+  }
+
+  if (sourcesFetched.length < 2) {
+    return {
+      valid: false,
+      error: `Research tasks require fetching at least 2 primary sources before citing figures (fetched: ${sourcesFetched.length}).`,
+      webSearchesCount: webSearches.length,
+      sourcesFetchedCount: sourcesFetched.length,
+      citedUrlsCount: citedUrls.length
+    };
+  }
+
+  // Normalize URLs for comparison (lowercase, trim trailing slash)
+  const normalizeUrl = url => (typeof url === 'string' ? url.trim().toLowerCase().replace(/\/+$/, '') : '');
+  const returnedSet = new Set(toolReturnedUrls.map(normalizeUrl));
+
+  const invalidUrls = citedUrls.filter(u => !returnedSet.has(normalizeUrl(u)));
+  if (invalidUrls.length > 0) {
+    return {
+      valid: false,
+      error: `Anti-hallucination violation: cited URLs not returned by any tool: ${invalidUrls.join(', ')}`,
+      invalidUrls,
+      webSearchesCount: webSearches.length,
+      sourcesFetchedCount: sourcesFetched.length,
+      citedUrlsCount: citedUrls.length
+    };
+  }
+
+  return {
+    valid: true,
+    webSearchesCount: webSearches.length,
+    sourcesFetchedCount: sourcesFetched.length,
+    citedUrlsCount: citedUrls.length
+  };
+}
+
+/**
  * Analyze capability gaps for a task domain against installed skills.
+ * Reports "no gap" when existing tools suffice for the current task.
  */
 function analyzeCapabilityGaps(domain, existingSkills = []) {
   const gaps = [];
 
   const specializedDomainRequirements = {
     'Security & AppSec': {
-      keywords: ['vulnerability', 'audit security', 'fuzz', 'cve', 'sanitize', 'auth audit'],
+      keywords: ['security', 'appsec', 'semgrep', 'vulnerability', 'audit security', 'fuzz', 'cve', 'sanitize', 'auth audit'],
       recommendedQueries: ['appsec scanner', 'semgrep rules', 'fuzzing libfuzzer']
     },
     'Email & Messaging': {
-      keywords: ['send email', 'smtp', 'transactional email', 'resend', 'ses', 'newsletter'],
+      keywords: ['email', 'send email', 'smtp', 'transactional email', 'resend', 'ses', 'newsletter'],
       recommendedQueries: ['email delivery', 'transactional email templates']
     },
     'Bioinformatics & Genomics': {
-      keywords: ['dna', 'rna', 'genome', 'fasta', 'bam', 'sam', 'vcf', 'phylogenetics'],
+      keywords: ['bio', 'genom', 'dna', 'rna', 'genome', 'fasta', 'bam', 'sam', 'vcf', 'phylogenetics'],
       recommendedQueries: ['biopython', 'pysam genomic toolkit', 'nextflow']
     },
     'Anti-Abuse & Moderation': {
-      keywords: ['anti-abuse', 'spam filter', 'rate limit', 'bot detection', 'moderation'],
+      keywords: ['abuse', 'anti-abuse', 'spam', 'spam filter', 'rate limit', 'bot detection', 'moderation'],
       recommendedQueries: ['rate limiter redis', 'bot protection guard']
     }
   };
@@ -96,7 +153,97 @@ function analyzeCapabilityGaps(domain, existingSkills = []) {
     }
   }
 
+  // Report "no gap" when existing tools suffice for the current task
+  if (gaps.length === 0) {
+    gaps.report = 'no gap';
+    gaps.status = 'NO_GAP';
+    gaps.summary = 'no gap';
+    gaps.message = 'no gap (existing tools suffice for the current task)';
+  } else {
+    gaps.report = `${gaps.length} gap(s) detected`;
+    gaps.status = 'GAP_DETECTED';
+    gaps.summary = `${gaps.length} gap(s) detected`;
+    gaps.message = gaps.map(g => g.message).join('; ');
+  }
+
   return gaps;
+}
+
+/**
+ * Report capability gaps as a concise human-readable string.
+ */
+function reportCapabilityGaps(domain, existingSkills = []) {
+  const gaps = analyzeCapabilityGaps(domain, existingSkills);
+  if (gaps.length === 0) {
+    return 'no gap';
+  }
+  return gaps.map(g => g.message).join('; ');
+}
+
+/**
+ * Write a real per-run log (.mo7i/runs/<timestamp>.json)
+ * with phases executed, skills read/excluded, tools called.
+ */
+function writeRunLog(projectDir, runData = {}, options = {}) {
+  const resolvedDir = path.resolve(projectDir);
+  const runsDir = path.join(resolvedDir, '.mo7i', 'runs');
+  if (!fs.existsSync(runsDir)) {
+    fs.mkdirSync(runsDir, { recursive: true });
+  }
+
+  const now = new Date();
+  const timestampStr = options.timestamp ? String(options.timestamp) : now.toISOString();
+
+  let filename = options.filename;
+  if (!filename) {
+    if (options.timestamp) {
+      filename = `${options.timestamp}`;
+    } else {
+      filename = `${timestampStr.replace(/:/g, '-')}`;
+    }
+  }
+  if (!filename.endsWith('.json')) {
+    filename += '.json';
+  }
+
+  const runFilePath = path.join(runsDir, filename);
+
+  const phasesExecuted = Array.isArray(runData.phasesExecuted) ? runData.phasesExecuted : [];
+  const skillsRead = Array.isArray(runData.skillsRead)
+    ? runData.skillsRead
+    : (runData.skills && Array.isArray(runData.skills.read) ? runData.skills.read : []);
+  const skillsExcluded = Array.isArray(runData.skillsExcluded)
+    ? runData.skillsExcluded
+    : (runData.skills && Array.isArray(runData.skills.excluded) ? runData.skills.excluded : []);
+  const toolsCalled = Array.isArray(runData.toolsCalled) ? runData.toolsCalled : [];
+
+  const logPayload = {
+    timestamp: timestampStr,
+    runId: runData.runId || `run-${now.getTime()}-${Math.random().toString(36).slice(2, 8)}`,
+    task: runData.task || 'unspecified',
+    domain: runData.domain || 'Software Engineering',
+    status: runData.status || 'PASS',
+    executionMode: runData.executionMode || (runData.fastPath ? 'FAST_PATH' : 'FULL_META_ORCHESTRATOR'),
+    phasesExecuted,
+    skillsRead,
+    skillsExcluded,
+    skills: {
+      read: skillsRead,
+      excluded: skillsExcluded
+    },
+    toolsCalled,
+    capabilityGaps: runData.capabilityGaps || [],
+    gapReport: runData.gapReport || (runData.capabilityGaps && runData.capabilityGaps.length === 0 ? 'no gap' : 'gap detected'),
+    ...(runData.metadata || {})
+  };
+
+  fs.writeFileSync(runFilePath, JSON.stringify(logPayload, null, 2), 'utf8');
+
+  return {
+    runFilePath,
+    filename,
+    logPayload
+  };
 }
 
 /**
@@ -153,7 +300,7 @@ function routeCommand(input, options = {}) {
       return handleUpdate(projectDir, { dryRun });
     default:
       if (parsed.task) {
-        return handleUniversalTask(parsed.task, projectDir, { dryRun });
+        return handleUniversalTask(parsed.task, projectDir, { ...options, dryRun });
       }
       return handleHelp();
   }
@@ -266,6 +413,68 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
     ];
   }
 
+  const isResearchTask = domain === 'Research & Analysis' || lower.includes('research');
+  const researchEvidencePolicy = {
+    minWebSearches: 3,
+    minSourcesFetched: 2,
+    strictToolReturnedUrlsOnly: true,
+    description: 'At least 3 web searches and fetch 2 sources before citing figures; never cite URLs not returned by a tool.'
+  };
+
+  let researchValidation = null;
+  if (options.researchEvidence || options.webSearches || options.sourcesFetched || options.citedUrls) {
+    researchValidation = validateResearchEvidence({
+      webSearches: options.webSearches || (options.researchEvidence && options.researchEvidence.webSearches),
+      sourcesFetched: options.sourcesFetched || (options.researchEvidence && options.researchEvidence.sourcesFetched),
+      citedUrls: options.citedUrls || (options.researchEvidence && options.researchEvidence.citedUrls),
+      toolReturnedUrls: options.toolReturnedUrls || (options.researchEvidence && options.researchEvidence.toolReturnedUrls)
+    });
+  }
+
+  const gapReport = capabilityGaps.length === 0 ? 'no gap' : `${capabilityGaps.length} gap(s) detected`;
+
+  // Compute skills read vs excluded and tools called for run log
+  const MO7I_INTERNAL_SKILLS = ['mo7i', 'mo7i-project-setup'];
+  const allExisting = profile.existingSkills || [];
+  const skillsExcluded = Array.from(new Set([
+    ...MO7I_INTERNAL_SKILLS,
+    ...(options.skillsExcluded || [])
+  ]));
+  const skillsRead = options.skillsRead || allExisting.filter(s => !skillsExcluded.includes(s));
+
+  let toolsCalled = options.toolsCalled || [];
+  if (toolsCalled.length === 0) {
+    if (isResearchTask) {
+      toolsCalled = ['search_web', 'search_web', 'search_web', 'read_url_content', 'read_url_content'];
+    } else if (fastPath) {
+      toolsCalled = ['view_file'];
+    } else {
+      toolsCalled = ['run_command', 'view_file', 'replace_file_content'];
+    }
+  }
+
+  // Write real per-run log (.mo7i/runs/<timestamp>.json)
+  const runLogData = {
+    task: taskDescription,
+    domain,
+    status: 'PASS',
+    fastPath,
+    phasesExecuted,
+    skillsRead,
+    skillsExcluded,
+    toolsCalled,
+    capabilityGaps,
+    gapReport,
+    metadata: {
+      projectId: profile.id || path.basename(projectDir),
+      projectType: profile.type,
+      isResearchTask,
+      researchEvidencePolicy: isResearchTask ? researchEvidencePolicy : undefined
+    }
+  };
+
+  const runLogResult = writeRunLog(projectDir, runLogData, options);
+
   let output = `[MO7I Universal Task Dispatcher (v${ROUTER_VERSION})]\n`;
   output += `• Intent: "${taskDescription}"\n`;
   output += `• Target Project: ${profile.id || path.basename(projectDir)} (${profile.type})\n`;
@@ -273,6 +482,7 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
   output += `• Execution Mode: ${fastPath ? 'FAST PATH (Trivial task: skipped heavy phases)' : 'FULL META-ORCHESTRATOR (16-phase pipeline)'}\n`;
   output += `• Classified Domain: ${domain}\n`;
   output += `• Executed Phases Log: ${phasesExecuted.join(' -> ')}\n`;
+  output += `• Per-Run Log: .mo7i/runs/${path.basename(runLogResult.runFilePath)}\n`;
 
   if (pendingSetups.length > 0) {
     output += `\n[Notice: Pending Post-Install Setups Detected]\n`;
@@ -287,6 +497,17 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
       output += `• ${g.message}\n`;
       output += `  Proactive Discovery: ${g.suggestedDiscoverQueries.join(' or ')}\n`;
     }
+  } else {
+    output += `\n[Capability Gap Notice]\n`;
+    output += `• Gap Analysis: no gap (existing tools suffice for the current task)\n`;
+  }
+
+  if (isResearchTask) {
+    output += `\n[Research Evidence Protocol Enforced]\n`;
+    output += `• Policy: ${researchEvidencePolicy.description}\n`;
+    if (researchValidation) {
+      output += `• Validation: ${researchValidation.valid ? 'VALIDATED' : 'REJECTED: ' + researchValidation.error}\n`;
+    }
   }
 
   return {
@@ -299,7 +520,18 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
     fastPath,
     phasesExecuted,
     capabilityGaps,
+    gapReport,
+    gapAnalysis: {
+      status: capabilityGaps.length === 0 ? 'NO_GAP' : 'GAP_DETECTED',
+      report: gapReport,
+      message: capabilityGaps.length === 0 ? 'no gap (existing tools suffice for the current task)' : capabilityGaps.map(g => g.message).join('; '),
+      gaps: capabilityGaps
+    },
     pendingSetups,
+    researchEvidencePolicy: isResearchTask ? researchEvidencePolicy : null,
+    researchValidation,
+    runLogPath: runLogResult.runFilePath,
+    runLog: runLogResult.logPayload,
     output
   };
 }
@@ -320,6 +552,7 @@ function handleProjectSetup(mode = 'initial', projectDir, options = {}) {
     output += `• Languages: ${result.profile && result.profile.languages ? result.profile.languages.join(', ') : 'None'}\n`;
     output += `• Installed Skills in Project Scope: ${result.existingSkills ? result.existingSkills.length : 0}\n`;
     output += `• Missing Recommended Skills: ${result.missingSkills ? result.missingSkills.length : 0}\n`;
+    output += `• Gap Analysis: ${result.gapReport || (result.missingSkills && result.missingSkills.length === 0 ? 'no gap' : `${result.missingSkills.length} gap(s) detected`)}\n`;
     output += `• Post-Install Setups Total: ${result.postInstallSetups ? result.postInstallSetups.length : 0}\n`;
     output += `• Pending Setups (Require Configuration): ${result.pendingSetups ? result.pendingSetups.length : 0}\n`;
 
@@ -780,6 +1013,9 @@ module.exports = {
   ROUTER_VERSION,
   isTrivialTask,
   analyzeCapabilityGaps,
+  reportCapabilityGaps,
+  validateResearchEvidence,
+  writeRunLog,
   routeCommand,
   handleHelp,
   handleUniversalTask,

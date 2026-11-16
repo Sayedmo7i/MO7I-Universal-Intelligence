@@ -71,3 +71,10 @@ When a task requires external accounts, third-party subscriptions, hardware devi
 ### D. DevOps & Cloud Infrastructure
 - Audit Dockerfiles, Compose specs, GitHub Actions workflows, and Terraform templates against container security benchmarks.
 - Enforce non-root container users, multi-stage builds, and pinned image digests.
+
+### E. Research & Analysis
+- **Research Evidence Protocol**:
+  - Execute at least 3 web searches (`search_web`) exploring multiple distinct facets of the research question.
+  - Fetch at least 2 primary source documents (`read_url_content`) before citing figures, statistics, or benchmarks.
+  - **Anti-Hallucination Policy**: Never cite URLs not returned by a tool. Every cited numerical claim, benchmark, or figure must directly trace back to tool-fetched content.
+

@@ -663,6 +663,8 @@ function installProjectSkills(projectDir, skillsToInstall, options = {}) {
   return results;
 }
 
+const MO7I_OWN_SKILLS = new Set(['mo7i', 'mo7i-project-setup']);
+
 /**
  * Verify post-install setup completion against concrete artifacts and file evidence.
  * Derived from real inspection in Phase 0B.
@@ -670,6 +672,15 @@ function installProjectSkills(projectDir, skillsToInstall, options = {}) {
 function verifySetupCompletion(projectDir, setupSkillName) {
   const resolvedDir = path.resolve(projectDir);
   const sName = setupSkillName.toLowerCase().trim();
+
+  // MO7I internal infrastructure skills require no companion post-install setup
+  if (MO7I_OWN_SKILLS.has(sName)) {
+    return {
+      verified: true,
+      evidence: 'MO7I internal infrastructure skill requires no companion post-install setup.',
+      status: 'not-required'
+    };
+  }
 
   // 1. setup-matt-pocock-skills verification
   if (sName === 'setup-matt-pocock-skills') {
@@ -834,14 +845,20 @@ function detectPostInstallSetups(projectDir, installedSkills = [], options = {})
     }
   }
 
-  // Combine with passed skills
-  const combinedSkills = Array.from(new Set([...allSkillDirs, ...installedSkills]));
+  // Combine with passed skills, strictly excluding MO7I's own internal skills
+  const combinedSkills = Array.from(new Set([...allSkillDirs, ...installedSkills]))
+    .filter(skillId => !MO7I_OWN_SKILLS.has(skillId.toLowerCase().trim()));
 
   // 1. Dynamic inspection of installed SKILL.md files
   for (const skillId of combinedSkills) {
+    if (MO7I_OWN_SKILLS.has(skillId.toLowerCase().trim())) {
+      continue;
+    }
+
     const skillMdPath = path.join(agentsSkillDir, skillId, 'SKILL.md');
     let isSetupSkill = false;
     let description = '';
+    let interactive = false;
     if (fs.existsSync(skillMdPath)) {
       try {
         const content = fs.readFileSync(skillMdPath, 'utf8');
@@ -902,6 +919,9 @@ function detectPostInstallSetups(projectDir, installedSkills = [], options = {})
   // 2. Collection mapping fallback
   for (const [collKey, collInfo] of Object.entries(mapData.collections)) {
     const setupSkill = collInfo.setupSkill;
+    if (MO7I_OWN_SKILLS.has(setupSkill.toLowerCase().trim())) {
+      continue;
+    }
     if (combinedSkills.includes(setupSkill) && !detected.has(setupSkill)) {
       const verification = verifySetupCompletion(resolvedDir, setupSkill);
       const existing = existingStatusMap.get(setupSkill);
@@ -1260,16 +1280,26 @@ function runEngine(mode = 'initial', projectDir = process.cwd(), options = {}) {
 
   if (mode === 'audit') {
     const pendingSetups = postInstallSetups.filter(s => s.status === 'pending');
+    const missingSkills = [
+      ...recommendations.CORE_PROJECT_SKILLS,
+      ...recommendations.DEVELOPMENT_SKILLS,
+      ...recommendations.QUALITY_ASSURANCE
+    ].filter(s => !profile.existingSkills.includes(s.id));
+    const gapReport = missingSkills.length === 0 ? 'no gap' : `${missingSkills.length} gap(s) detected`;
+    const gapAnalysis = {
+      status: missingSkills.length === 0 ? 'NO_GAP' : 'GAP_DETECTED',
+      report: gapReport,
+      message: missingSkills.length === 0 ? 'no gap (existing tools suffice for the current task)' : `${missingSkills.length} missing skill(s) detected`,
+      missingSkills
+    };
     return {
       mode: 'audit',
       profile,
       recommendations,
       existingSkills: profile.existingSkills,
-      missingSkills: [
-        ...recommendations.CORE_PROJECT_SKILLS,
-        ...recommendations.DEVELOPMENT_SKILLS,
-        ...recommendations.QUALITY_ASSURANCE
-      ].filter(s => !profile.existingSkills.includes(s.id)),
+      missingSkills,
+      gapAnalysis,
+      gapReport,
       postInstallSetups,
       pendingSetups,
       reconciliation
@@ -1363,6 +1393,7 @@ function runEngine(mode = 'initial', projectDir = process.cwd(), options = {}) {
 module.exports = {
   ENGINE_VERSION,
   MATT_POCOCK_OFFICIAL_SOURCE,
+  MO7I_OWN_SKILLS: Array.from(MO7I_OWN_SKILLS),
   analyzeProject,
   recommendProjectSkills,
   installProjectSkills,
