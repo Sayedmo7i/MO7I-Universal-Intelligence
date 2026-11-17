@@ -49,7 +49,7 @@ Every phase, test case, and execution summary must report one of these 5 precise
 
 ## 5. Per-Run Logging & Research Evidence Standards
 
-### A. Per-Run Audit Logging (`.mo7i/runs/<timestamp>.json`)
+### A. Per-Run Audit Logging (`.mo7i/runs/<timestamp>.json` & `.mo7i/mo7i.log`)
 Every task execution writes a verifiable per-run execution record containing:
 - `timestamp`: ISO timestamp of execution
 - `task`: Raw intent description
@@ -57,12 +57,37 @@ Every task execution writes a verifiable per-run execution record containing:
 - `phasesExecuted`: Array of executed pipeline phases
 - `skillsRead`: Array of active specialist skills consulted
 - `skillsExcluded`: Array of excluded skills (strictly excluding MO7I internal skills `mo7i` and `mo7i-project-setup`)
+- `skillsInstalled`: Array of newly provisioned or installed skills
 - `toolsCalled`: Array of tools invoked during the run
 - `gapReport`: Concise gap status (`no gap` or detected gaps)
 
-### B. Research Tasks Evidence Protocol
+In addition to `.mo7i/runs/<timestamp>.json`, MO7I appends a human-readable entry to `.mo7i/mo7i.log`:
+```text
+[<TIMESTAMP>] TASK: "<task>" | DOMAIN: <domain> | STATUS: PASS | MODE: <mode>
+  Tools: [<toolsCalled>]
+  Skills: [<skillsRead>]
+  Installed: [<skillsInstalled>]
+  Phases: <phasesExecuted>
+  RunLog: .mo7i/runs/<timestamp>.json
+```
+
+### B. Mandatory Turn-End Execution Summary
+At the conclusion of every response or CLI execution, MO7I mandates presenting a clear execution summary block:
+```markdown
+---
+### 📊 MO7I Execution Summary
+- **🛠️ Tools Executed**: `<comma-separated tools or none>`
+- **🧠 Skills Activated**: `<comma-separated skills or none>`
+- **📦 Skills Installed**: `<newly installed skills or None (stack up-to-date)>`
+- **📋 Status**: `PASS` | `FAIL` | `BLOCKED`
+- **📁 Audit Log**: `.mo7i/runs/<timestamp>.json` & `.mo7i/mo7i.log`
+---
+```
+
+### C. Research Tasks Evidence Protocol
 For research and analysis tasks:
 - **Search Density**: Execute at least 3 distinct web searches (`search_web`).
 - **Source Verification**: Fetch at least 2 primary source pages (`read_url_content`) before citing figures, benchmarks, or statistics.
 - **Strict Anti-Hallucination**: Never cite URLs not returned by a tool. All cited figures must be grounded directly in tool-fetched content.
+
 
