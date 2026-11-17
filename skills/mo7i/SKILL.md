@@ -1,6 +1,6 @@
 ---
 name: mo7i
-description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Multi-Platform Entry Point (v2.6.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands (bench, audit, learn, discover, status, doctor, update, self-update, selftest, help, or a free-form task). Autonomously analyzes project stacks, provisions project-scoped skills, manages post-install setup lifecycles, and executes with verifiable evidence."
+description: "Universal Intelligence Layer, Autonomous Task Meta-Orchestrator & Multi-Platform Entry Point (v2.6.0). Activates when: the user specifies WHAT to accomplish across any domain (software engineering, mobile, UI/UX, DevOps, marketing/SEO, research, data, or general workflows) without manually selecting tools, or invokes subcommands (bench, audit, learn, discover, status, doctor, update, self-update, selftest, help, or a free-form task; audit, learn, discover, status, doctor, update, help). Autonomously analyzes project stacks, provisions project-scoped skills, manages post-install setup lifecycles, and executes with verifiable evidence."
 ---
 
 # MO7I Universal Intelligence
@@ -88,3 +88,37 @@ For non-trivial tasks, MO7I executes the full autonomous pipeline:
 | **Cursor / Windsurf** | MDC rules in `.cursor/rules/` | **UNVERIFIED** (Editor prompt instructions, no slash command parser) |
 | **OpenAI Codex** | Prompt commands in `.codex/prompts/` | **UNVERIFIED** (No documented slash command discovery standard) |
 | **Gemini CLI** | Command extensions in `.gemini/commands/` | **UNVERIFIED** (No documented slash command discovery standard) |
+
+---
+
+## 5. Mandatory Agent Execution Directives (Every Turn)
+
+When an AI agent (Claude Code, Antigravity, Cursor, Windsurf, or Codex) receives a prompt invoking `$mo7i` or operating under MO7I Universal Intelligence, the agent **MUST** execute the following operational contract:
+
+### 1. Project Initialization & Stack Provisioning
+Check if `.mo7i/project-profile.json` exists in the target repository.
+- If **missing or uninitialized**: The agent MUST run project setup via `./bin/mo7i setup initial` or execute `setup-project-skills initial` to analyze the project's stack and install verified specialist skills into `.agents/skills/`.
+- If **stack evolved**: If new dependencies were added (e.g. Next.js, Prisma, Tailwind, Flutter), run `./bin/mo7i update` to provision missing specialists.
+
+### 2. Capability Gap Evaluation
+Analyze if the requested task requires specialized skills not currently active in project scope. If gaps exist, search and install candidate skills using `discover <query>` and `learn <skill>`.
+
+### 3. Execution Logging (`.mo7i/runs/<timestamp>.json` & `.mo7i/mo7i.log`)
+During and after completing the task, the agent MUST persist an execution record:
+1. Write JSON record to `.mo7i/runs/<timestamp>.json` with: `phasesExecuted`, `toolsCalled`, `skillsRead`, `skillsExcluded`, `skillsInstalled`, and `status`.
+2. Append a human-readable log entry to `.mo7i/mo7i.log`.
+
+### 4. Mandatory Final Message Execution Summary
+The agent MUST conclude its final response on every request with the following structured Markdown summary block:
+
+```markdown
+---
+### 📊 MO7I Execution Summary
+- **🛠️ Tools Executed**: `<list of all tools called during turn, e.g. run_command, view_file>`
+- **🧠 Skills Activated**: `<list of specialist skills consulted or read, e.g. diagnosing-bugs, tdd>`
+- **📦 Skills Installed**: `<newly provisioned skills or 'None (stack up-to-date)'>`
+- **📋 Status**: `PASS` | `FAIL` | `BLOCKED`
+- **📁 Audit Log**: `.mo7i/runs/<timestamp>.json` & `.mo7i/mo7i.log`
+---
+```
+

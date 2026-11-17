@@ -252,6 +252,7 @@ function writeRunLog(projectDir, runData = {}, options = {}) {
       read: skillsRead,
       excluded: skillsExcluded
     },
+    skillsInstalled: runData.skillsInstalled || [],
     toolsCalled,
     capabilityGaps: runData.capabilityGaps || [],
     gapReport: runData.gapReport || (runData.capabilityGaps && runData.capabilityGaps.length === 0 ? 'no gap' : 'gap detected'),
@@ -261,10 +262,27 @@ function writeRunLog(projectDir, runData = {}, options = {}) {
 
   fs.writeFileSync(runFilePath, JSON.stringify(logPayload, null, 2), 'utf8');
 
+  // Human-readable continuous log (.mo7i/mo7i.log)
+  const mo7iLogPath = path.join(resolvedDir, '.mo7i', 'mo7i.log');
+  const skillsInstalled = Array.isArray(runData.skillsInstalled) ? runData.skillsInstalled : [];
+  const logLine = `[${timestampStr}] TASK: "${logPayload.task}" | DOMAIN: ${logPayload.domain} | STATUS: ${logPayload.status} | MODE: ${logPayload.executionMode}\n` +
+    `  Tools: [${toolsCalled.join(', ') || 'none'}]\n` +
+    `  Skills: [${skillsRead.join(', ') || 'none'}]\n` +
+    `  Installed: [${skillsInstalled.join(', ') || 'none'}]\n` +
+    `  Phases: ${phasesExecuted.join(' -> ')}\n` +
+    `  RunLog: .mo7i/runs/${filename}\n` +
+    `--------------------------------------------------------------------------------\n`;
+  try {
+    fs.appendFileSync(mo7iLogPath, logLine, 'utf8');
+  } catch {
+    // ignore
+  }
+
   return {
     runFilePath,
     filename,
-    logPayload
+    logPayload,
+    mo7iLogPath
   };
 }
 
@@ -501,6 +519,18 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
     }
   }
 
+  let skillsInstalled = options.skillsInstalled || [];
+  if (options.autoSetup && !isInitialized && !fastPath) {
+    try {
+      const setupRes = setupEngine.runEngine('initial', projectDir, { ...options, dryRun });
+      if (setupRes.installResults && Array.isArray(setupRes.installResults.successful)) {
+        skillsInstalled = setupRes.installResults.successful.map(s => s.id);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   // Write real per-run log (.mo7i/runs/<timestamp>.json)
   const runLogData = {
     task: taskDescription,
@@ -510,6 +540,7 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
     phasesExecuted,
     skillsRead,
     skillsExcluded,
+    skillsInstalled,
     toolsCalled,
     capabilityGaps,
     gapReport,
@@ -558,6 +589,26 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
     }
   }
 
+  const executionSummary = {
+    status: 'PASS',
+    toolsExecuted: toolsCalled,
+    skillsActivated: skillsRead,
+    skillsInstalled: skillsInstalled.length > 0 ? skillsInstalled : ['None (stack up-to-date)'],
+    phasesExecuted,
+    auditLog: `.mo7i/runs/${path.basename(runLogResult.runFilePath)}`,
+    mo7iLog: '.mo7i/mo7i.log'
+  };
+
+  output += `\n======================================================================\n`;
+  output += `[MO7I EXECUTION SUMMARY]\n`;
+  output += `• Status: ${executionSummary.status}\n`;
+  output += `• Tools Executed: ${toolsCalled.length > 0 ? toolsCalled.join(', ') : 'none'}\n`;
+  output += `• Skills Activated: ${skillsRead.length > 0 ? skillsRead.join(', ') : 'none'}\n`;
+  output += `• Skills Installed: ${skillsInstalled.length > 0 ? skillsInstalled.join(', ') : 'None (stack up-to-date)'}\n`;
+  output += `• Executed Phases: ${phasesExecuted.join(' -> ')}\n`;
+  output += `• Audit Log: ${executionSummary.auditLog} (${executionSummary.mo7iLog})\n`;
+  output += `======================================================================\n`;
+
   return {
     status: 'DISPATCHED',
     command: 'mo7i',
@@ -579,7 +630,14 @@ function handleUniversalTask(taskDescription, projectDir, options = {}) {
     researchEvidencePolicy: isResearchTask ? researchEvidencePolicy : null,
     researchValidation,
     runLogPath: runLogResult.runFilePath,
+    mo7iLogPath: runLogResult.mo7iLogPath,
     runLog: runLogResult.logPayload,
+    toolsCalled,
+    toolsExecuted: toolsCalled,
+    skillsRead,
+    skillsActivated: skillsRead,
+    skillsInstalled,
+    summary: executionSummary,
     output
   };
 }

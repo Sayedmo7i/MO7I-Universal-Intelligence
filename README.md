@@ -17,7 +17,7 @@
 
 ---
 
-A project onboarding and autonomous orchestration layer for AI agents: automatically detects the stack, provisions the right skills, tracks manual setup steps, selects the minimum skills per task, verifies with reproducible evidence, and logs every execution run. Consistent slash commands and unified state (`.mo7i/`) across projects and agent harnesses.
+A project onboarding and orchestration layer for AI agents: detects the stack, provisions the right skills, tracks manual setup steps, selects the minimum skills per task, verifies with evidence, and logs every run. Same commands and same state (.mo7i/) across projects and agents.
 
 ---
 
